@@ -4,14 +4,15 @@ import { clamp } from "../dist/helpers.mjs";
 
 const canvas = d3.select("#canvas");
 canvas.attr("width", window.innerWidth).attr("height", window.innerHeight);
-const links = graph.links;
-const nodes = graph.nodes;
+let links = graph.links;
+let nodes = graph.nodes;
 
 const simulation = d3
   .forceSimulation(nodes)
   .force(
     "link",
     d3.forceLink(links).id((d) => d.id)
+    //.strength((d) => clamp(d.distance, -300, 0))
   )
   .force("charge", d3.forceManyBody().strength(-3000))
   .force("x", d3.forceX())
@@ -51,15 +52,75 @@ node.call(
   d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended)
 );
 
-simulation.on("tick", () => {
+simulation.on("tick", ticked);
+
+let chart = Object.assign(canvas.node(), {
+  update(nodes, links) {
+    // Make a shallow copy to protect against mutation, while
+    // recycling old nodes to preserve position and velocity.
+    const old = new Map(node.data().map((d) => [d.name, d]));
+    nodes = nodes.map((d) => Object.assign(old.get(d.id) || {}, d));
+    links = links.map((d) => Object.assign({}, d));
+
+    simulation.nodes(nodes);
+    simulation.force("link").links(links);
+    simulation.alpha(1).restart();
+
+    node = node
+      .data(nodes)
+      .join(
+        (enter) => {
+          let node = enter.append("circle").attr("r", 10).attr("fill", "red");
+          let title = node.append("title").text((d) => d.name);
+          return node;
+        },
+        (update) => update,
+        (exit) => exit.remove()
+      )
+      .call(
+        d3
+          .drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended)
+      );
+
+    link = link
+      .data(links, (d) => `${d.source.id}\t${d.target.id}`)
+      .join("line");
+  },
+});
+
+setTimeout(() => {
+  const lilli = {
+    name: "Lilli",
+    location: {
+      name: "Hinterdupfingen",
+      lat: 47.990841,
+      lon: 8.121713,
+    },
+    age: 27,
+  };
+
+  nodes.push(lilli);
+
+  chart.update(nodes, links);
+}, 3000);
+
+function ticked() {
+  node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+
+  console.log(link);
+
   link
-    .attr("x1", (d) => d.source.x)
+    .attr("x1", (d) => {
+      console.log(d.source);
+      return d.source.x;
+    })
     .attr("y1", (d) => d.source.y)
     .attr("x2", (d) => d.target.x)
     .attr("y2", (d) => d.target.y);
-
-  node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-});
+}
 
 // Reheat the simulation when drag starts, and fix the subject position.
 function dragstarted(event) {

@@ -6,6 +6,7 @@ type GraphData = {
 };
 
 type Person = {
+  id: number;
   name: string;
   location: Position;
   age: number;
@@ -69,6 +70,7 @@ export const platonic: RelType = {
 };
 
 const luca: Person = {
+  id: 0,
   name: "Luca",
   location: {
     name: "Vorderdupfingen",
@@ -79,6 +81,7 @@ const luca: Person = {
 };
 
 const michi: Person = {
+  id: 1,
   name: "Michi",
   location: {
     name: "Hinterdupfingen",
@@ -89,6 +92,7 @@ const michi: Person = {
 };
 
 const lilli: Person = {
+  id: 2,
   name: "Lilli",
   location: {
     name: "Hinterdupfingen",
