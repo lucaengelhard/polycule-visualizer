@@ -1,65 +1,65 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-import { graph, Relationship, platonic, romantic } from "../dist/index.mjs";
+import { graph } from "../dist/index.mjs";
+import { clamp } from "../dist/helpers.mjs";
 
 const canvas = d3.select("#canvas");
-const linkGroup = canvas.append("g").attr("class", "links");
-const nodeGroup = canvas.append("g").attr("class", "nodes");
-
-canvas.attr("width", window.innerWidth);
-canvas.attr("height", window.innerHeight);
-
-const links = linkGroup
-  .selectAll("line")
-  .data(graph.links)
-  .enter()
-  .append("line")
-  .attr("stroke-width", 3)
-  .style("stroke", "orange");
-
-const drag = d3
-  .drag()
-  .on("start", dragstarted)
-  .on("drag", dragged)
-  .on("end", dragended);
-
-const nodeAndText = nodeGroup
-  .selectAll("g")
-  .data(graph.nodes)
-  .enter()
-  .append("g")
-  .call(drag);
-
-const nodes = nodeAndText.append("circle").attr("r", 15).attr("fill", "red");
-const text = nodeAndText
-  .append("text")
-  .text((d) => d.name)
-  .attr("class", "nodeText");
+canvas.attr("width", window.innerWidth).attr("height", window.innerHeight);
+const links = graph.links;
+const nodes = graph.nodes;
 
 const simulation = d3
-  .forceSimulation(graph.nodes)
+  .forceSimulation(nodes)
   .force(
     "link",
-    d3.forceLink(graph.links).id((d) => d.name)
+    d3.forceLink(links).id((d) => d.id)
   )
   .force("charge", d3.forceManyBody().strength(-3000))
+  .force("x", d3.forceX())
+  .force("y", d3.forceY())
   .force(
     "center",
     d3.forceCenter(window.innerWidth / 2, window.innerHeight / 2)
-  )
-  .on("tick", tick);
+  );
 
-function tick() {
-  links
+const linkGroup = canvas
+  .append("g")
+  .attr("stroke", "#999")
+  .attr("stroke-opacity", 0.6);
+
+const nodeGroup = canvas
+  .append("g")
+  .attr("stroke", "#fff")
+  .attr("stroke-width", 1.5);
+
+// Add a line for each link, and a circle for each node.
+let link = linkGroup
+  .selectAll("line")
+  .data(links)
+  .join("line")
+  .attr("stroke-width", (d) => clamp(d.type.value, 1, 5));
+
+let node = nodeGroup
+  .selectAll("circle")
+  .data(nodes)
+  .join("circle")
+  .attr("r", 10)
+  .attr("fill", "red");
+
+let titles = node.append("title").text((d) => d.name);
+
+node.call(
+  d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended)
+);
+
+simulation.on("tick", () => {
+  link
     .attr("x1", (d) => d.source.x)
     .attr("y1", (d) => d.source.y)
     .attr("x2", (d) => d.target.x)
     .attr("y2", (d) => d.target.y);
 
-  nodeAndText.attr("transform", (d) => `translate(${d.x},${d.y})`);
-
-  nodeAndText.exit().remove();
-  links.exit().remove();
-}
+  node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+});
 
 // Reheat the simulation when drag starts, and fix the subject position.
 function dragstarted(event) {
@@ -81,56 +81,3 @@ function dragended(event) {
   event.subject.fx = null;
   event.subject.fy = null;
 }
-/*getNewData();
-
-const refreshButton = document
-  .querySelector("#refresh")
-  .addEventListener("click", () => {
-    getNewData();
-  });
-
-const removeButton = document
-  .querySelector("#remove")
-  .addEventListener("click", () => {
-    deleteNode(1);
-  });
-
-function deleteNode(i) {
-  graph.nodes[i] = graph.nodes[i + 1];
-  graph.nodes.splice(i + 1, 1);
-  redraw();
-}
-
-function getNewData() {
-  const lilli = {
-    name: "Lilli",
-    location: {
-      name: "Hinterdupfingen",
-      lat: 47.990841,
-      lon: 8.121713,
-    },
-    age: 27,
-  };
-
-  const michi = {
-    name: "Michi",
-    location: {
-      name: "Hinterdupfingen",
-      lat: 47.994517,
-      lon: 8.248138,
-    },
-    age: 27,
-  };
-
-  const MichiLilli = new Relationship(
-    { partner1: michi, partner2: lilli },
-    platonic,
-    false
-  );
-
-  graph.nodes.push(lilli);
-  graph.links.push(MichiLilli);
-
-  redraw(graph);
-}
-*/
