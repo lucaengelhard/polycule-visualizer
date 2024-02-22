@@ -31,8 +31,8 @@ type RelHistoryEvent = {
 };
 
 export class Relationship {
-  source: Person;
-  target: Person;
+  source: number;
+  target: number;
   type: RelType;
   exclusive: boolean;
   history?: RelHistory;
@@ -44,8 +44,8 @@ export class Relationship {
     exclusive: boolean,
     history?: RelHistory
   ) {
-    this.source = partners.partner1;
-    this.target = partners.partner2;
+    this.source = partners.partner1.id;
+    this.target = partners.partner2.id;
     this.type = type;
     this.history = history;
     this.exclusive = exclusive;

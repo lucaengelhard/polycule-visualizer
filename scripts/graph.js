@@ -4,15 +4,17 @@ import { clamp } from "../dist/helpers.mjs";
 
 const canvas = d3.select("#canvas");
 canvas.attr("width", window.innerWidth).attr("height", window.innerHeight);
-let links = graph.links;
-let nodes = graph.nodes;
+const links = graph.links.map((d) => ({ ...d }));
+const nodes = graph.nodes.map((d) => ({ ...d }));
 
 const simulation = d3
   .forceSimulation(nodes)
   .force(
     "link",
-    d3.forceLink(links).id((d) => d.id)
-    //.strength((d) => clamp(d.distance, -300, 0))
+    d3
+      .forceLink(links)
+      .id((d) => d.id)
+      .distance((d) => d.distance)
   )
   .force("charge", d3.forceManyBody().strength(-3000))
   .force("x", d3.forceX())
@@ -108,18 +110,20 @@ setTimeout(() => {
 }, 3000);
 
 function ticked() {
-  node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-
-  console.log(link);
-
   link
     .attr("x1", (d) => {
-      console.log(d.source);
+      //console.log(d);
       return d.source.x;
     })
     .attr("y1", (d) => d.source.y)
     .attr("x2", (d) => d.target.x)
     .attr("y2", (d) => d.target.y);
+
+  node
+    .attr("cx", (d) => {
+      return d.x;
+    })
+    .attr("cy", (d) => d.y);
 }
 
 // Reheat the simulation when drag starts, and fix the subject position.
