@@ -12,6 +12,17 @@ const luca: Person = {
   relationships: [],
 };
 
+const luca2: Person = {
+  id: 2,
+  name: "Luca2",
+  location: {
+    name: "Vorderdupfingenn",
+    lat: 47.766099,
+    lon: 8.094229,
+  },
+  relationships: [],
+};
+
 const michi: Person = {
   id: 1,
   name: "Michi",
@@ -24,7 +35,7 @@ const michi: Person = {
 };
 
 export const db: GraphData = {
-  nodes: [luca, michi],
+  nodes: [luca, michi, luca2],
   links: [],
 };
 

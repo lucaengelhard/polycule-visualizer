@@ -7,48 +7,23 @@ import { Relationship } from "../classes/relationship";
 import { InputOpenContext } from "./Input";
 
 const AddRelContext = createContext<{
-  addRelState: {
-    queriedPartners: {
-      0: Types.Person[];
-      1: Types.Person[];
-    };
-    relTypes: { items: Types.RelType[]; selected?: Types.RelType | undefined };
-  };
-  setAddRelState: React.Dispatch<
-    React.SetStateAction<{
-      queriedPartners: {
-        0: Types.Person[];
-        1: Types.Person[];
-      };
-      relTypes: {
-        items: Types.RelType[];
-        selected?: Types.RelType;
-      };
-    }>
-  >;
+  addRelState: Types.addRelState;
+  setAddRelState: React.Dispatch<React.SetStateAction<Types.addRelState>>;
 }>(null);
 
 export function AddRelationship() {
   const { setAddRelOpen } = useContext(InputOpenContext);
-  const [addRelState, setAddRelState] = useState<{
-    queriedPartners: {
-      0: Types.Person[];
-      1: Types.Person[];
-    };
-    relTypes: {
-      items: Types.RelType[];
-      selected?: Types.RelType;
-    };
-  }>({
-    queriedPartners: { 1: [], 2: [] },
+  const [addRelState, setAddRelState] = useState<Types.addRelState>({
+    queriedPartners: { 0: [], 1: [] },
+    selectedPartners: { 0: undefined, 1: undefined },
     relTypes: { items: [], selected: undefined },
   });
 
   function addRel() {
-    const partner1List = addRelState.queriedPartners[0];
-    const partner2List = addRelState.queriedPartners[1];
-
-    if (partner1List.length === 0 || partner2List.length === 0) {
+    if (
+      addRelState.selectedPartners[0] === undefined ||
+      addRelState.selectedPartners[1] === undefined
+    ) {
       throw new Error("Partner undefined");
     }
 
@@ -56,13 +31,10 @@ export function AddRelationship() {
       throw new Error("Relationship Type undefined");
     }
 
-    const partner1 = partner1List[0];
-    const partner2 = partner2List[0];
-
     const rel = new Relationship(
       {
-        partner1: partner1,
-        partner2: partner2,
+        partner1: addRelState.selectedPartners[0],
+        partner2: addRelState.selectedPartners[1],
       },
       addRelState.relTypes.selected,
       false,
@@ -107,6 +79,8 @@ export function AddRelationship() {
 
 function InputRelPerson({ index }: { index: 0 | 1 }) {
   const { addRelState, setAddRelState } = useContext(AddRelContext);
+  const inputField = useRef<HTMLInputElement>(null);
+
   function searchRelPerson(event: React.ChangeEvent<HTMLInputElement>) {
     const query = event.target.value.toLowerCase();
 
@@ -134,9 +108,16 @@ function InputRelPerson({ index }: { index: 0 | 1 }) {
     });
   }
 
+  function updateInputFieldText(string: string) {
+    if (inputField.current) {
+      inputField.current.value = string;
+    }
+  }
+
   return (
     <div>
       <input
+        ref={inputField}
         onChange={searchRelPerson}
         type="text"
         name="partner"
@@ -146,7 +127,9 @@ function InputRelPerson({ index }: { index: 0 | 1 }) {
       {addRelState.queriedPartners[index] &&
         addRelState.queriedPartners[index].length > 0 && (
           <InputRelPersonList
+            index={index}
             queriedPartners={addRelState.queriedPartners[index]}
+            updateInputFieldText={updateInputFieldText}
           />
         )}
     </div>
@@ -154,24 +137,54 @@ function InputRelPerson({ index }: { index: 0 | 1 }) {
 }
 
 function InputRelPersonList({
+  index,
   queriedPartners,
+  updateInputFieldText,
 }: {
+  index: 0 | 1;
   queriedPartners: Types.Person[];
+  updateInputFieldText: (string: string) => void;
 }) {
-  const { addRelState, setAddRelState } = useContext(AddRelContext);
   return (
     <ul className="mt-3 rounded-lg bg-white shadow-lg">
-      {queriedPartners.map((person, index) => (
-        <InputRelPersonListItem key={index} person={person} />
+      {queriedPartners.map((person, i) => (
+        <InputRelPersonListItem
+          key={i}
+          person={person}
+          index={index}
+          updateInputFieldText={updateInputFieldText}
+        />
       ))}
     </ul>
   );
 }
 
-function InputRelPersonListItem({ person }: { person: Types.Person }) {
+function InputRelPersonListItem({
+  person,
+  index,
+  updateInputFieldText,
+}: {
+  person: Types.Person;
+  index: 0 | 1;
+  updateInputFieldText: (string: string) => void;
+}) {
+  const { addRelState, setAddRelState } = useContext(AddRelContext);
+
+  function setPartner() {
+    setAddRelState({
+      ...addRelState,
+      selectedPartners: { ...addRelState.selectedPartners, [index]: person },
+      queriedPartners: {
+        ...addRelState.queriedPartners,
+        [index]: [],
+      },
+    });
+
+    updateInputFieldText(person.name);
+  }
   return (
     <li className="cursor-pointer rounded-lg p-3 outline-offset-0 outline-blue-500 hover:outline">
-      <button className="w-full text-left">
+      <button className="w-full text-left" onClick={setPartner}>
         <div className="font-bold text-blue-500">{person.name}</div>
         <div className="text-blue-500/50">{person.location.name}</div>
       </button>

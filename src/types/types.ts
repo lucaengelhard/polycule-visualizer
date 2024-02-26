@@ -32,3 +32,15 @@ export type GraphData = {
   nodes: Person[];
   links: Relationship[];
 };
+
+export type addRelState = {
+  queriedPartners: {
+    0: Person[];
+    1: Person[];
+  };
+  selectedPartners: {
+    0?: Person;
+    1?: Person;
+  };
+  relTypes: { items: RelType[]; selected?: RelType | undefined };
+};
