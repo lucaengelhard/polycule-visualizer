@@ -1,7 +1,7 @@
 import { PlusCircle, UserRoundPlus } from "lucide-react";
 import { createContext, useContext, useRef, useState } from "react";
 import * as Types from "../types/types";
-import { db } from "../db/db";
+import { add, db } from "../db/db";
 import { geoCode } from "../utils/geocode";
 import { InputOpenContext } from "./Input";
 
@@ -42,11 +42,14 @@ export function AddPerson() {
       relationships: [],
     };
 
-    //console.log(person);
-    //Add to db
-    db.nodes.push(person);
-    console.log(db.nodes);
-    //update Graph
+    const length = add({ payload: person, type: "node" });
+    if (length !== undefined) {
+      const index = length - 1;
+      console.log(db.nodes[index]);
+    } else {
+      throw new Error("Adding to DB Failed");
+    }
+
     if (nameInputField.current !== null) {
       nameInputField.current.value = "";
       addPersonState.name = "";

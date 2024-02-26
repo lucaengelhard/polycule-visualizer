@@ -1,14 +1,8 @@
 import { CheckCircle, Circle, PlusCircle, Users } from "lucide-react";
-import {
-  MouseEventHandler,
-  createContext,
-  useContext,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useContext, useRef, useState } from "react";
 import { hexToRGBA } from "../utils/helpers";
 import * as Types from "../types/types";
-import { db } from "../db/db";
+import { add, db } from "../db/db";
 import { Relationship } from "../classes/relationship";
 import { InputOpenContext } from "./Input";
 
@@ -69,7 +63,13 @@ export function AddRelationship() {
       false
     );
 
-    console.log(rel);
+    const length = add({ payload: rel, type: "link" });
+    if (length !== undefined) {
+      const index = length - 1;
+      console.log(db.links[index]);
+    } else {
+      throw new Error("Adding to DB Failed");
+    }
   }
 
   return (
@@ -103,7 +103,7 @@ export function AddRelationship() {
 function InputRelPerson({ index }: { index: 0 | 1 }) {
   const { addRelState, setAddRelState } = useContext(AddRelContext);
   function searchRelPerson(event: React.ChangeEvent<HTMLInputElement>) {
-    const query = event.target.value;
+    const query = event.target.value.toLowerCase();
 
     if (query.length === 0) {
       addRelState.queriedPartners.set(index, undefined);
@@ -128,14 +128,42 @@ function InputRelPerson({ index }: { index: 0 | 1 }) {
   }
 
   return (
-    <input
-      onChange={searchRelPerson}
-      type="text"
-      name="partner"
-      className="p-3 mt-2 rounded-lg shadow-lg block"
-      placeholder="Partner Name"
-    />
+    <div>
+      <input
+        onChange={searchRelPerson}
+        type="text"
+        name="partner"
+        className="p-3 mt-2 rounded-lg shadow-lg block"
+        placeholder="Partner Name"
+      />
+      {addRelState.queriedPartners.get(index) &&
+        addRelState.queriedPartners.get(index)?.length > 0 && (
+          <InputRelPersonList
+            queriedPartners={addRelState.queriedPartners.get(index)}
+          />
+        )}
+    </div>
   );
+}
+
+function InputRelPersonList({
+  queriedPartners,
+}: {
+  queriedPartners: Types.Person[] | undefined;
+}) {
+  const { addRelState, setAddRelState } = useContext(AddRelContext);
+  return (
+    <ul className="p-3 mt-1 rounded-lg shadow-lg bg-white">
+      {queriedPartners &&
+        queriedPartners.map((person) => (
+          <InputRelPersonListItem person={person} />
+        ))}
+    </ul>
+  );
+}
+
+function InputRelPersonListItem({ person }: { person: Types.Person }) {
+  return <li>{person.name}</li>;
 }
 
 function SelectRelType() {
@@ -173,10 +201,11 @@ function SelectRelType() {
   return (
     <fieldset className="mt-3">
       <legend>Select the type of Relationship</legend>
-      {addRelState.relTypes.items.map((item) => (
+      {addRelState.relTypes.items.map((item, index) => (
         <RelType
           key={item.id}
-          isChecked={item.checked}
+          index={index}
+          isChecked={item.checked ?? false}
           relType={item}
           updateChecked={() => updateChecked(item.id)}
         />
@@ -187,29 +216,46 @@ function SelectRelType() {
 }
 
 function RelType({
-  relType,
+  index,
   isChecked,
   updateChecked,
 }: {
   relType: Types.RelType;
+  index: number;
   isChecked: boolean;
   updateChecked: () => void;
 }) {
-  const [color, setColor] = useState(relType.color);
-  const [name, setName] = useState(relType.name);
+  const { addRelState, setAddRelState } = useContext(AddRelContext);
 
   const divStyle = {
-    backgroundColor: hexToRGBA(color, 0.5) ?? "#ffffff",
+    backgroundColor:
+      hexToRGBA(addRelState.relTypes.items[index].color, 0.5) ?? "#ffffff",
   };
 
   function changeColor(event: React.ChangeEvent<HTMLInputElement>) {
-    setColor(event.target.value);
-    relType.color = event.target.value;
+    const items = addRelState.relTypes.items;
+    items[index].color = event.target.value;
+
+    setAddRelState({
+      ...addRelState,
+      relTypes: {
+        ...addRelState.relTypes,
+        items: items,
+      },
+    });
   }
 
   function changeName(event: React.ChangeEvent<HTMLInputElement>) {
-    setName(event.target.value);
-    relType.name = event.target.value;
+    const items = addRelState.relTypes.items;
+    items[index].name = event.target.value;
+
+    setAddRelState({
+      ...addRelState,
+      relTypes: {
+        ...addRelState.relTypes,
+        items: items,
+      },
+    });
   }
 
   return (
@@ -221,11 +267,14 @@ function RelType({
         <button className="cursor-pointer" onClick={updateChecked}>
           {isChecked ? <CheckCircle /> : <Circle />}
         </button>
-        <label className="cursor-pointer block w-full" htmlFor={name}>
+        <label
+          className="cursor-pointer block w-full"
+          htmlFor={addRelState.relTypes.items[index].name}
+        >
           <input
             onBlur={changeName}
             type="text"
-            defaultValue={name}
+            defaultValue={addRelState.relTypes.items[index].name}
             className="bg-transparent cursor-pointer"
           />
         </label>
@@ -235,7 +284,7 @@ function RelType({
           className=" h-8 w-8 rounded-lg"
           type="color"
           name="relTypeColor"
-          value={color}
+          value={addRelState.relTypes.items[index].color}
           onChange={changeColor}
         />
       </div>

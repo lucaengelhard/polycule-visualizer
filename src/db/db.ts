@@ -1,3 +1,4 @@
+import { Relationship } from "../classes/relationship";
 import { GraphData, Person } from "../types/types";
 
 const luca: Person = {
@@ -37,4 +38,30 @@ updateGraphData();
 export function updateGraphData() {
   graph.nodes = db.nodes.map((node) => node);
   graph.links = db.links.map((link) => link);
+}
+
+export function add({
+  type,
+  payload,
+}: {
+  type: "node" | "link";
+  payload: typeof type extends "node"
+    ? Person
+    : typeof type extends "link"
+    ? Relationship
+    : never;
+}) {
+  let index: number | undefined = undefined;
+
+  if (type === "node") {
+    index = db.nodes.push(payload);
+  }
+
+  if (type === "link") {
+    index = db.links.push(payload);
+  }
+
+  updateGraphData();
+
+  return index;
 }

@@ -12,7 +12,7 @@ export type RelType = {
   name: string;
   id: number;
   color: string;
-  checked: boolean;
+  checked?: boolean;
 };
 
 export type Position = {
