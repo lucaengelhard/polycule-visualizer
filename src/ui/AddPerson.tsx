@@ -14,20 +14,6 @@ const AddPersonContext = createContext<{
   locationInputField: React.RefObject<HTMLInputElement>;
 }>(null);
 
-export function AddPersonButton() {
-  const { setAddPersonOpen, setAddRelOpen } = useContext(InputOpenContext);
-  return (
-    <button
-      onClick={() => {
-        setAddPersonOpen(true);
-        setAddRelOpen(false);
-      }}
-      className="flex gap-3 p-3 rounded-lg shadow-xl "
-    >
-      <UserRoundPlus /> Add Person
-    </button>
-  );
-}
 export function AddPerson() {
   const { setAddPersonOpen } = useContext(InputOpenContext);
   const [addPersonState, setAddPersonState] = useState({
@@ -140,5 +126,20 @@ function InputPersonLocation() {
       name="personLocation"
       placeholder="Location"
     />
+  );
+}
+
+export function AddPersonButton() {
+  const { setAddPersonOpen, setAddRelOpen } = useContext(InputOpenContext);
+  return (
+    <button
+      onClick={() => {
+        setAddPersonOpen(true);
+        setAddRelOpen(false);
+      }}
+      className="flex gap-3 p-3 rounded-lg shadow-xl "
+    >
+      <UserRoundPlus /> Add Person
+    </button>
   );
 }

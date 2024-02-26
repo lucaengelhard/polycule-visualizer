@@ -1,5 +1,4 @@
 import { createContext, useState } from "react";
-import * as Types from "../types/types";
 import { AddPersonButton, AddPerson } from "./AddPerson";
 import { AddRelationshipButton, AddRelationship } from "./AddRelationship";
 

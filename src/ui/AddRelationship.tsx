@@ -1,5 +1,11 @@
 import { CheckCircle, Circle, PlusCircle, Users } from "lucide-react";
-import { createContext, useContext, useRef, useState } from "react";
+import {
+  MouseEventHandler,
+  createContext,
+  useContext,
+  useRef,
+  useState,
+} from "react";
 import { hexToRGBA } from "../utils/helpers";
 import * as Types from "../types/types";
 import { db } from "../db/db";
@@ -22,25 +28,6 @@ const AddRelContext = createContext<{
   >;
 }>(null);
 
-const SelectRelTypeContext = createContext<{
-  relTypeElements: JSX.Element[];
-  setRelTypeElements: React.Dispatch<React.SetStateAction<JSX.Element[]>>;
-}>(null);
-
-export function AddRelationshipButton() {
-  const { setAddPersonOpen, setAddRelOpen } = useContext(InputOpenContext);
-  return (
-    <button
-      onClick={() => {
-        setAddPersonOpen(false);
-        setAddRelOpen(true);
-      }}
-      className="flex gap-3 p-3 rounded-lg shadow-xl"
-    >
-      <Users /> Add Relationship
-    </button>
-  );
-}
 export function AddRelationship() {
   const { setAddRelOpen } = useContext(InputOpenContext);
   const [addRelState, setAddRelState] = useState<{
@@ -112,6 +99,7 @@ export function AddRelationship() {
     </AddRelContext.Provider>
   );
 }
+
 function InputRelPerson({ index }: { index: 0 | 1 }) {
   const { addRelState, setAddRelState } = useContext(AddRelContext);
   function searchRelPerson(event: React.ChangeEvent<HTMLInputElement>) {
@@ -119,7 +107,13 @@ function InputRelPerson({ index }: { index: 0 | 1 }) {
 
     if (query.length === 0) {
       addRelState.queriedPartners.set(index, undefined);
-      setAddRelState(addRelState);
+      setAddRelState({
+        ...addRelState,
+        queriedPartners: new Map([
+          ...addRelState.queriedPartners,
+          [index, undefined],
+        ]),
+      });
       return;
     }
 
@@ -127,8 +121,10 @@ function InputRelPerson({ index }: { index: 0 | 1 }) {
       node.name.toLowerCase().includes(query)
     );
 
-    addRelState.queriedPartners.set(index, res);
-    setAddRelState(addRelState);
+    setAddRelState({
+      ...addRelState,
+      queriedPartners: addRelState.queriedPartners.set(index, res),
+    });
   }
 
   return (
@@ -143,27 +139,61 @@ function InputRelPerson({ index }: { index: 0 | 1 }) {
 }
 
 function SelectRelType() {
-  const [relTypeElements, setRelTypeElements] = useState<JSX.Element[]>([]);
+  const { addRelState, setAddRelState } = useContext(AddRelContext);
+
+  function updateChecked(id: number) {
+    const items = addRelState.relTypes.items;
+    let selected = addRelState.relTypes.selected;
+    addRelState.relTypes.items.forEach((item, index) => {
+      if (item.id === id) {
+        if (item.checked) {
+          item.checked = false;
+          selected = undefined;
+        } else {
+          item.checked = true;
+          selected = item;
+        }
+      } else {
+        item.checked = false;
+      }
+
+      items[index] = item;
+    });
+
+    setAddRelState({
+      ...addRelState,
+      relTypes: {
+        ...addRelState.relTypes,
+        items: items,
+        selected: selected,
+      },
+    });
+  }
+
   return (
-    <SelectRelTypeContext.Provider
-      value={{ relTypeElements, setRelTypeElements }}
-    >
-      {" "}
-      <fieldset className="mt-3">
-        <legend>Select the type of Relationship</legend>
-        {relTypeElements}
-        <AddRelType />
-      </fieldset>
-    </SelectRelTypeContext.Provider>
+    <fieldset className="mt-3">
+      <legend>Select the type of Relationship</legend>
+      {addRelState.relTypes.items.map((item) => (
+        <RelType
+          key={item.id}
+          isChecked={item.checked}
+          relType={item}
+          updateChecked={() => updateChecked(item.id)}
+        />
+      ))}
+      <AddRelType />
+    </fieldset>
   );
 }
 
 function RelType({
   relType,
   isChecked,
+  updateChecked,
 }: {
   relType: Types.RelType;
   isChecked: boolean;
+  updateChecked: () => void;
 }) {
   const [color, setColor] = useState(relType.color);
   const [name, setName] = useState(relType.name);
@@ -188,7 +218,7 @@ function RelType({
       style={divStyle}
     >
       <div className="flex gap-3 w-full items-center">
-        <button className="cursor-pointer">
+        <button className="cursor-pointer" onClick={updateChecked}>
           {isChecked ? <CheckCircle /> : <Circle />}
         </button>
         <label className="cursor-pointer block w-full" htmlFor={name}>
@@ -215,8 +245,6 @@ function RelType({
 
 function AddRelType() {
   const { addRelState, setAddRelState } = useContext(AddRelContext);
-  const { relTypeElements, setRelTypeElements } =
-    useContext(SelectRelTypeContext);
   const relName = useRef<HTMLInputElement>(null);
   const relColor = useRef<HTMLInputElement>(null);
 
@@ -226,20 +254,16 @@ function AddRelType() {
         id: addRelState.relTypes.items.length,
         name: relName.current.value,
         color: relColor.current.value,
+        checked: false,
       };
 
-      addRelState.relTypes.items = [...addRelState.relTypes.items, type];
-
-      setRelTypeElements([
-        ...relTypeElements,
-        <RelType
-          key={addRelState.relTypes.items.length}
-          relType={type}
-          isChecked={false}
-        />,
-      ]);
-
-      setAddRelState(addRelState);
+      setAddRelState({
+        ...addRelState,
+        relTypes: {
+          ...addRelState.relTypes,
+          items: [...addRelState.relTypes.items, type],
+        },
+      });
 
       relName.current.value = "";
     }
@@ -267,5 +291,20 @@ function AddRelType() {
         <PlusCircle />
       </button>
     </div>
+  );
+}
+
+export function AddRelationshipButton() {
+  const { setAddPersonOpen, setAddRelOpen } = useContext(InputOpenContext);
+  return (
+    <button
+      onClick={() => {
+        setAddPersonOpen(false);
+        setAddRelOpen(true);
+      }}
+      className="flex gap-3 p-3 rounded-lg shadow-xl"
+    >
+      <Users /> Add Relationship
+    </button>
   );
 }
