@@ -35,7 +35,7 @@ export function distance(
   lon1: number,
   lat2: number,
   lon2: number,
-  unit: "M" | "K" | "N"
+  unit: "M" | "K" | "N",
 ) {
   if (lat1 == lat2 && lon1 == lon2) {
     return 0;

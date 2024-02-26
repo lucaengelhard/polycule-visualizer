@@ -8,12 +8,18 @@ import { InputOpenContext } from "./Input";
 
 const AddRelContext = createContext<{
   addRelState: {
-    queriedPartners: Map<0 | 1, Types.Person[] | undefined>;
+    queriedPartners: {
+      0: Types.Person[];
+      1: Types.Person[];
+    };
     relTypes: { items: Types.RelType[]; selected?: Types.RelType | undefined };
   };
   setAddRelState: React.Dispatch<
     React.SetStateAction<{
-      queriedPartners: Map<0 | 1, Types.Person[] | undefined>;
+      queriedPartners: {
+        0: Types.Person[];
+        1: Types.Person[];
+      };
       relTypes: {
         items: Types.RelType[];
         selected?: Types.RelType;
@@ -25,25 +31,24 @@ const AddRelContext = createContext<{
 export function AddRelationship() {
   const { setAddRelOpen } = useContext(InputOpenContext);
   const [addRelState, setAddRelState] = useState<{
-    queriedPartners: Map<0 | 1, Types.Person[] | undefined>;
+    queriedPartners: {
+      0: Types.Person[];
+      1: Types.Person[];
+    };
     relTypes: {
       items: Types.RelType[];
-
       selected?: Types.RelType;
     };
   }>({
-    queriedPartners: new Map([
-      [0, undefined],
-      [1, undefined],
-    ]),
+    queriedPartners: { 1: [], 2: [] },
     relTypes: { items: [], selected: undefined },
   });
 
   function addRel() {
-    const partner1List = addRelState.queriedPartners.get(0);
-    const partner2List = addRelState.queriedPartners.get(1);
+    const partner1List = addRelState.queriedPartners[0];
+    const partner2List = addRelState.queriedPartners[1];
 
-    if (partner1List === undefined || partner2List === undefined) {
+    if (partner1List.length === 0 || partner2List.length === 0) {
       throw new Error("Partner undefined");
     }
 
@@ -60,7 +65,7 @@ export function AddRelationship() {
         partner2: partner2,
       },
       addRelState.relTypes.selected,
-      false
+      false,
     );
 
     const length = add({ payload: rel, type: "link" });
@@ -74,7 +79,7 @@ export function AddRelationship() {
 
   return (
     <AddRelContext.Provider value={{ addRelState, setAddRelState }}>
-      <fieldset className="m-0 p-3 shadow-lg rounded-lg inline-block absolute top-3 left-3 bg-white">
+      <fieldset className="absolute left-3 top-3 m-0 inline-block rounded-lg bg-white p-3 shadow-lg">
         <div className="flex gap-3">
           <InputRelPerson index={0} />
           <InputRelPerson index={1} />
@@ -83,14 +88,14 @@ export function AddRelationship() {
         <div className="flex gap-3">
           <button
             onClick={addRel}
-            className="flex gap-3 mt-3 p-3 rounded-lg shadow-lg hover:bg-green-500 transition-colors"
+            className="mt-3 flex gap-3 rounded-lg p-3 shadow-lg transition-colors hover:bg-green-500"
           >
             <PlusCircle />
             Submit
           </button>
           <button
             onClick={() => setAddRelOpen(false)}
-            className="flex gap-3 mt-3 p-3 rounded-lg shadow-lg hover:bg-red-500 transition-colors"
+            className="mt-3 flex gap-3 rounded-lg p-3 shadow-lg transition-colors hover:bg-red-500"
           >
             Cancel
           </button>
@@ -106,24 +111,26 @@ function InputRelPerson({ index }: { index: 0 | 1 }) {
     const query = event.target.value.toLowerCase();
 
     if (query.length === 0) {
-      addRelState.queriedPartners.set(index, undefined);
       setAddRelState({
         ...addRelState,
-        queriedPartners: new Map([
+        queriedPartners: {
           ...addRelState.queriedPartners,
-          [index, undefined],
-        ]),
+          [index]: [],
+        },
       });
       return;
     }
 
     const res = db.nodes.filter((node) =>
-      node.name.toLowerCase().includes(query)
+      node.name.toLowerCase().includes(query),
     );
 
     setAddRelState({
       ...addRelState,
-      queriedPartners: addRelState.queriedPartners.set(index, res),
+      queriedPartners: {
+        ...addRelState.queriedPartners,
+        [index]: res,
+      },
     });
   }
 
@@ -133,13 +140,13 @@ function InputRelPerson({ index }: { index: 0 | 1 }) {
         onChange={searchRelPerson}
         type="text"
         name="partner"
-        className="p-3 mt-2 rounded-lg shadow-lg block"
+        className="mt-2 block rounded-lg p-3 shadow-lg"
         placeholder="Partner Name"
       />
-      {addRelState.queriedPartners.get(index) &&
-        addRelState.queriedPartners.get(index)?.length > 0 && (
+      {addRelState.queriedPartners[index] &&
+        addRelState.queriedPartners[index].length > 0 && (
           <InputRelPersonList
-            queriedPartners={addRelState.queriedPartners.get(index)}
+            queriedPartners={addRelState.queriedPartners[index]}
           />
         )}
     </div>
@@ -149,21 +156,27 @@ function InputRelPerson({ index }: { index: 0 | 1 }) {
 function InputRelPersonList({
   queriedPartners,
 }: {
-  queriedPartners: Types.Person[] | undefined;
+  queriedPartners: Types.Person[];
 }) {
   const { addRelState, setAddRelState } = useContext(AddRelContext);
   return (
-    <ul className="p-3 mt-1 rounded-lg shadow-lg bg-white">
-      {queriedPartners &&
-        queriedPartners.map((person) => (
-          <InputRelPersonListItem person={person} />
-        ))}
+    <ul className="mt-3 rounded-lg bg-white shadow-lg">
+      {queriedPartners.map((person, index) => (
+        <InputRelPersonListItem key={index} person={person} />
+      ))}
     </ul>
   );
 }
 
 function InputRelPersonListItem({ person }: { person: Types.Person }) {
-  return <li>{person.name}</li>;
+  return (
+    <li className="cursor-pointer rounded-lg p-3 outline-offset-0 outline-blue-500 hover:outline">
+      <button className="w-full text-left">
+        <div className="font-bold text-blue-500">{person.name}</div>
+        <div className="text-blue-500/50">{person.location.name}</div>
+      </button>
+    </li>
+  );
 }
 
 function SelectRelType() {
@@ -260,22 +273,22 @@ function RelType({
 
   return (
     <div
-      className="flex gap-3 pl-3 pr-1 mt-1 rounded-lg justify-between h-10"
+      className="mt-1 flex h-10 justify-between gap-3 rounded-lg pl-3 pr-1"
       style={divStyle}
     >
-      <div className="flex gap-3 w-full items-center">
+      <div className="flex w-full items-center gap-3">
         <button className="cursor-pointer" onClick={updateChecked}>
           {isChecked ? <CheckCircle /> : <Circle />}
         </button>
         <label
-          className="cursor-pointer block w-full"
+          className="block w-full cursor-pointer"
           htmlFor={addRelState.relTypes.items[index].name}
         >
           <input
             onBlur={changeName}
             type="text"
             defaultValue={addRelState.relTypes.items[index].name}
-            className="bg-transparent cursor-pointer"
+            className="cursor-pointer bg-transparent"
           />
         </label>
       </div>
@@ -325,17 +338,17 @@ function AddRelType() {
         type="text"
         name="addType"
         placeholder="New Relationship type"
-        className="p-3 mt-2 rounded-lg shadow-lg block"
+        className="mt-2 block rounded-lg p-3 shadow-lg"
       />
       <input
         ref={relColor}
-        className="h-10 mt-4 w-10 rounded-lg"
+        className="mt-4 h-10 w-10 rounded-lg"
         type="color"
         name="relColor"
       />
       <button
         onClick={addRelType}
-        className="flex gap-3 mt-3 p-3 rounded-lg shadow-lg hover:bg-green-500 transition-colors"
+        className="mt-3 flex gap-3 rounded-lg p-3 shadow-lg transition-colors hover:bg-green-500"
       >
         <PlusCircle />
       </button>
@@ -351,7 +364,7 @@ export function AddRelationshipButton() {
         setAddPersonOpen(false);
         setAddRelOpen(true);
       }}
-      className="flex gap-3 p-3 rounded-lg shadow-xl"
+      className="flex gap-3 rounded-lg p-3 shadow-xl"
     >
       <Users /> Add Relationship
     </button>

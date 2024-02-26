@@ -48,8 +48,8 @@ export function add({
   payload: typeof type extends "node"
     ? Person
     : typeof type extends "link"
-    ? Relationship
-    : never;
+      ? Relationship
+      : never;
 }) {
   let index: number | undefined = undefined;
 

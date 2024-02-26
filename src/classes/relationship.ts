@@ -13,7 +13,7 @@ export class Relationship {
     partners: { partner1: Types.Person; partner2: Types.Person },
     type: Types.RelType,
     exclusive: boolean,
-    history?: Types.RelHistory
+    history?: Types.RelHistory,
   ) {
     this.source = partners.partner1.id;
     this.target = partners.partner2.id;
@@ -27,7 +27,7 @@ export class Relationship {
       partners.partner1.location.lon,
       partners.partner2.location.lat,
       partners.partner2.location.lon,
-      "K"
+      "K",
     );
   }
 }
