@@ -4,7 +4,7 @@ import { hexToRGBA } from "../utils/helpers";
 import * as Types from "../types/types";
 import { add, db } from "../db/db";
 import { Relationship } from "../classes/relationship";
-import { InputOpenContext } from "./Input";
+import { InputOpenContext } from "./UI";
 
 const AddRelContext = createContext<{
   addRelState: Types.addRelState;
@@ -25,6 +25,12 @@ export function AddRelationship() {
       addRelState.selectedPartners[1] === undefined
     ) {
       throw new Error("Partner undefined");
+    }
+
+    if (
+      addRelState.selectedPartners[0].id === addRelState.selectedPartners[1].id
+    ) {
+      throw new Error("Partners are the Same");
     }
 
     if (addRelState.relTypes.selected === undefined) {
@@ -377,7 +383,7 @@ export function AddRelationshipButton() {
         setAddPersonOpen(false);
         setAddRelOpen(true);
       }}
-      className="flex gap-3 rounded-lg p-3 shadow-xl"
+      className="flex gap-3 rounded-lg p-3 shadow-xl outline-offset-0 outline-blue-500 hover:outline"
     >
       <Users /> Add Relationship
     </button>

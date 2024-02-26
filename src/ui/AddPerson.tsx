@@ -3,7 +3,7 @@ import { createContext, useContext, useRef, useState } from "react";
 import * as Types from "../types/types";
 import { add, db } from "../db/db";
 import { geoCode } from "../utils/geocode";
-import { InputOpenContext } from "./Input";
+import { InputOpenContext } from "./UI";
 
 const AddPersonContext = createContext<{
   addPersonState: { name: string; locationString: string };
@@ -70,20 +70,20 @@ export function AddPerson() {
         locationInputField,
       }}
     >
-      <fieldset className="m-0 p-3 shadow-lg rounded-lg inline-block absolute top-3 left-3 bg-white">
+      <fieldset className="absolute left-3 top-3 m-0 inline-block rounded-lg bg-white p-3 shadow-lg">
         <InputPersonName />
         <InputPersonLocation />
         <div className="flex gap-3">
           <button
             onClick={addPerson}
-            className="flex gap-3 mt-3 p-3 rounded-lg shadow-lg hover:bg-green-500 transition-colors"
+            className="mt-3 flex gap-3 rounded-lg p-3 shadow-lg transition-colors hover:bg-green-500"
           >
             <PlusCircle />
             Submit
           </button>
           <button
             onClick={() => setAddPersonOpen(false)}
-            className="flex gap-3 mt-3 p-3 rounded-lg shadow-lg hover:bg-red-500 transition-colors"
+            className="mt-3 flex gap-3 rounded-lg p-3 shadow-lg transition-colors hover:bg-red-500"
           >
             Cancel
           </button>
@@ -104,7 +104,7 @@ function InputPersonName() {
     <input
       ref={nameInputField}
       onInput={changeName}
-      className="p-3 rounded-lg shadow-lg block"
+      className="block rounded-lg p-3 shadow-lg"
       type="text"
       name="personName"
       placeholder="Name"
@@ -124,7 +124,7 @@ function InputPersonLocation() {
     <input
       ref={locationInputField}
       onInput={getLocation}
-      className="p-3 mt-2 rounded-lg shadow-lg block"
+      className="mt-2 block rounded-lg p-3 shadow-lg"
       type="text"
       name="personLocation"
       placeholder="Location"
@@ -140,7 +140,7 @@ export function AddPersonButton() {
         setAddPersonOpen(true);
         setAddRelOpen(false);
       }}
-      className="flex gap-3 p-3 rounded-lg shadow-xl "
+      className="flex gap-3 rounded-lg p-3 shadow-xl outline-offset-0 outline-blue-500 hover:outline"
     >
       <UserRoundPlus /> Add Person
     </button>

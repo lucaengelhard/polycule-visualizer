@@ -1,9 +1,11 @@
-import Input from "./ui/Input";
+import Graph from "./graph/Graph";
+import UI from "./ui/UI";
 
 export default function App() {
   return (
     <>
-      <Input />
+      <UI />
+      <Graph />
     </>
   );
 }

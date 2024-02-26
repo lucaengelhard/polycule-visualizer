@@ -1,6 +1,7 @@
 import { createContext, useState } from "react";
 import { AddPersonButton, AddPerson } from "./AddPerson";
 import { AddRelationshipButton, AddRelationship } from "./AddRelationship";
+import SaveLoad from "./SaveLoad";
 
 export const InputOpenContext = createContext<{
   addPersonOpen: boolean;
@@ -9,21 +10,25 @@ export const InputOpenContext = createContext<{
   setAddRelOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }>(null);
 
-export default function Input() {
+export default function UI() {
   const [addPersonOpen, setAddPersonOpen] = useState(false);
   const [addRelOpen, setAddRelOpen] = useState(false);
 
   return (
-    <InputOpenContext.Provider
-      value={{ addPersonOpen, setAddPersonOpen, addRelOpen, setAddRelOpen }}
-    >
-      <div className="absolute top-3 left-3">
-        <AddPersonButton />
-        <AddRelationshipButton />
-      </div>
+    <div className="flex justify-between p-3">
+      <InputOpenContext.Provider
+        value={{ addPersonOpen, setAddPersonOpen, addRelOpen, setAddRelOpen }}
+      >
+        <div className="flex gap-3">
+          <AddPersonButton />
+          <AddRelationshipButton />
+        </div>
 
-      {addPersonOpen && !addRelOpen && <AddPerson />}
-      {addRelOpen && !addPersonOpen && <AddRelationship />}
-    </InputOpenContext.Provider>
+        {addPersonOpen && !addRelOpen && <AddPerson />}
+        {addRelOpen && !addPersonOpen && <AddRelationship />}
+      </InputOpenContext.Provider>
+
+      <SaveLoad />
+    </div>
   );
 }
