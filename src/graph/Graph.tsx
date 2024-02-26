@@ -64,7 +64,26 @@ export default function Graph({ graph }: { graph: Types.GraphData }) {
           .attr("class", "node pointer-events-auto")
           .attr("r", 8)
           .attr("cx", (node) => node.x)
-          .attr("cy", (node) => node.y);
+          .attr("cy", (node) => node.y)
+          .call(
+            d3
+              .drag() // Attach drag behavior
+              .on("start", (event: unknown, d: Types.GraphNode) => {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+              })
+              .on("drag", (event: unknown, d: Types.GraphNode) => {
+                d.fx = event.x;
+                d.fy = event.y;
+              })
+              .on("end", (event: unknown, d: Types.GraphNode) => {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+              }),
+            undefined,
+          );
 
         svg
           .selectAll(".label")

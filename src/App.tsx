@@ -24,7 +24,7 @@ export default function App() {
   return (
     <>
       <UI />
-      <Graph graph={graphState} setGraphState={setGraphState} />
+      <Graph graph={graphState} />
     </>
   );
 }

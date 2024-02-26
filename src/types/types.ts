@@ -63,3 +63,5 @@ export type addRelState = {
   };
   relTypes: { items: RelType[]; selected?: RelType | undefined };
 };
+
+export type DragEvent = { active: boolean };
