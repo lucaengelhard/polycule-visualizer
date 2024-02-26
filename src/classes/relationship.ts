@@ -2,8 +2,8 @@ import { distance } from "../utils/helpers";
 import * as Types from "../types/types";
 
 export class Relationship {
-  source: number;
-  target: number;
+  source: number | Types.GraphNode;
+  target: number | Types.GraphNode;
   type: Types.RelType;
   exclusive: boolean;
   history?: Types.RelHistory;

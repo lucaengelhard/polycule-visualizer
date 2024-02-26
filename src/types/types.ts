@@ -8,6 +8,20 @@ export type Person = {
   relationships: Relationship[];
 };
 
+export interface GraphNode extends Person {
+  dx?: number;
+  dy?: number;
+  x?: number;
+  y?: number;
+  fx?: number;
+  fy?: number;
+}
+
+export interface GraphLink extends Relationship {
+  source: number | GraphNode;
+  target: number | GraphNode;
+}
+
 export type RelType = {
   name: string;
   id: number;
@@ -28,10 +42,15 @@ export type RelHistoryEvent = {
   description: string;
 };
 
-export type GraphData = {
+export type DBData = {
   nodes: Person[];
   links: Relationship[];
 };
+
+export interface GraphData extends DBData {
+  nodes: GraphNode[];
+  links: GraphLink[];
+}
 
 export type addRelState = {
   queriedPartners: {

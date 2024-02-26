@@ -19,7 +19,7 @@ export default function UI() {
       <InputOpenContext.Provider
         value={{ addPersonOpen, setAddPersonOpen, addRelOpen, setAddRelOpen }}
       >
-        <div className="flex gap-3">
+        <div className="pointer-events-auto flex gap-3">
           <AddPersonButton />
           <AddRelationshipButton />
         </div>

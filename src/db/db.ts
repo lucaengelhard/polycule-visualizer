@@ -34,9 +34,15 @@ const michi: Person = {
   relationships: [],
 };
 
+const MichiLuca = new Relationship(
+  { partner1: michi, partner2: luca },
+  { name: "romantic", color: "#c66a55", id: 0 },
+  false,
+);
+
 export const db: GraphData = {
   nodes: [luca, michi, luca2],
-  links: [],
+  links: [MichiLuca],
 };
 
 export const graph: GraphData = {

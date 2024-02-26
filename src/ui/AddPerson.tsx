@@ -140,7 +140,7 @@ export function AddPersonButton() {
         setAddPersonOpen(true);
         setAddRelOpen(false);
       }}
-      className="flex gap-3 rounded-lg p-3 shadow-xl outline-offset-0 outline-blue-500 hover:outline"
+      className="flex gap-3 rounded-lg bg-white p-3 shadow-xl outline-offset-0 outline-blue-500 hover:outline"
     >
       <UserRoundPlus /> Add Person
     </button>

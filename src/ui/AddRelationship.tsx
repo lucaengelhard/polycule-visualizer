@@ -383,7 +383,7 @@ export function AddRelationshipButton() {
         setAddPersonOpen(false);
         setAddRelOpen(true);
       }}
-      className="flex gap-3 rounded-lg p-3 shadow-xl outline-offset-0 outline-blue-500 hover:outline"
+      className="flex gap-3 rounded-lg bg-white p-3 shadow-xl outline-offset-0 outline-blue-500 hover:outline"
     >
       <Users /> Add Relationship
     </button>

@@ -3,7 +3,7 @@ import { db, set } from "../db/db";
 
 export default function SaveLoad() {
   return (
-    <div className="flex gap-3">
+    <div className="pointer-events-auto flex gap-3 ">
       <SaveDB />
       <ImportDB />
     </div>
@@ -26,7 +26,7 @@ function SaveDB() {
 
   return (
     <button
-      className="flex gap-3 rounded-lg bg-white p-3 shadow-xl outline-offset-0 outline-blue-500 hover:outline"
+      className="z-10 flex gap-3 rounded-lg bg-white p-3 shadow-xl outline-offset-0 outline-blue-500 hover:outline"
       onClick={save}
     >
       <Save />
