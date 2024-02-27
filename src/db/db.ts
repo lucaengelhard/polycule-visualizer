@@ -1,7 +1,8 @@
 import { Relationship } from "../classes/relationship";
-import { GraphData, Person } from "../types/types";
 
-const luca: Person = {
+import * as Types from "../types/types";
+
+const luca: Types.Person = {
   id: 0,
   name: "Luca",
   location: {
@@ -12,7 +13,7 @@ const luca: Person = {
   relationships: [],
 };
 
-const luca2: Person = {
+const luca2: Types.Person = {
   id: 2,
   name: "Luca2",
   location: {
@@ -23,7 +24,7 @@ const luca2: Person = {
   relationships: [],
 };
 
-const michi: Person = {
+const michi: Types.Person = {
   id: 1,
   name: "Michi",
   location: {
@@ -40,12 +41,12 @@ const MichiLuca = new Relationship(
   false,
 );
 
-export const db: GraphData = {
+export const db: Types.DBData = {
   nodes: [luca, michi, luca2],
   links: [MichiLuca],
 };
 
-export const graph: GraphData = {
+export const graph: Types.GraphData = {
   nodes: [],
   links: [],
 };
@@ -55,6 +56,9 @@ updateGraphData();
 export function updateGraphData() {
   graph.nodes = db.nodes.map((node) => node);
   graph.links = db.links.map((link) => link);
+
+  const event = new Event("onGraphUpdate");
+  document.dispatchEvent(event);
 }
 
 export function add({
@@ -63,7 +67,7 @@ export function add({
 }: {
   type: "node" | "link";
   payload: typeof type extends "node"
-    ? Person
+    ? Types.Person
     : typeof type extends "link"
       ? Relationship
       : never;
@@ -98,30 +102,30 @@ export function set(input: unknown) {
   }
 }
 
-export function checkGraphDataType(input: unknown): input is GraphData {
-  if ((input as GraphData).links === undefined) {
+export function checkGraphDataType(input: unknown): input is Types.GraphData {
+  if ((input as Types.GraphData).links === undefined) {
     return false;
   }
 
-  if ((input as GraphData).links.length > 0) {
+  if ((input as Types.GraphData).links.length > 0) {
     if (
-      (input as GraphData).links[0].source === undefined ||
-      (input as GraphData).links[0].target === undefined ||
-      (input as GraphData).links[0].distance === undefined
+      (input as Types.GraphData).links[0].source === undefined ||
+      (input as Types.GraphData).links[0].target === undefined ||
+      (input as Types.GraphData).links[0].distance === undefined
     ) {
       return false;
     }
   }
 
-  if ((input as GraphData).nodes === undefined) {
+  if ((input as Types.GraphData).nodes === undefined) {
     return false;
   }
 
-  if ((input as GraphData).nodes.length > 0) {
+  if ((input as Types.GraphData).nodes.length > 0) {
     if (
-      (input as GraphData).nodes[0].name === undefined ||
-      (input as GraphData).nodes[0].id === undefined ||
-      (input as GraphData).nodes[0].location === undefined
+      (input as Types.GraphData).nodes[0].name === undefined ||
+      (input as Types.GraphData).nodes[0].id === undefined ||
+      (input as Types.GraphData).nodes[0].location === undefined
     ) {
       return false;
     }
