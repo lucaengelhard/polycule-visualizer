@@ -94,7 +94,14 @@ export function set(input: unknown) {
   }
 
   if (checkGraphDataType(res)) {
-    db.links = res.links;
+    db.links = res.links.map((link) => {
+      return {
+        ...link,
+        source: typeof link.source !== "number" ? link.source.id : link.source,
+        target: typeof link.target !== "number" ? link.target.id : link.target,
+      };
+    });
+
     db.nodes = res.nodes;
     updateGraphData();
   } else {

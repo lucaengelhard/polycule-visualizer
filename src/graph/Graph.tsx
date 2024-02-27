@@ -89,7 +89,7 @@ export default function Graph({ graph }: { graph: Types.GraphData }) {
           .selectAll(".label")
           .data(nodes)
           .join("text")
-          .attr("class", "label")
+          .attr("class", "label pointer-events-none")
           .attr("text-anchor", "middle")
           .attr("font-size", 20)
           .text((node) => node.name)
@@ -103,7 +103,7 @@ export default function Graph({ graph }: { graph: Types.GraphData }) {
   return (
     <div
       ref={wrapperRef}
-      className="pointer-events-none fixed inset-0 h-screen w-screen"
+      className="pointer-events-none inset-0 h-screen w-screen bg-white"
     >
       <svg ref={svgRef} className="h-full w-full"></svg>
     </div>

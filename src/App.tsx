@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Graph from "./graph/Graph";
 import UI from "./ui/UI";
 import * as Types from "./types/types";
@@ -19,8 +19,8 @@ export default function App() {
 
   return (
     <>
-      <UI />
       <Graph graph={graphState} />
+      <UI />
     </>
   );
 }

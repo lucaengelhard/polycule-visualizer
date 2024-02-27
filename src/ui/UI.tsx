@@ -15,11 +15,11 @@ export default function UI() {
   const [addRelOpen, setAddRelOpen] = useState(false);
 
   return (
-    <div className="flex justify-between p-3">
+    <div className="fixed inset-0 flex h-min justify-between p-3">
       <InputOpenContext.Provider
         value={{ addPersonOpen, setAddPersonOpen, addRelOpen, setAddRelOpen }}
       >
-        <div className="pointer-events-auto flex gap-3">
+        <div className="flex gap-3">
           <AddPersonButton />
           <AddRelationshipButton />
         </div>
