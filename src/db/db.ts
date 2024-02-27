@@ -1,159 +1,71 @@
-import { Relationship } from "../classes/relationship";
+import Link from "../classes/link";
 import {
   checkGraphDataType,
-  typeCheckPerson,
-  typeCheckRel,
-  typeCheckRelType,
+  typeCheckNode,
+  typeCheckLink,
+  typeCheckLinkType,
 } from "../types/typechecks";
 
 import * as Types from "../types/types";
+import { getNewIndex } from "../utils/helpers";
 
 export const db: Types.DBData = {
-  nodes: [],
-  links: [],
+  nodes: {},
+  links: {},
+  linkTypes: {},
 };
 
-export const graph: Types.GraphData = {
-  nodes: [],
-  links: [],
-};
+const dbUpDate = new Event("dbUpDate");
+const NodeUpDate = new Event("NodeUpdate");
+const LinkUpdate = new Event("LinkUpdate");
+const LinkTypeUpdate = new Event("LinkTypeUpdate");
 
-updateGraphData();
-
-export function updateGraphData() {
-  graph.nodes = db.nodes.map((node) => node);
-  graph.links = db.links.map((link) => link);
-  db.relTypes?.forEach((type) => {
-    if (graph.relTypes === undefined) {
-      graph.relTypes = new Map([[type.id, type]]);
-    } else {
-      graph.relTypes.set(type.id, type);
-    }
-  });
-
-  const event = new Event("onGraphUpdate");
-  document.dispatchEvent(event);
-}
-
-export function add(
-  type: "node" | "link" | "relType",
-  payload: Types.Person | Relationship | Types.RelType,
+export function update(
+  type: "nodes" | "links" | "linkTypes",
+  payload: Types.Node | Link | Types.LinkType,
+  action: "add" | "change",
 ) {
+  switch (type) {
+    case "nodes":
+      typeCheckNode(payload);
+      break;
+    case "links":
+      typeCheckLink(payload);
+      break;
+    case "linkTypes":
+      typeCheckLinkType(payload);
+      break;
+    default:
+      throw new Error("No type defined");
+  }
+
   let length: number | undefined = undefined;
+  let i = payload.id;
 
-  if (type === "node" && typeCheckPerson(payload)) {
-    length = db.nodes.push(payload);
+  if (action === "add") {
+    i = getNewIndex(db[type]);
+    payload.id = i;
   }
 
-  if (type === "link" && typeCheckRel(payload)) {
-    length = db.links.push(payload);
+  db[type][i] = payload;
+  length = Object.keys(db[type]).length;
+
+  switch (type) {
+    case "nodes":
+      document.dispatchEvent(NodeUpDate);
+      break;
+    case "links":
+      document.dispatchEvent(LinkUpdate);
+      break;
+    case "linkTypes":
+      document.dispatchEvent(LinkTypeUpdate);
+      break;
+    default:
+      document.dispatchEvent(dbUpDate);
+      break;
   }
-
-  if (type === "relType" && typeCheckRelType(payload)) {
-    if (db.relTypes === undefined) {
-      db.relTypes = new Map([[payload.id, payload]]);
-    } else {
-      db.relTypes.set(payload.id, payload);
-    }
-
-    length = db.relTypes.size;
-  }
-
-  updateGraphData();
 
   return length;
-}
-
-export function change(
-  type: "node" | "link" | "relType",
-  payload: Types.Person | Relationship | Types.RelType,
-) {
-  if (type === "node" && typeCheckPerson(payload)) {
-    const index = db.nodes.findIndex((node) => {
-      return node.id === payload.id;
-    });
-
-    db.nodes[index] = payload;
-  }
-
-  if (type === "link" && typeCheckRel(payload)) {
-    const index = db.links.findIndex((link) => {
-      const check = { source: false, target: false };
-
-      if (
-        typeof payload.source === "number" &&
-        typeof link.source === "object"
-      ) {
-        check.source = payload.source === link.source.id;
-      }
-
-      if (
-        typeof payload.target === "number" &&
-        typeof link.target === "object"
-      ) {
-        check.source = payload.target === link.target.id;
-      }
-
-      if (
-        typeof payload.source === "object" &&
-        typeof link.source === "number"
-      ) {
-        check.source = payload.source.id === link.source;
-      }
-
-      if (
-        typeof payload.target === "object" &&
-        typeof link.target === "number"
-      ) {
-        check.source = payload.target.id === link.target;
-      }
-
-      if (
-        typeof payload.source === "number" &&
-        typeof link.source === "number"
-      ) {
-        check.source = payload.source === link.source;
-      }
-
-      if (
-        typeof payload.target === "number" &&
-        typeof link.target === "number"
-      ) {
-        check.source = payload.target === link.target;
-      }
-
-      if (
-        typeof payload.source === "object" &&
-        typeof link.source === "object"
-      ) {
-        check.source = payload.source.id === link.source.id;
-      }
-
-      if (
-        typeof payload.target === "object" &&
-        typeof link.target === "object"
-      ) {
-        check.source = payload.target.id === link.target.id;
-      }
-
-      if (check.source && check.target) {
-        return true;
-      }
-    });
-
-    db.links[index] = payload;
-  }
-
-  if (type === "relType" && typeCheckRelType(payload)) {
-    if (db.relTypes !== undefined) {
-      db.relTypes.set(payload.id, payload);
-    } else {
-      db.relTypes = new Map([[payload.id, payload]]);
-    }
-  }
-
-  updateGraphData();
-  return db;
 }
 
 export function set(input: unknown) {
@@ -163,16 +75,11 @@ export function set(input: unknown) {
   }
 
   if (checkGraphDataType(res)) {
-    db.links = res.links.map((link) => {
-      return {
-        ...link,
-        source: typeof link.source !== "number" ? link.source.id : link.source,
-        target: typeof link.target !== "number" ? link.target.id : link.target,
-      };
-    });
-
     db.nodes = res.nodes;
-    updateGraphData();
+    db.links = res.links;
+    db.linkTypes = res.linkTypes;
+
+    document.dispatchEvent(dbUpDate);
   } else {
     throw new Error("Parsing Error");
   }

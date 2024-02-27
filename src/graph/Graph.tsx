@@ -8,7 +8,7 @@ import {
 } from "react";
 import * as d3 from "d3";
 
-import * as Types from "../types/types";
+import * as Types from "../types/types-old";
 import { clamp, distanceScale, findFullSourceTarget } from "../utils/helpers";
 import { Pencil } from "lucide-react";
 import { change } from "../db/db";

@@ -1,9 +1,9 @@
 import { CheckCircle, Circle, PlusCircle, Users } from "lucide-react";
 import { createContext, useContext, useRef, useState } from "react";
 import { hexToRGBA } from "../utils/helpers";
-import * as Types from "../types/types";
+import * as Types from "../types/types-old";
 import { add, db } from "../db/db";
-import { Relationship } from "../classes/relationship";
+import { Relationship } from "../classes/relationship-old";
 import { InputOpenContext } from "./UI";
 
 const AddRelContext = createContext<{

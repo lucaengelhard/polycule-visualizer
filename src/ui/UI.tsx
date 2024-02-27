@@ -1,34 +1,55 @@
-import { createContext, useState } from "react";
-import { AddPersonButton, AddPerson } from "./AddPerson";
-import { AddRelationshipButton, AddRelationship } from "./AddRelationship";
-import SaveLoad from "./SaveLoad";
-
-export const InputOpenContext = createContext<{
-  addPersonOpen: boolean;
-  setAddPersonOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  addRelOpen: boolean;
-  setAddRelOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}>(null);
+import AddPerson from "./AddPerson";
+import { ImportDB, SaveDB } from "./SaveLoad";
 
 export default function UI() {
-  const [addPersonOpen, setAddPersonOpen] = useState(false);
-  const [addRelOpen, setAddRelOpen] = useState(false);
-
   return (
-    <div className="fixed inset-0 flex h-min justify-between p-3">
-      <InputOpenContext.Provider
-        value={{ addPersonOpen, setAddPersonOpen, addRelOpen, setAddRelOpen }}
-      >
+    <div>
+      <div className="flex w-full justify-between gap-3 p-3">
         <div className="flex gap-3">
-          <AddPersonButton />
-          <AddRelationshipButton />
+          <AddPerson />
+          {/* <AddRelationship />*/}
         </div>
+        <div className="flex gap-3">
+          <SaveDB />
+          <ImportDB />
+        </div>
+      </div>
 
-        {addPersonOpen && !addRelOpen && <AddPerson />}
-        {addRelOpen && !addPersonOpen && <AddRelationship />}
-      </InputOpenContext.Provider>
-
-      <SaveLoad />
+      <div>
+        {/*
+        <EditPerson />
+        <EditRel />*/}
+      </div>
     </div>
   );
 }
+
+/*
+export default function UI() {
+  const [radioItems, setRadioItems] = useState<Types.RadioItems>({
+    items: {
+      0: { id: 0, name: "test", color: "#f13456" },
+      1: { id: 1, name: "test2", color: "#ffffff" },
+    },
+  });
+
+  useEffect(() => {
+    console.log(radioItems);
+  }, [radioItems]);
+
+  return (
+    <div className="p-3">
+      <div className="flex gap-3">
+        <SaveDB />
+        <ImportDB />
+        <RadioInput
+          items={radioItems}
+          setItems={setRadioItems}
+          extendable={true}
+          color={true}
+        />
+      </div>
+    </div>
+  );
+}
+*/

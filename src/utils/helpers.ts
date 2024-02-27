@@ -1,9 +1,12 @@
-import { graph } from "../db/db";
-import * as Types from "../types/types";
-
 export function hexToRGBA(hex: string, alpha?: number): string | null {
   if (alpha === undefined) {
     alpha = 1;
+  }
+
+  const rgbaRegex =
+    /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([01](\.\d+)?)\s*\)/;
+  if (rgbaRegex.test(hex)) {
+    return hex;
   }
 
   // Check if the input is a valid hex code
@@ -31,6 +34,42 @@ export function hexToRGBA(hex: string, alpha?: number): string | null {
   const blue = bigint & 255;
 
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+}
+
+export function rgbaStringToHex(rgbaString: string): string | null {
+  const rgbaRegex =
+    /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([01](\.\d+)?)\s*\)/;
+
+  const hexRegex = /^#?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+  if (hexRegex.test(rgbaString)) {
+    return rgbaString;
+  }
+
+  const match = rgbaString.match(rgbaRegex);
+
+  if (!match) {
+    console.error("Invalid RGBA string format");
+    return null;
+  }
+
+  const red = parseInt(match[1], 10);
+  const green = parseInt(match[2], 10);
+  const blue = parseInt(match[3], 10);
+
+  // Ensure that the values are within the valid range (0-255 for RGB, 0-1 for alpha)
+  const validRed = Math.min(255, Math.max(0, red));
+  const validGreen = Math.min(255, Math.max(0, green));
+  const validBlue = Math.min(255, Math.max(0, blue));
+
+  // Convert RGB to hex
+  const rgbHex = ((validRed << 16) | (validGreen << 8) | validBlue)
+    .toString(16)
+    .padStart(6, "0");
+
+  // Combine RGB and alpha hex values
+  const hexColor = `#${rgbHex}`;
+
+  return hexColor;
 }
 
 export function distance(
@@ -70,6 +109,7 @@ export function clamp(num: number, min: number, max: number) {
   return Math.min(Math.max(num, min), max);
 }
 
+/*
 export function findFullSourceTarget(rel: Types.GraphLink) {
   if (typeof rel.source === "number") {
     const fullSource = graph.nodes.find((node) => node.id === rel.source);
@@ -92,7 +132,7 @@ export function findFullSourceTarget(rel: Types.GraphLink) {
   }
 
   return rel;
-}
+}*/
 
 export function distanceScale(input: number) {
   const mappedValue = mapRange(input, 0, 500, 0, 1);
@@ -117,4 +157,18 @@ function mapRange(
     ((clampedValue - fromMin) / (fromMax - fromMin)) * (toMax - toMin) + toMin;
 
   return mappedValue;
+}
+
+export function getNewIndex(input: object): number {
+  let index = Object.keys(input).length;
+  let checked = false;
+  while (!checked) {
+    if (index in input) {
+      index++;
+    } else {
+      checked = true;
+    }
+  }
+
+  return index;
 }

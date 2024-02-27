@@ -1,20 +1,20 @@
-import { Relationship } from "../classes/relationship";
+import Link from "../classes/link";
 import * as Types from "./types";
 
-export function typeCheckPerson(input: unknown): input is Types.Person {
+export function typeCheckNode(input: unknown): input is Types.Node {
   if (
-    (input as Types.Person).id === undefined ||
-    (input as Types.Person).name === undefined ||
-    (input as Types.Person).location === undefined ||
-    (input as Types.Person).relationships === undefined
+    (input as Types.Node).id === undefined ||
+    (input as Types.Node).name === undefined ||
+    (input as Types.Node).location === undefined ||
+    (input as Types.Node).relationships === undefined
   ) {
     return false;
   }
 
   if (
-    (input as Types.Person).location.name === undefined ||
-    (input as Types.Person).location.lat === undefined ||
-    (input as Types.Person).location.lon === undefined
+    (input as Types.Node).location.name === undefined ||
+    (input as Types.Node).location.lat === undefined ||
+    (input as Types.Node).location.lon === undefined
   ) {
     return false;
   }
@@ -22,28 +22,28 @@ export function typeCheckPerson(input: unknown): input is Types.Person {
   return true;
 }
 
-export function typeCheckRel(input: unknown): input is Relationship {
+export function typeCheckLink(input: unknown): input is Link {
   if (
-    (input as Relationship).source === undefined ||
-    (input as Relationship).target === undefined ||
-    (input as Relationship).type === undefined ||
-    (input as Relationship).distance === undefined
+    (input as Link).source === undefined ||
+    (input as Link).target === undefined ||
+    (input as Link).type === undefined ||
+    (input as Link).distance === undefined
   ) {
     return false;
   }
 
-  if (!typeCheckRelType((input as Relationship).type)) {
+  if (!typeCheckLinkType((input as Link).type)) {
     return false;
   }
 
   return true;
 }
 
-export function typeCheckRelType(input: unknown): input is Types.RelType {
+export function typeCheckLinkType(input: unknown): input is Types.LinkType {
   if (
-    (input as Types.RelType).color === undefined ||
-    (input as Types.RelType).name === undefined ||
-    (input as Types.RelType).id === undefined
+    (input as Types.LinkType).color === undefined ||
+    (input as Types.LinkType).name === undefined ||
+    (input as Types.LinkType).id === undefined
   ) {
     return true;
   }
@@ -51,23 +51,23 @@ export function typeCheckRelType(input: unknown): input is Types.RelType {
   return false;
 }
 
-export function checkGraphDataType(input: unknown): input is Types.GraphData {
-  if ((input as Types.GraphData).links === undefined) {
+export function checkGraphDataType(input: unknown): input is Types.DBData {
+  if ((input as Types.DBData).links === undefined) {
     return false;
   }
 
-  if ((input as Types.GraphData).links.length > 0) {
-    if (!typeCheckRel((input as Types.GraphData).links)) {
+  if (Object.keys((input as Types.DBData).links).length > 0) {
+    if (!typeCheckLink((input as Types.DBData).links)) {
       return false;
     }
   }
 
-  if ((input as Types.GraphData).nodes === undefined) {
+  if ((input as Types.DBData).nodes === undefined) {
     return false;
   }
 
-  if ((input as Types.GraphData).nodes.length > 0) {
-    if (!typeCheckPerson((input as Types.GraphData).nodes)) {
+  if (Object.keys((input as Types.DBData).nodes).length > 0) {
+    if (!typeCheckNode((input as Types.DBData).nodes)) {
       return false;
     }
   }

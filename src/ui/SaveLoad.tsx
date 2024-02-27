@@ -1,16 +1,8 @@
 import { FolderUp, Save } from "lucide-react";
 import { db, set } from "../db/db";
+import { Button } from "./Components";
 
-export default function SaveLoad() {
-  return (
-    <div className="pointer-events-auto flex gap-3 ">
-      <SaveDB />
-      <ImportDB />
-    </div>
-  );
-}
-
-function SaveDB() {
+export function SaveDB() {
   function save() {
     const saveString = JSON.stringify(db);
 
@@ -24,22 +16,14 @@ function SaveDB() {
     link.remove();
   }
 
-  return (
-    <button
-      className="z-10 flex gap-3 rounded-lg bg-white p-3 shadow-xl outline-offset-0 outline-blue-500 hover:outline"
-      onClick={save}
-    >
-      <Save />
-    </button>
-  );
+  return <Button icon={<Save />} onClick={save} />;
 }
 
-function ImportDB() {
+export function ImportDB() {
   function importJSON() {
     const fileUploadElement = document.createElement("input");
     fileUploadElement.type = "file";
     fileUploadElement.accept = ".json";
-
     fileUploadElement.click();
 
     fileUploadElement.addEventListener("change", () => {
@@ -64,12 +48,5 @@ function ImportDB() {
     });
   }
 
-  return (
-    <button
-      className="flex gap-3 rounded-lg bg-white p-3 shadow-xl outline-offset-0 outline-blue-500 hover:outline"
-      onClick={importJSON}
-    >
-      <FolderUp />
-    </button>
-  );
+  return <Button icon={<FolderUp />} onClick={importJSON} />;
 }
