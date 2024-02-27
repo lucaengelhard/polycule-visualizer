@@ -1,4 +1,9 @@
 import { Relationship } from "../classes/relationship";
+import {
+  typeCheckPerson,
+  typeCheckRel,
+  typeCheckRelType,
+} from "../types/typechecks";
 
 import * as Types from "../types/types";
 /*
@@ -104,6 +109,98 @@ export function add({
   updateGraphData();
 
   return length;
+}
+
+export function change(
+  type: "node" | "link" | "relType",
+  payload: Types.Person | Relationship | Types.RelType,
+) {
+  if (type === "node" && typeCheckPerson(payload)) {
+    const index = db.nodes.findIndex((node) => {
+      return node.id === payload.id;
+    });
+
+    db.nodes[index] = payload;
+  }
+
+  if (type === "link" && typeCheckRel(payload)) {
+    const index = db.links.findIndex((link) => {
+      const check = { source: false, target: false };
+
+      if (
+        typeof payload.source === "number" &&
+        typeof link.source === "object"
+      ) {
+        check.source = payload.source === link.source.id;
+      }
+
+      if (
+        typeof payload.target === "number" &&
+        typeof link.target === "object"
+      ) {
+        check.source = payload.target === link.target.id;
+      }
+
+      if (
+        typeof payload.source === "object" &&
+        typeof link.source === "number"
+      ) {
+        check.source = payload.source.id === link.source;
+      }
+
+      if (
+        typeof payload.target === "object" &&
+        typeof link.target === "number"
+      ) {
+        check.source = payload.target.id === link.target;
+      }
+
+      if (
+        typeof payload.source === "number" &&
+        typeof link.source === "number"
+      ) {
+        check.source = payload.source === link.source;
+      }
+
+      if (
+        typeof payload.target === "number" &&
+        typeof link.target === "number"
+      ) {
+        check.source = payload.target === link.target;
+      }
+
+      if (
+        typeof payload.source === "object" &&
+        typeof link.source === "object"
+      ) {
+        check.source = payload.source.id === link.source.id;
+      }
+
+      if (
+        typeof payload.target === "object" &&
+        typeof link.target === "object"
+      ) {
+        check.source = payload.target.id === link.target.id;
+      }
+
+      if (check.source && check.target) {
+        return true;
+      }
+    });
+
+    db.links[index] = payload;
+  }
+
+  if (type === "relType" && typeCheckRelType(payload)) {
+    if (db.relTypes !== undefined) {
+      db.relTypes.set(payload.id, payload);
+    } else {
+      db.relTypes = new Map([[payload.id, payload]]);
+    }
+  }
+
+  updateGraphData();
+  return db;
 }
 
 export function set(input: unknown) {

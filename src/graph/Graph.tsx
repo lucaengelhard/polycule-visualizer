@@ -11,6 +11,8 @@ import * as d3 from "d3";
 import * as Types from "../types/types";
 import { clamp, distanceScale, findFullSourceTarget } from "../utils/helpers";
 import { Pencil } from "lucide-react";
+import { change } from "../db/db";
+import { geoCode } from "../utils/geocode";
 
 export default function Graph({ graph }: { graph: Types.GraphData }) {
   const svgRef = useRef(null);
@@ -127,10 +129,30 @@ export default function Graph({ graph }: { graph: Types.GraphData }) {
 }
 
 function PersonInfo({ person }: { person: Types.GraphNode }) {
+  function changeName(event: React.ChangeEvent<HTMLInputElement>) {
+    person.name = event.target.value;
+
+    console.log(change("node", person));
+  }
+  async function changeLocation(event: React.ChangeEvent<HTMLInputElement>) {
+    person.location = await geoCode(event.target.value);
+
+    console.log(change("node", person));
+  }
   return (
     <div className="pointer-events-auto fixed bottom-3 left-3 w-56 rounded-lg bg-white p-3 shadow-xl">
-      <input type="text" className="font-bold" defaultValue={person.name} />
-      <input type="text" className="" defaultValue={person.location.name} />
+      <input
+        type="text"
+        className="font-bold"
+        defaultValue={person.name}
+        onBlur={changeName}
+      />
+      <input
+        type="text"
+        className=""
+        defaultValue={person.location.name}
+        onBlur={changeLocation}
+      />
       {person.relationships.length > 0 && (
         <ul className="mt-3">
           Relationships:
