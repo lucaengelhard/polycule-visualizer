@@ -2,7 +2,7 @@ import { CheckCircle, Circle, PlusCircle, Users } from "lucide-react";
 import { createContext, useContext, useRef, useState } from "react";
 import { hexToRGBA } from "../utils/helpers";
 import * as Types from "../types/types";
-import { add, db } from "../db/db";
+import { add, db, graph } from "../db/db";
 import { Relationship } from "../classes/relationship";
 import { InputOpenContext } from "./UI";
 
@@ -346,6 +346,7 @@ function AddRelType() {
         },
       });
 
+      console.log(add({ type: "relType", payload: type }));
       relName.current.value = "";
     }
   }

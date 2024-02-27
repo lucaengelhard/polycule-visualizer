@@ -9,11 +9,16 @@ import {
 import * as d3 from "d3";
 
 import * as Types from "../types/types";
-import { clamp } from "../utils/helpers";
+import { clamp, findFullSourceTarget } from "../utils/helpers";
+import { Pencil } from "lucide-react";
+import { graph } from "../db/db";
 
 export default function Graph({ graph }: { graph: Types.GraphData }) {
   const svgRef = useRef(null);
   const wrapperRef = useRef(null);
+  const [personInfo, setPersonInfo] = useState<Types.GraphNode | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     const width = window.innerWidth;
@@ -83,7 +88,10 @@ export default function Graph({ graph }: { graph: Types.GraphData }) {
                 d.fy = null;
               }),
             undefined,
-          );
+          )
+          .on("click", (e, d) => {
+            setPersonInfo(d);
+          });
 
         svg
           .selectAll(".label")
@@ -106,6 +114,68 @@ export default function Graph({ graph }: { graph: Types.GraphData }) {
       className="pointer-events-none inset-0 h-screen w-screen bg-white"
     >
       <svg ref={svgRef} className="h-full w-full"></svg>
+      {personInfo && <PersonInfo person={personInfo} />}
+    </div>
+  );
+}
+
+function PersonInfo({ person }: { person: Types.GraphNode }) {
+  return (
+    <div className="pointer-events-auto fixed bottom-3 left-3 w-56 rounded-lg bg-white p-3 shadow-xl">
+      <input type="text" className="font-bold" defaultValue={person.name} />
+      <input type="text" className="" defaultValue={person.location.name} />
+      {person.relationships.length > 0 && (
+        <ul className="mt-3">
+          Relationships:
+          {person.relationships.map((rel, index) => {
+            return <PersonRelListItem key={index} person={person} rel={rel} />;
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function PersonRelListItem({
+  person,
+  rel,
+}: {
+  key: number;
+  person: Types.GraphNode;
+  rel: Types.GraphLink;
+}) {
+  const cleanRel = findFullSourceTarget(rel);
+  rel.source = cleanRel.source as Types.GraphNode;
+  rel.target = cleanRel.target as Types.GraphNode;
+  return (
+    <li className="group mt-1 flex cursor-pointer items-center justify-between gap-3 rounded-lg bg-white pr-3 transition-transform hover:translate-x-2">
+      <div>
+        <div className="font-bold text-blue-500">
+          {rel.source.name === person.name ? rel.target.name : rel.source.name}
+        </div>
+        <div className="text-blue-500/50">
+          {rel.source.name === person.name
+            ? rel.target.location.name
+            : rel.source.location.name}
+        </div>
+      </div>
+      <Pencil
+        className="opacity-0 transition-opacity group-hover:opacity-100"
+        color="rgb(59 130 246)"
+        size={22}
+      />
+    </li>
+  );
+}
+
+function EditRel({ rel }: { rel: Types.GraphLink }) {
+  const cleanRel = findFullSourceTarget(rel);
+  rel.source = cleanRel.source as Types.GraphNode;
+  rel.target = cleanRel.target as Types.GraphNode;
+  return (
+    <div className="fixed">
+      <input type="text" defaultValue={rel.source.name} />
+      <input type="text" defaultValue={rel.target.name} />
     </div>
   );
 }

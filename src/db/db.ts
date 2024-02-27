@@ -13,17 +13,6 @@ const luca: Types.Person = {
   relationships: [],
 };
 
-const luca2: Types.Person = {
-  id: 2,
-  name: "Luca2",
-  location: {
-    name: "Vorderdupfingenn",
-    lat: 47.766099,
-    lon: 8.094229,
-  },
-  relationships: [],
-};
-
 const michi: Types.Person = {
   id: 1,
   name: "Michi",
@@ -41,6 +30,17 @@ const MichiLuca = new Relationship(
   false,
 );
 
+const luca2: Types.Person = {
+  id: 2,
+  name: "Luca2",
+  location: {
+    name: "Vorderdupfingenn",
+    lat: 47.766099,
+    lon: 8.094229,
+  },
+  relationships: [MichiLuca],
+};
+
 export const db: Types.DBData = {
   nodes: [luca, michi, luca2],
   links: [MichiLuca],
@@ -56,6 +56,13 @@ updateGraphData();
 export function updateGraphData() {
   graph.nodes = db.nodes.map((node) => node);
   graph.links = db.links.map((link) => link);
+  db.relTypes?.forEach((type) => {
+    if (graph.relTypes === undefined) {
+      graph.relTypes = new Map([[type.id, type]]);
+    } else {
+      graph.relTypes.set(type.id, type);
+    }
+  });
 
   const event = new Event("onGraphUpdate");
   document.dispatchEvent(event);
@@ -65,26 +72,38 @@ export function add({
   type,
   payload,
 }: {
-  type: "node" | "link";
+  type: "node" | "link" | "relType";
   payload: typeof type extends "node"
     ? Types.Person
     : typeof type extends "link"
       ? Relationship
-      : never;
+      : typeof type extends "relType"
+        ? Types.RelType
+        : never;
 }) {
-  let index: number | undefined = undefined;
+  let length: number | undefined = undefined;
 
   if (type === "node") {
-    index = db.nodes.push(payload);
+    length = db.nodes.push(payload);
   }
 
   if (type === "link") {
-    index = db.links.push(payload);
+    length = db.links.push(payload);
+  }
+
+  if (type === "relType") {
+    if (db.relTypes === undefined) {
+      db.relTypes = new Map([[payload.id, payload]]);
+    } else {
+      db.relTypes.set(payload.id, payload);
+    }
+
+    length = db.relTypes.size;
   }
 
   updateGraphData();
 
-  return index;
+  return length;
 }
 
 export function set(input: unknown) {

@@ -45,6 +45,7 @@ export type RelHistoryEvent = {
 export type DBData = {
   nodes: Person[];
   links: Relationship[];
+  relTypes?: Map<number, RelType>;
 };
 
 export interface GraphData extends DBData {
