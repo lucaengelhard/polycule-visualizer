@@ -50,3 +50,27 @@ export function typeCheckRelType(input: unknown): input is Types.RelType {
 
   return false;
 }
+
+export function checkGraphDataType(input: unknown): input is Types.GraphData {
+  if ((input as Types.GraphData).links === undefined) {
+    return false;
+  }
+
+  if ((input as Types.GraphData).links.length > 0) {
+    if (!typeCheckRel((input as Types.GraphData).links)) {
+      return false;
+    }
+  }
+
+  if ((input as Types.GraphData).nodes === undefined) {
+    return false;
+  }
+
+  if ((input as Types.GraphData).nodes.length > 0) {
+    if (!typeCheckPerson((input as Types.GraphData).nodes)) {
+      return false;
+    }
+  }
+
+  return true;
+}
