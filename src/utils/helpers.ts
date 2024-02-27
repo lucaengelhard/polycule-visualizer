@@ -93,3 +93,28 @@ export function findFullSourceTarget(rel: Types.GraphLink) {
 
   return rel;
 }
+
+export function distanceScale(input: number) {
+  const mappedValue = mapRange(input, 0, 500, 0, 1);
+
+  console.log(mappedValue);
+
+  return 1 / (1 + Math.exp(-(mappedValue - 1) * 5));
+}
+
+function mapRange(
+  value: number,
+  fromMin: number,
+  fromMax: number,
+  toMin: number,
+  toMax: number,
+): number {
+  // Ensure the input value is within the source range
+  const clampedValue = Math.min(Math.max(value, fromMin), fromMax);
+
+  // Map the value from the source range to the target range
+  const mappedValue =
+    ((clampedValue - fromMin) / (fromMax - fromMin)) * (toMax - toMin) + toMin;
+
+  return mappedValue;
+}

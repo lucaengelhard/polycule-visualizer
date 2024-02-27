@@ -9,7 +9,7 @@ import {
 import * as d3 from "d3";
 
 import * as Types from "../types/types";
-import { clamp, findFullSourceTarget } from "../utils/helpers";
+import { clamp, distanceScale, findFullSourceTarget } from "../utils/helpers";
 import { Pencil } from "lucide-react";
 import { graph } from "../db/db";
 
@@ -42,7 +42,11 @@ export default function Graph({ graph }: { graph: Types.GraphData }) {
         d3
           .forceLink(links)
           .id((d: any) => d.id)
-          .distance((d) => clamp(d.distance, 0, 500)),
+          .distance((d) => {
+            console.log(distanceScale(d.distance));
+
+            return clamp(d.distance, 0, 800);
+          }),
       )
       .force("x", d3.forceX())
       .force("y", d3.forceY())
