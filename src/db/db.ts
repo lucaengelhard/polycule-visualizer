@@ -1,7 +1,7 @@
 import { Relationship } from "../classes/relationship";
 
 import * as Types from "../types/types";
-
+/*
 const luca: Types.Person = {
   id: 0,
   name: "Luca",
@@ -40,10 +40,10 @@ const luca2: Types.Person = {
   },
   relationships: [MichiLuca],
 };
-
+*/
 export const db: Types.DBData = {
-  nodes: [luca, michi, luca2],
-  links: [MichiLuca],
+  nodes: [],
+  links: [],
 };
 
 export const graph: Types.GraphData = {

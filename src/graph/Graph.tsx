@@ -167,15 +167,3 @@ function PersonRelListItem({
     </li>
   );
 }
-
-function EditRel({ rel }: { rel: Types.GraphLink }) {
-  const cleanRel = findFullSourceTarget(rel);
-  rel.source = cleanRel.source as Types.GraphNode;
-  rel.target = cleanRel.target as Types.GraphNode;
-  return (
-    <div className="fixed">
-      <input type="text" defaultValue={rel.source.name} />
-      <input type="text" defaultValue={rel.target.name} />
-    </div>
-  );
-}
