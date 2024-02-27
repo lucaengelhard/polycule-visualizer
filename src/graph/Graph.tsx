@@ -11,7 +11,6 @@ import * as d3 from "d3";
 import * as Types from "../types/types";
 import { clamp, distanceScale, findFullSourceTarget } from "../utils/helpers";
 import { Pencil } from "lucide-react";
-import { graph } from "../db/db";
 
 export default function Graph({ graph }: { graph: Types.GraphData }) {
   const svgRef = useRef(null);
