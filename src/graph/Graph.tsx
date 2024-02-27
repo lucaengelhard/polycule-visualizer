@@ -15,6 +15,7 @@ import { graph } from "../db/db";
 
 export default function Graph({ graph }: { graph: Types.GraphData }) {
   const svgRef = useRef(null);
+  const layer2ref = useRef(null);
   const wrapperRef = useRef(null);
   const [personInfo, setPersonInfo] = useState<Types.GraphNode | undefined>(
     undefined,
@@ -27,6 +28,7 @@ export default function Graph({ graph }: { graph: Types.GraphData }) {
     if (!width || !height) return;
 
     const svg = d3.select(svgRef.current);
+    const layer2 = d3.select(layer2ref.current);
 
     const nodes = graph.nodes.map((node) => node);
     const links = graph.links.map((link) => link);
@@ -49,7 +51,7 @@ export default function Graph({ graph }: { graph: Types.GraphData }) {
         d3.forceRadial(Math.min(width, height) - 500, width / 2, height / 2),
       )
       .on("tick", () => {
-        svg
+        layer2
           .selectAll(".link")
           .data(links)
           .join("line")
@@ -104,16 +106,18 @@ export default function Graph({ graph }: { graph: Types.GraphData }) {
           .attr("x", (node) => node.x)
           .attr("y", (node) => node.y)
           .attr("dx", 21)
-          .attr("dy", -10);
+          .attr("dy", -12);
       });
   }, [graph]);
 
   return (
     <div
       ref={wrapperRef}
-      className="pointer-events-none inset-0 h-screen w-screen bg-white"
+      className="pointer-events-none relative inset-0 h-screen w-screen bg-white"
     >
-      <svg ref={svgRef} className="h-full w-full"></svg>
+      <svg ref={layer2ref} className="absolute inset-0 h-full w-full"></svg>
+      <svg ref={svgRef} className="absolute inset-0  h-full w-full"></svg>
+
       {personInfo && <PersonInfo person={personInfo} />}
     </div>
   );
