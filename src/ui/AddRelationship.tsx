@@ -3,12 +3,15 @@ import { DBContext } from "../App";
 import { Button, RadioInput, TextInput } from "./Components";
 import { Link, Users, XCircle } from "lucide-react";
 import * as Types from "../types/types";
+import Classes from "../classes";
 import { update } from "../db/db";
+import { getNewIndex } from "../utils/helpers";
 
 export default function AddRelationship() {
   const { DBState } = useContext(DBContext);
   const [open, setOpen] = useState(true);
   const [linkTypes, setLinkTypes] = useState<Types.RadioItems>({ items: {} });
+  const [prevLinkItemIds, setPrevLinkItemIds] = useState<string[]>([]);
   const [partner1, setPartner1] = useState<Types.Node | undefined>(undefined);
   const [partner2, setPartner2] = useState<Types.Node | undefined>(undefined);
 
@@ -19,9 +22,13 @@ export default function AddRelationship() {
       if (Object.prototype.hasOwnProperty.call(DBState.linkTypes, key)) {
         const linkType = DBState.linkTypes[key];
 
-        radioItemList[linkType.id].id = linkType.id;
-        radioItemList[linkType.id].name = linkType.name;
-        radioItemList[linkType.id].color = linkType.color;
+        const newRadioItem: Types.RadioItem = {
+          id: linkType.id,
+          name: linkType.name,
+          color: linkType.color,
+        };
+
+        radioItemList[linkType.id] = newRadioItem;
       }
     }
 
@@ -30,10 +37,45 @@ export default function AddRelationship() {
     });
   }, [DBState.linkTypes]);
 
+  useEffect(() => {
+    const difference = Object.keys(linkTypes.items).filter(
+      (x) => !prevLinkItemIds.includes(x),
+    );
+
+    setPrevLinkItemIds(Object.keys(linkTypes.items));
+
+    const index = parseInt(difference[0]);
+
+    if (linkTypes.items[index]) {
+      const newLinkType: Types.LinkType = {
+        name: linkTypes.items[index].name,
+        color: linkTypes.items[index].color ?? "#ffffff",
+        id:
+          Object.keys(DBState.linkTypes).length === 0 &&
+          !(index in DBState.linkTypes)
+            ? index
+            : getNewIndex(DBState.linkTypes),
+      };
+
+      update("linkTypes", newLinkType, "add");
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linkTypes.items]);
+
   function submit() {
-    console.log(partner1);
-    console.log(partner2);
-    console.log(linkTypes.selected);
+    if (partner1 === undefined) throw new Error("Partner 1 undefined");
+    if (partner2 === undefined) throw new Error("Partner 2 undefined");
+    if (linkTypes.selected === undefined) throw new Error("LinkType undefined");
+
+    const linkType: Types.LinkType = DBState.linkTypes[linkTypes.selected?.id];
+
+    const rel = new Classes.Link(
+      { partner1: partner1, partner2: partner2 },
+      linkType,
+    );
+
+    update("links", rel, "add");
   }
 
   return (

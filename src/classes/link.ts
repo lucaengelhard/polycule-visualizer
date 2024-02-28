@@ -7,14 +7,14 @@ export default class Link {
   source: Types.Node;
   target: Types.Node;
   type: Types.LinkType;
-  exclusive: boolean;
+
   //history?: Types.RelHistory;
   distance: number;
 
   constructor(
     partners: { partner1: Types.Node; partner2: Types.Node },
     type: Types.LinkType,
-    exclusive: boolean,
+
     //history?: Types.RelHistory,
   ) {
     this.id = getNewIndex(db.links);
@@ -24,7 +24,7 @@ export default class Link {
     this.type = type;
 
     //this.history = history;
-    this.exclusive = exclusive;
+
     this.distance = distance(
       partners.partner1.location.lat,
       partners.partner1.location.lon,

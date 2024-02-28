@@ -49,12 +49,17 @@ export default function App() {
     document.addEventListener("LinkUpdate", () => {
       const changeLinks: Types.LinkList = {};
 
+      console.log(db.links);
+      console.log(DBState.links);
+
       for (const Key in db.links) {
         if (Object.prototype.hasOwnProperty.call(db.links, Key)) {
           const Link = db.links[Key];
 
           if (Link.id in DBState.links) {
             const StateLink = DBState.links[Link.id];
+            console.log(StateLink);
+
             if (
               StateLink.source.id !== Link.source.id ||
               StateLink.target.id !== Link.target.id ||
@@ -80,7 +85,7 @@ export default function App() {
     document.addEventListener("LinkTypeUpdate", () => {
       const changeLinkTypes: Types.LinkTypeList = {};
 
-      for (const Key in db.nodes) {
+      for (const Key in db.linkTypes) {
         if (Object.prototype.hasOwnProperty.call(db.linkTypes, Key)) {
           const LinkType = db.linkTypes[Key];
 
