@@ -1,31 +1,60 @@
-import { TextInput } from "./Components";
+import { Button, TextInput, WindowTitle } from "./Components";
 import * as Types from "../types/types";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { DBContext, EditContext } from "../App";
 import { hexToRGBA } from "../utils/helpers";
-import { Pencil } from "lucide-react";
+import { Pencil, UserRound, XCircle } from "lucide-react";
+import { update } from "../db/db";
 
 export default function NodeInfo() {
   const { editState, setEditState } = useContext(EditContext);
+  const { DBState } = useContext(DBContext);
+  const [node, setNode] = useState(DBState.nodes[editState.node ?? -1]);
+
+  useEffect(() => {
+    setNode(DBState.nodes[editState.node ?? -1]);
+  }, [DBState.nodes, editState.node]);
+
+  function updateName(event: React.ChangeEvent<HTMLInputElement>) {
+    if (editState.node !== undefined) {
+      if (event.target.value.length === 0)
+        throw new Error("String of length 0 not allowed");
+      update(
+        "nodes",
+        {
+          name: event.target.value,
+          location: node.location,
+          id: node.id,
+          links: new Set(node.links),
+        },
+        "change",
+      );
+    }
+  }
 
   return (
     <>
-      {editState.node !== undefined && (
-        <div className="grid gap-3 rounded-lg bg-white p-3 shadow-lg">
-          <TextInput defaultValue={editState.node.name} />
-          <TextInput defaultValue={editState.node.location.name} />
-          <div>Relationships:</div>
+      {node !== undefined && (
+        <div className="grid h-min gap-3 rounded-lg bg-white p-3 shadow-lg">
+          <WindowTitle label="Person:" icon={<UserRound />} />
+          <TextInput onBlur={updateName} defaultValue={node.name} />
+          <TextInput defaultValue={node.location.name} />
+          {Array.from(node.links).length > 0 && <div>Relationships:</div>}
           {editState.node !== undefined && (
             <div>
-              {Array.from(editState.node.links).map((linkId) => (
-                <NodeRelListItem
-                  key={linkId}
-                  linkId={linkId}
-                  editNode={editState.node as Types.Node}
-                />
+              {Array.from(node.links).map((linkId) => (
+                <NodeRelListItem key={linkId} linkId={linkId} editNode={node} />
               ))}
             </div>
           )}
+          <Button
+            label="Close"
+            icon={<XCircle />}
+            type="deny"
+            onClick={() => {
+              setEditState({ ...editState, node: undefined });
+            }}
+          />
         </div>
       )}
     </>
@@ -40,6 +69,7 @@ function NodeRelListItem({
   editNode: Types.Node;
 }) {
   const { DBState } = useContext(DBContext);
+  const { editState, setEditState } = useContext(EditContext);
 
   const divStyle = {
     backgroundColor:
@@ -54,6 +84,7 @@ function NodeRelListItem({
         <div
           className="group mt-3 flex cursor-pointer items-center justify-between rounded-lg p-3 shadow-lg transition-transform first:mt-0 hover:translate-x-2"
           style={divStyle}
+          onClick={() => setEditState({ ...editState, link: linkId })}
         >
           <div>
             <div className="font-bold">

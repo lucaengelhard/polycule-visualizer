@@ -19,9 +19,7 @@ export function typeCheckNode(input: unknown): input is Types.Node {
     typeof (input as Types.Node).name !== "string" ||
     typeof (input as Types.Node).location !== "object" ||
     typeof (input as Types.Node).links !== "object" ||
-    typeof (input as Types.Node).location.name !== "string" ||
-    typeof (input as Types.Node).location.lat !== "string" ||
-    typeof (input as Types.Node).location.lon !== "string"
+    typeof (input as Types.Node).location.name !== "string"
   ) {
     return false;
   }

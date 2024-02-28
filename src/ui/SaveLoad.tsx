@@ -4,9 +4,15 @@ import { Button } from "./Components";
 import { useContext } from "react";
 import { DBContext } from "../App";
 
+import { transformSetsToArray } from "../utils/helpers";
+
 export function SaveDB() {
   function save() {
-    const saveString = JSON.stringify(db);
+    const saveDB = transformSetsToArray(db);
+
+    const saveString = JSON.stringify(saveDB);
+
+    console.log(JSON.parse(saveString));
 
     const blob = new Blob([saveString], { type: "application/json" });
     const url = URL.createObjectURL(blob);

@@ -1,6 +1,6 @@
 import { useContext, useRef, useState } from "react";
 import { DBContext } from "../App";
-import { Button, TextInput } from "./Components";
+import { Button, TextInput, WindowTitle } from "./Components";
 import { UserRoundPlus, XCircle } from "lucide-react";
 import { geoCode } from "../utils/geocode";
 import { update } from "../db/db";
@@ -30,7 +30,7 @@ export default function AddPerson() {
         name: name,
         location: location,
         id: getNewIndex(DBState.nodes),
-        links: [],
+        links: new Set([]),
       },
       "add",
     );
@@ -58,6 +58,7 @@ export default function AddPerson() {
       )}
       {open && (
         <div className="grid gap-3 rounded-lg bg-white p-3 shadow-lg">
+          <WindowTitle label="Add Person:" icon={<UserRoundPlus />} />
           <TextInput
             ref={nameRef}
             placeholder="Name"

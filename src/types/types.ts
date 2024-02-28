@@ -1,4 +1,4 @@
-import Link from "../classes/link";
+import ClassLink from "../classes/link";
 
 // Component types //
 export type ButtonType = "confirm" | "deny" | undefined;
@@ -41,8 +41,8 @@ export type LinkType = {
 
 export type Position = {
   name: string;
-  lat: number;
-  lon: number;
+  lat: number | string;
+  lon: number | string;
 };
 
 export type DBData = {
@@ -56,7 +56,7 @@ export type NodeList = {
 };
 
 export type LinkList = {
-  [key: number]: Link;
+  [key: number]: ClassLink;
 };
 
 export type LinkTypeList = {

@@ -50,6 +50,21 @@ export function Button({
   );
 }
 
+export function WindowTitle({
+  label,
+  icon,
+}: {
+  label?: string;
+  icon?: ReactNode;
+}) {
+  return (
+    <div className="flex gap-3 font-bold">
+      {icon}
+      {label}
+    </div>
+  );
+}
+
 export const TextInput = forwardRef(function TextInput(
   {
     defaultValue,
@@ -130,6 +145,7 @@ export function RadioInput({
 }) {
   const [itemsArray, setItemsArray] = useState<Types.RadioItem[]>();
   const [maxHeight, setMaxHeight] = useState<string | undefined>(undefined);
+
   const itemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

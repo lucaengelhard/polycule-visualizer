@@ -147,3 +147,29 @@ export function getNewIndex(input: object): number {
 
   return index;
 }
+
+type NestedObject = {
+  [key: string]: unknown;
+};
+
+export function transformSetsToArray(input: unknown): unknown {
+  if (input instanceof Set) {
+    // If it's a Set, convert it to an array
+    return Array.from(input).map(transformSetsToArray);
+  } else if (Array.isArray(input)) {
+    // If it's an array, recursively transform each element
+    return input.map(transformSetsToArray);
+  } else if (typeof input === "object" && input !== null) {
+    // If it's an object, recursively transform each value
+    const transformedObject: NestedObject = {};
+    for (const key in input) {
+      if (Object.prototype.hasOwnProperty.call(input, key)) {
+        transformedObject[key] = transformSetsToArray(input[key]);
+      }
+    }
+    return transformedObject;
+  }
+
+  // Base case: return unchanged for non-object, non-array, non-Set values
+  return input;
+}

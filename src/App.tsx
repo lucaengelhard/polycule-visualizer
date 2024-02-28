@@ -2,7 +2,6 @@ import { createContext, useEffect, useState } from "react";
 import UI from "./ui/UI";
 import * as Types from "./types/types";
 import { db } from "./db/db";
-import Link from "./classes/link";
 
 export const DBContext = createContext<{
   DBState: Types.DBData;
@@ -10,11 +9,14 @@ export const DBContext = createContext<{
 }>(null);
 
 export const EditContext = createContext<{
-  editState: { node?: Types.Node | undefined; link?: Link | undefined };
+  editState: {
+    node?: keyof Types.NodeList | undefined;
+    link?: keyof Types.LinkList | undefined;
+  };
   setEditState: React.Dispatch<
     React.SetStateAction<{
-      node?: Types.Node | undefined;
-      link?: Link | undefined;
+      node?: keyof Types.NodeList | undefined;
+      link?: keyof Types.LinkList | undefined;
     }>
   >;
 }>(null);
@@ -22,33 +24,12 @@ export const EditContext = createContext<{
 export default function App() {
   const [DBState, setDBState] = useState<Types.DBData>(db);
   const [editState, setEditState] = useState<{
-    node?: Types.Node;
-    link?: Link;
+    node?: keyof Types.NodeList;
+    link?: keyof Types.LinkList;
   }>({
     //TODO: return to undefined after tests
-    node: {
-      name: "test1",
-      links: new Set([0, 1]),
-      id: 0,
-      location: { name: "test", lat: 34.0304049, lon: 50.6707877 },
-    },
-    link: {
-      id: 0,
-      source: {
-        name: "test1",
-        links: new Set([0]),
-        id: 0,
-        location: { name: "test", lat: 34.0304049, lon: 50.6707877 },
-      },
-      target: {
-        name: "test2",
-        links: new Set([0]),
-        id: 1,
-        location: { name: "test", lat: 34.0304049, lon: 50.6707877 },
-      },
-      type: { name: "test1link", color: "#8486df", id: 0 },
-      distance: 0,
-    },
+    node: undefined,
+    link: 0,
   });
 
   useEffect(() => {

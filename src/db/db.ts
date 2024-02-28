@@ -32,6 +32,7 @@ export function update(
     }
     case "links": {
       if (!typeCheckLink(payload)) throw new Error("Link Parsing Error");
+
       const newSourceLinks: Set<keyof Types.LinkList> = new Set(
         db.nodes[payload.source.id].links,
       );

@@ -1,10 +1,11 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { DBContext } from "../App";
-import { Button, RadioInput, TextInput } from "./Components";
-import { Link, Users, XCircle } from "lucide-react";
+import { Button, RadioInput, TextInput, WindowTitle } from "./Components";
+import { Link, XCircle } from "lucide-react";
 import * as Types from "../types/types";
-import Classes from "../classes";
+
 import { update } from "../db/db";
+import ClassLink from "../classes/link";
 
 export default function AddRelationship() {
   const { DBState } = useContext(DBContext);
@@ -94,7 +95,7 @@ export default function AddRelationship() {
 
     const linkType: Types.LinkType = DBState.linkTypes[linkTypes.selected?.id];
 
-    const rel = new Classes.Link(
+    const rel = new ClassLink(
       { partner1: partner1, partner2: partner2 },
       linkType,
     );
@@ -106,14 +107,15 @@ export default function AddRelationship() {
     <div>
       {!open && (
         <Button
-          label="Add Person"
-          icon={<Users />}
+          label="Add Relationship"
+          icon={<Link />}
           onClick={() => setOpen(true)}
         />
       )}
 
       {open && (
         <div className="grid gap-3 rounded-lg bg-white p-3 shadow-lg">
+          <WindowTitle label="Add Relationship:" icon={<Link />} />
           <div className="flex gap-3">
             <SearchField setResult={setPartner1} />
             <SearchField setResult={setPartner2} />
