@@ -1,392 +1,178 @@
-import { CheckCircle, Circle, PlusCircle, Users } from "lucide-react";
-import { createContext, useContext, useRef, useState } from "react";
-import { hexToRGBA } from "../utils/helpers";
-import * as Types from "../types/types-old";
-import { add, db } from "../db/db";
-import { Relationship } from "../classes/relationship-old";
-import { InputOpenContext } from "./UI";
+import { useContext, useEffect, useRef, useState } from "react";
+import { DBContext } from "../App";
+import { Button, RadioInput, TextInput } from "./Components";
+import { Link, Users, XCircle } from "lucide-react";
+import * as Types from "../types/types";
+import { update } from "../db/db";
 
-const AddRelContext = createContext<{
-  addRelState: Types.addRelState;
-  setAddRelState: React.Dispatch<React.SetStateAction<Types.addRelState>>;
-}>(null);
+export default function AddRelationship() {
+  const { DBState } = useContext(DBContext);
+  const [open, setOpen] = useState(true);
+  const [linkTypes, setLinkTypes] = useState<Types.RadioItems>({ items: {} });
+  const [partner1, setPartner1] = useState<Types.Node | undefined>(undefined);
+  const [partner2, setPartner2] = useState<Types.Node | undefined>(undefined);
 
-export function AddRelationship() {
-  const { setAddRelOpen } = useContext(InputOpenContext);
-  const [addRelState, setAddRelState] = useState<Types.addRelState>({
-    queriedPartners: { 0: [], 1: [] },
-    selectedPartners: { 0: undefined, 1: undefined },
-    relTypes: { items: [], selected: undefined },
-  });
+  useEffect(() => {
+    const radioItemList: Types.RadioItemList = {};
 
-  function addRel() {
-    if (
-      addRelState.selectedPartners[0] === undefined ||
-      addRelState.selectedPartners[1] === undefined
-    ) {
-      throw new Error("Partner undefined");
+    for (const key in DBState.linkTypes) {
+      if (Object.prototype.hasOwnProperty.call(DBState.linkTypes, key)) {
+        const linkType = DBState.linkTypes[key];
+
+        radioItemList[linkType.id].id = linkType.id;
+        radioItemList[linkType.id].name = linkType.name;
+        radioItemList[linkType.id].color = linkType.color;
+      }
     }
 
-    if (
-      addRelState.selectedPartners[0].id === addRelState.selectedPartners[1].id
-    ) {
-      throw new Error("Partners are the Same");
-    }
-
-    if (addRelState.relTypes.selected === undefined) {
-      throw new Error("Relationship Type undefined");
-    }
-
-    const rel = new Relationship(
-      {
-        partner1: addRelState.selectedPartners[0],
-        partner2: addRelState.selectedPartners[1],
-      },
-      addRelState.relTypes.selected,
-      false,
-    );
-
-    const length = add({ payload: rel, type: "link" });
-    if (length !== undefined) {
-      const index = length - 1;
-      console.log(db.links[index]);
-    } else {
-      throw new Error("Adding to DB Failed");
-    }
-  }
-
-  return (
-    <AddRelContext.Provider value={{ addRelState, setAddRelState }}>
-      <fieldset className="absolute left-3 top-3 m-0 inline-block rounded-lg bg-white p-3 shadow-lg">
-        <div className="flex gap-3">
-          <InputRelPerson index={0} />
-          <InputRelPerson index={1} />
-        </div>
-        <SelectRelType />
-        <div className="flex gap-3">
-          <button
-            onClick={addRel}
-            className="mt-3 flex gap-3 rounded-lg p-3 shadow-lg transition-colors hover:bg-green-500"
-          >
-            <PlusCircle />
-            Submit
-          </button>
-          <button
-            onClick={() => setAddRelOpen(false)}
-            className="mt-3 flex gap-3 rounded-lg p-3 shadow-lg transition-colors hover:bg-red-500"
-          >
-            Cancel
-          </button>
-        </div>
-      </fieldset>
-    </AddRelContext.Provider>
-  );
-}
-
-function InputRelPerson({ index }: { index: 0 | 1 }) {
-  const { addRelState, setAddRelState } = useContext(AddRelContext);
-  const inputField = useRef<HTMLInputElement>(null);
-
-  function searchRelPerson(event: React.ChangeEvent<HTMLInputElement>) {
-    const query = event.target.value.toLowerCase();
-
-    if (query.length === 0) {
-      setAddRelState({
-        ...addRelState,
-        queriedPartners: {
-          ...addRelState.queriedPartners,
-          [index]: [],
-        },
-      });
-      return;
-    }
-
-    const res = db.nodes.filter((node) =>
-      node.name.toLowerCase().includes(query),
-    );
-
-    setAddRelState({
-      ...addRelState,
-      queriedPartners: {
-        ...addRelState.queriedPartners,
-        [index]: res,
-      },
+    setLinkTypes({
+      items: { ...radioItemList },
     });
-  }
+  }, [DBState.linkTypes]);
 
-  function updateInputFieldText(string: string) {
-    if (inputField.current) {
-      inputField.current.value = string;
-    }
+  function submit() {
+    console.log(partner1);
+    console.log(partner2);
+    console.log(linkTypes.selected);
   }
 
   return (
     <div>
-      <input
-        ref={inputField}
-        onChange={searchRelPerson}
-        type="text"
-        name="partner"
-        className="mt-2 block rounded-lg p-3 shadow-lg"
-        placeholder="Partner Name"
-      />
-      {addRelState.queriedPartners[index] &&
-        addRelState.queriedPartners[index].length > 0 && (
-          <InputRelPersonList
-            index={index}
-            queriedPartners={addRelState.queriedPartners[index]}
-            updateInputFieldText={updateInputFieldText}
+      {!open && (
+        <Button
+          label="Add Person"
+          icon={<Users />}
+          onClick={() => setOpen(true)}
+        />
+      )}
+
+      {open && (
+        <div className="grid gap-3 rounded-lg bg-white p-3 shadow-lg">
+          <div className="flex gap-3">
+            <SearchField setResult={setPartner1} />
+            <SearchField setResult={setPartner2} />
+          </div>
+
+          <RadioInput
+            items={linkTypes}
+            setItems={setLinkTypes}
+            extendable={true}
+            color={true}
           />
-        )}
+          <Button
+            label="Add Relationship"
+            icon={<Link />}
+            type="confirm"
+            onClick={submit}
+          />
+          <Button
+            label="Close"
+            icon={<XCircle />}
+            type="deny"
+            onClick={() => {
+              setOpen(false);
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
 
-function InputRelPersonList({
-  index,
-  queriedPartners,
-  updateInputFieldText,
+function SearchField({
+  setResult,
 }: {
-  index: 0 | 1;
-  queriedPartners: Types.Person[];
-  updateInputFieldText: (string: string) => void;
+  setResult: React.Dispatch<React.SetStateAction<Types.Node | undefined>>;
 }) {
-  return (
-    <ul className="mt-3 rounded-lg bg-white shadow-lg">
-      {queriedPartners.map((person, i) => (
-        <InputRelPersonListItem
-          key={i}
-          person={person}
-          index={index}
-          updateInputFieldText={updateInputFieldText}
-        />
-      ))}
-    </ul>
-  );
-}
+  const { DBState } = useContext(DBContext);
+  const [searching, setSearching] = useState(true);
+  const [suggestions, setSuggestions] = useState<Types.Node[]>([]);
 
-function InputRelPersonListItem({
-  person,
-  index,
-  updateInputFieldText,
-}: {
-  person: Types.Person;
-  index: 0 | 1;
-  updateInputFieldText: (string: string) => void;
-}) {
-  const { addRelState, setAddRelState } = useContext(AddRelContext);
+  const textRef = useRef<HTMLInputElement>(null);
 
-  function setPartner() {
-    setAddRelState({
-      ...addRelState,
-      selectedPartners: { ...addRelState.selectedPartners, [index]: person },
-      queriedPartners: {
-        ...addRelState.queriedPartners,
-        [index]: [],
-      },
+  function search(event: React.ChangeEvent<HTMLInputElement>) {
+    setSearching(true);
+    const query = event.target.value.toLowerCase();
+
+    if (query.length === 0) {
+      setSuggestions([]);
+    }
+
+    const res = Object.values(DBState.nodes).filter((node) => {
+      return node.name.toLowerCase().includes(query);
     });
 
-    updateInputFieldText(person.name);
+    setSuggestions(res);
   }
-  return (
-    <li className="cursor-pointer rounded-lg p-3 outline-offset-0 outline-blue-500 hover:outline">
-      <button className="w-full text-left" onClick={setPartner}>
-        <div className="font-bold text-blue-500">{person.name}</div>
-        <div className="text-blue-500/50">{person.location.name}</div>
-      </button>
-    </li>
-  );
-}
 
-function SelectRelType() {
-  const { addRelState, setAddRelState } = useContext(AddRelContext);
-
-  function updateChecked(id: number) {
-    const items = addRelState.relTypes.items;
-    let selected = addRelState.relTypes.selected;
-    addRelState.relTypes.items.forEach((item, index) => {
-      if (item.id === id) {
-        if (item.checked) {
-          item.checked = false;
-          selected = undefined;
-        } else {
-          item.checked = true;
-          selected = item;
-        }
-      } else {
-        item.checked = false;
+  function textBlur() {
+    if (textRef.current && suggestions[0].name !== undefined) {
+      if (textRef.current.value.length === 0) {
+        setSuggestions([]);
+        return;
       }
-
-      items[index] = item;
-    });
-
-    setAddRelState({
-      ...addRelState,
-      relTypes: {
-        ...addRelState.relTypes,
-        items: items,
-        selected: selected,
-      },
-    });
-  }
-
-  return (
-    <fieldset className="mt-3">
-      <legend>Select the type of Relationship</legend>
-      {addRelState.relTypes.items.map((item, index) => (
-        <RelType
-          key={item.id}
-          index={index}
-          isChecked={item.checked ?? false}
-          relType={item}
-          updateChecked={() => updateChecked(item.id)}
-        />
-      ))}
-      <AddRelType />
-    </fieldset>
-  );
-}
-
-function RelType({
-  index,
-  isChecked,
-  updateChecked,
-}: {
-  relType: Types.RelType;
-  index: number;
-  isChecked: boolean;
-  updateChecked: () => void;
-}) {
-  const { addRelState, setAddRelState } = useContext(AddRelContext);
-
-  const divStyle = {
-    backgroundColor:
-      hexToRGBA(addRelState.relTypes.items[index].color, 0.5) ?? "#ffffff",
-  };
-
-  function changeColor(event: React.ChangeEvent<HTMLInputElement>) {
-    const items = addRelState.relTypes.items;
-    items[index].color = event.target.value;
-
-    setAddRelState({
-      ...addRelState,
-      relTypes: {
-        ...addRelState.relTypes,
-        items: items,
-      },
-    });
-  }
-
-  function changeName(event: React.ChangeEvent<HTMLInputElement>) {
-    const items = addRelState.relTypes.items;
-    items[index].name = event.target.value;
-
-    setAddRelState({
-      ...addRelState,
-      relTypes: {
-        ...addRelState.relTypes,
-        items: items,
-      },
-    });
-  }
-
-  return (
-    <div
-      className="mt-1 flex h-10 justify-between gap-3 rounded-lg pl-3 pr-1"
-      style={divStyle}
-    >
-      <div className="flex w-full items-center gap-3">
-        <button className="cursor-pointer" onClick={updateChecked}>
-          {isChecked ? <CheckCircle /> : <Circle />}
-        </button>
-        <label
-          className="block w-full cursor-pointer"
-          htmlFor={addRelState.relTypes.items[index].name}
-        >
-          <input
-            onBlur={changeName}
-            type="text"
-            defaultValue={addRelState.relTypes.items[index].name}
-            className="cursor-pointer bg-transparent"
-          />
-        </label>
-      </div>
-      <div className="flex items-center gap-2">
-        <input
-          className=" h-8 w-8 rounded-lg"
-          type="color"
-          name="relTypeColor"
-          value={addRelState.relTypes.items[index].color}
-          onChange={changeColor}
-        />
-      </div>
-    </div>
-  );
-}
-
-function AddRelType() {
-  const { addRelState, setAddRelState } = useContext(AddRelContext);
-  const relName = useRef<HTMLInputElement>(null);
-  const relColor = useRef<HTMLInputElement>(null);
-
-  function addRelType() {
-    if (relName.current && relColor.current) {
-      const type = {
-        id: addRelState.relTypes.items.length,
-        name: relName.current.value,
-        color: relColor.current.value,
-        checked: false,
-      };
-
-      setAddRelState({
-        ...addRelState,
-        relTypes: {
-          ...addRelState.relTypes,
-          items: [...addRelState.relTypes.items, type],
-        },
-      });
-
-      console.log(add({ type: "relType", payload: type }));
-      relName.current.value = "";
+      if (textRef.current.value === suggestions[0].name) {
+        setResult(suggestions[0]);
+        setSuggestions([]);
+      }
     }
   }
 
   return (
-    <div className="flex gap-3">
-      <input
-        ref={relName}
-        type="text"
-        name="addType"
-        placeholder="New Relationship type"
-        className="mt-2 block rounded-lg p-3 shadow-lg"
+    <div className="relative">
+      <TextInput
+        ref={textRef}
+        placeholder="Partner Name"
+        onChange={search}
+        onBlur={textBlur}
       />
-      <input
-        ref={relColor}
-        className="mt-4 h-10 w-10 rounded-lg"
-        type="color"
-        name="relColor"
-      />
-      <button
-        onClick={addRelType}
-        className="mt-3 flex gap-3 rounded-lg p-3 shadow-lg transition-colors hover:bg-green-500"
-      >
-        <PlusCircle />
-      </button>
+      {searching && (
+        <ul
+          className="absolute left-0 top-14 w-full rounded-lg bg-white
+        shadow-lg"
+        >
+          {" "}
+          {suggestions.map((suggestion, index) => {
+            return (
+              <SearchListItem
+                setResult={setResult}
+                setSuggestions={setSuggestions}
+                suggestion={suggestion}
+                key={index}
+                textRef={textRef}
+              />
+            );
+          })}{" "}
+        </ul>
+      )}
     </div>
   );
 }
 
-export function AddRelationshipButton() {
-  const { setAddPersonOpen, setAddRelOpen } = useContext(InputOpenContext);
+function SearchListItem({
+  setSuggestions,
+  setResult,
+  suggestion,
+  textRef,
+}: {
+  setSuggestions: React.Dispatch<React.SetStateAction<Types.Node[]>>;
+  setResult: React.Dispatch<React.SetStateAction<Types.Node | undefined>>;
+  suggestion: Types.Node;
+  textRef: React.RefObject<HTMLInputElement>;
+}) {
   return (
-    <button
-      onClick={() => {
-        setAddPersonOpen(false);
-        setAddRelOpen(true);
-      }}
-      className="flex gap-3 rounded-lg bg-white p-3 shadow-xl outline-offset-0 outline-blue-500 hover:outline"
-    >
-      <Users /> Add Relationship
-    </button>
+    <li className="cursor-pointer rounded-lg p-3 outline-offset-0 outline-blue-500 hover:outline">
+      <button
+        className="w-full text-left"
+        onClick={() => {
+          setResult(suggestion);
+          setSuggestions([]);
+          if (textRef.current) textRef.current.value = suggestion.name;
+        }}
+      >
+        <div className="font-bold text-blue-500">{suggestion.name}</div>
+        <div className="text-blue-500/50">{suggestion.location.name}</div>
+      </button>
+    </li>
   );
 }

@@ -109,31 +109,6 @@ export function clamp(num: number, min: number, max: number) {
   return Math.min(Math.max(num, min), max);
 }
 
-/*
-export function findFullSourceTarget(rel: Types.GraphLink) {
-  if (typeof rel.source === "number") {
-    const fullSource = graph.nodes.find((node) => node.id === rel.source);
-
-    if (!fullSource) {
-      throw new Error("No Source Defined");
-    }
-
-    rel.source = fullSource;
-  }
-
-  if (typeof rel.target === "number") {
-    const fullTarget = graph.nodes.find((node) => node.id === rel.target);
-
-    if (!fullTarget) {
-      throw new Error("No Source Defined");
-    }
-
-    rel.target = fullTarget;
-  }
-
-  return rel;
-}*/
-
 export function distanceScale(input: number) {
   const mappedValue = mapRange(input, 0, 500, 0, 1);
 

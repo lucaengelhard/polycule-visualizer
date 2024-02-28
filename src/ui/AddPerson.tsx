@@ -8,7 +8,7 @@ import { getNewIndex } from "../utils/helpers";
 
 export default function AddPerson() {
   const { DBState } = useContext(DBContext);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState<string | undefined>(undefined);
   const [locationstring, setLocationstring] = useState<string | undefined>(
     undefined,
