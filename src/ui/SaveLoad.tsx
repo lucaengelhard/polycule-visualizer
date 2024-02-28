@@ -30,6 +30,7 @@ export function ImportDB() {
     fileUploadElement.click();
 
     fileUploadElement.addEventListener("change", () => {
+      setDBState({ nodes: {}, links: {}, linkTypes: {} });
       const files = fileUploadElement.files;
 
       if (files?.length ?? 0 > 0) {
