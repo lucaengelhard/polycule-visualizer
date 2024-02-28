@@ -1,5 +1,7 @@
 import AddPerson from "./AddPerson";
 import AddRelationship from "./AddRelationship";
+import NodeInfo from "./NodeInfo";
+
 import { ImportDB, SaveDB } from "./SaveLoad";
 
 export default function UI() {
@@ -16,10 +18,9 @@ export default function UI() {
         </div>
       </div>
 
-      <div>
-        {/*
-        <EditPerson />
-        <EditRel />*/}
+      <div className="h-min w-min p-3">
+        <NodeInfo />
+        {/*<EditRel />*/}
       </div>
     </div>
   );

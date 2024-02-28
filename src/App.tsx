@@ -2,15 +2,54 @@ import { createContext, useEffect, useState } from "react";
 import UI from "./ui/UI";
 import * as Types from "./types/types";
 import { db } from "./db/db";
-//import { graph } from "./db/db";
+import Link from "./classes/link";
 
 export const DBContext = createContext<{
   DBState: Types.DBData;
   setDBState: React.Dispatch<Types.DBData>;
 }>(null);
 
+export const EditContext = createContext<{
+  editState: { node?: Types.Node | undefined; link?: Link | undefined };
+  setEditState: React.Dispatch<
+    React.SetStateAction<{
+      node?: Types.Node | undefined;
+      link?: Link | undefined;
+    }>
+  >;
+}>(null);
+
 export default function App() {
   const [DBState, setDBState] = useState<Types.DBData>(db);
+  const [editState, setEditState] = useState<{
+    node?: Types.Node;
+    link?: Link;
+  }>({
+    //TODO: return to undefined after tests
+    node: {
+      name: "test1",
+      links: new Set([0, 1]),
+      id: 0,
+      location: { name: "test", lat: 34.0304049, lon: 50.6707877 },
+    },
+    link: {
+      id: 0,
+      source: {
+        name: "test1",
+        links: new Set([0]),
+        id: 0,
+        location: { name: "test", lat: 34.0304049, lon: 50.6707877 },
+      },
+      target: {
+        name: "test2",
+        links: new Set([0]),
+        id: 1,
+        location: { name: "test", lat: 34.0304049, lon: 50.6707877 },
+      },
+      type: { name: "test1link", color: "#8486df", id: 0 },
+      distance: 0,
+    },
+  });
 
   useEffect(() => {
     document.addEventListener("dbUpDate", () => {
@@ -33,9 +72,11 @@ export default function App() {
   });
 
   return (
-    <DBContext.Provider value={{ DBState, setDBState }}>
-      <UI />
-    </DBContext.Provider>
+    <EditContext.Provider value={{ editState, setEditState }}>
+      <DBContext.Provider value={{ DBState, setDBState }}>
+        <UI />
+      </DBContext.Provider>
+    </EditContext.Provider>
   );
 }
 
