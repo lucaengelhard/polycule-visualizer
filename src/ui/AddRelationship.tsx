@@ -9,7 +9,7 @@ import { getNewIndex } from "../utils/helpers";
 
 export default function AddRelationship() {
   const { DBState } = useContext(DBContext);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [linkTypes, setLinkTypes] = useState<Types.RadioItems>({ items: {} });
   const [prevLinkItemIds, setPrevLinkItemIds] = useState<string[]>([]);
   const [partner1, setPartner1] = useState<Types.Node | undefined>(undefined);
@@ -60,6 +60,31 @@ export default function AddRelationship() {
       update("linkTypes", newLinkType, "add");
     }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linkTypes.items]);
+
+  useEffect(() => {
+    for (const key in linkTypes.items) {
+      if (Object.prototype.hasOwnProperty.call(linkTypes.items, key)) {
+        const element = linkTypes.items[key];
+        const index = parseInt(key);
+
+        if (DBState.linkTypes[key] !== undefined) {
+          if (
+            DBState.linkTypes[key].color !== element.color ||
+            DBState.linkTypes[key].name !== element.name
+          ) {
+            const newLinkType: Types.LinkType = {
+              name: linkTypes.items[key].name,
+              color: linkTypes.items[key].color ?? "#ffffff",
+              id: index,
+            };
+
+            update("linkTypes", newLinkType, "change");
+          }
+        }
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [linkTypes.items]);
 

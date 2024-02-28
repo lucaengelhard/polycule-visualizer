@@ -192,7 +192,7 @@ function RadioInputItem({
     const newItem = item;
     newItem.name = event.target.value;
 
-    const newItems = items.items;
+    const newItems = { ...items.items };
     newItems[index] = newItem;
 
     setItems({
@@ -205,7 +205,7 @@ function RadioInputItem({
     const newItem = item;
     newItem.color = event.target.value;
 
-    const newItems = items.items;
+    const newItems = { ...items.items };
     newItems[index] = newItem;
 
     setItems({
