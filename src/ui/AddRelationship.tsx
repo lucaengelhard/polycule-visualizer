@@ -78,8 +78,6 @@ export default function AddRelationship() {
               id: index,
             };
 
-            console.log(newLinkType);
-
             update("linkTypes", newLinkType, "change", true);
           }
         }

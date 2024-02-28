@@ -225,6 +225,14 @@ function RadioInputItem({
     setItem(items.items[index]);
   }, [items, index]);
 
+  useEffect(() => {
+    if (textRef.current !== null) {
+      textRef.current.value = item.name;
+    }
+  }, [item]);
+
+  const textRef = useRef<HTMLInputElement>(null);
+
   function setName(event: React.ChangeEvent<HTMLInputElement>) {
     const newItem = item;
     newItem.name = event.target.value;
@@ -264,7 +272,11 @@ function RadioInputItem({
         >
           {item.id === items.selected?.id ? <CheckCircle /> : <Circle />}
         </button>
-        <TextInput defaultValue={item.name} onBlur={(e) => setName(e)} />
+        <TextInput
+          ref={textRef}
+          defaultValue={item.name}
+          onBlur={(e) => setName(e)}
+        />
       </div>
 
       {color && (
