@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { DBContext, LinkTypeUpdate } from "../App";
+import { DBContext } from "../App";
 import { Button, RadioInput, TextInput } from "./Components";
 import { Link, Users, XCircle } from "lucide-react";
 import * as Types from "../types/types";
@@ -7,7 +7,7 @@ import Classes from "../classes";
 import { update } from "../db/db";
 
 export default function AddRelationship() {
-  const { DBState, setDBState } = useContext(DBContext);
+  const { DBState } = useContext(DBContext);
   const [open, setOpen] = useState(false);
   const [linkTypes, setLinkTypes] = useState<Types.RadioItems>({ items: {} });
   const [prevLinkItemIds, setPrevLinkItemIds] = useState<string[]>([]);

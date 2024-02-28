@@ -1,3 +1,4 @@
+import Link from "../classes/link";
 import {
   checkGraphDataType,
   typeCheckNode,
@@ -26,40 +27,71 @@ export function update(
   render?: boolean,
 ) {
   switch (type) {
-    case "nodes":
+    case "nodes": {
       if (!typeCheckNode(payload)) throw new Error("Node Parsing Error");
       break;
-    case "links":
-      if (typeCheckLink(payload)) {
-        const newSource: Types.Node = {
-          name: payload.source.name,
-          links: [...db.nodes[payload.source.id].links, payload.id],
-          id: payload.source.id,
-          location: payload.source.location,
-        };
+    }
+    case "links": {
+      if (!typeCheckLink(payload)) throw new Error("Link Parsing Error");
+      const newSourceLinks: Set<keyof Types.LinkList> = new Set(
+        db.nodes[payload.source.id].links,
+      );
 
-        const newTarget: Types.Node = {
-          name: payload.target.name,
-          links: [...db.nodes[payload.target.id].links, payload.id],
-          id: payload.target.id,
-          location: payload.target.location,
-        };
+      newSourceLinks.add(payload.id);
+      const newSource: Types.Node = {
+        name: payload.source.name,
+        links: newSourceLinks,
+        id: payload.source.id,
+        location: payload.source.location,
+      };
 
-        update("nodes", newSource, "change", false);
+      const newTargetLinks: Set<keyof Types.LinkList> = new Set(
+        db.nodes[payload.target.id].links,
+      );
 
-        update("nodes", newTarget, "change", false);
+      newTargetLinks.add(payload.id);
+      const newTarget: Types.Node = {
+        name: payload.target.name,
+        links: newTargetLinks,
+        id: payload.target.id,
+        location: payload.target.location,
+      };
 
-        payload.source = newSource;
-        payload.target = newTarget;
-      } else {
-        throw new Error("Link Parsing Error");
-      }
+      update("nodes", newSource, "change", false);
+
+      update("nodes", newTarget, "change", false);
+
+      payload.source = newSource;
+      payload.target = newTarget;
 
       break;
-    case "linkTypes":
+    }
+    case "linkTypes": {
       if (!typeCheckLinkType(payload))
         throw new Error("Link Type Parsing Error");
+
+      const toChange = Object.values(db.links).filter(
+        (link) => link.type.id === payload.id,
+      );
+
+      toChange.forEach((link) => {
+        const newLink = { ...link };
+
+        if (link.type.color !== payload.color) {
+          newLink.type.color = payload.color;
+        }
+
+        if (link.type.name !== payload.name) {
+          newLink.type.name = payload.name;
+        }
+
+        console.log(newLink);
+
+        update("links", newLink, "change", false);
+      });
+
       break;
+    }
     default:
       throw new Error("No type defined");
   }
