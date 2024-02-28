@@ -1,6 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import { DBContext, EditContext } from "../App";
-import { Link, UserRound, XCircle } from "lucide-react";
+import {
+  CornerDownLeft,
+  CornerUpLeft,
+  Link,
+  UserRound,
+  XCircle,
+} from "lucide-react";
 import { Button, RadioInput, WindowTitle } from "./Components";
 import * as Types from "../types/types";
 import { update } from "../db/db";
@@ -97,18 +103,29 @@ export default function LinkInfo() {
       {link !== undefined && (
         <div className="grid h-min gap-3 rounded-lg bg-white p-3 shadow-lg">
           <WindowTitle label="Relationship:" icon={<Link />} />
-          <Button
-            label={link.source.name}
-            icon={<UserRound />}
-            onClick={() => setEditState({ ...editState, node: link.source.id })}
-          />
+          <div className="flex items-center gap-3">
+            <div className="grid gap-3">
+              <Button
+                label={link.source.name}
+                icon={<UserRound />}
+                onClick={() =>
+                  setEditState({ ...editState, node: link.source.id })
+                }
+              />
 
-          <Button
-            label={link.target.name}
-            icon={<UserRound />}
-            onClick={() => setEditState({ ...editState, node: link.target.id })}
-          />
-
+              <Button
+                label={link.target.name}
+                icon={<UserRound />}
+                onClick={() =>
+                  setEditState({ ...editState, node: link.target.id })
+                }
+              />
+            </div>
+            <div className="grid h-min gap-3">
+              <CornerUpLeft />
+              <CornerDownLeft />
+            </div>
+          </div>
           <RadioInput
             items={linkTypes}
             setItems={setLinkTypes}
