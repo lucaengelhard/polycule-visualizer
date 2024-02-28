@@ -1,6 +1,6 @@
 import { Button, TextInput, WindowTitle } from "./Components";
 import * as Types from "../types/types";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { DBContext, EditContext } from "../App";
 import { hexToRGBA } from "../utils/helpers";
 import { Pencil, UserRound, XCircle } from "lucide-react";
@@ -10,10 +10,22 @@ export default function NodeInfo() {
   const { editState, setEditState } = useContext(EditContext);
   const { DBState } = useContext(DBContext);
   const [node, setNode] = useState(DBState.nodes[editState.node ?? -1]);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const placeRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setNode(DBState.nodes[editState.node ?? -1]);
   }, [DBState.nodes, editState.node]);
+
+  useEffect(() => {
+    if (nameRef.current !== null) {
+      nameRef.current.value = node.name;
+    }
+
+    if (placeRef.current !== null) {
+      placeRef.current.value = node.location.name;
+    }
+  }, [node]);
 
   function updateName(event: React.ChangeEvent<HTMLInputElement>) {
     if (editState.node !== undefined) {
@@ -37,8 +49,12 @@ export default function NodeInfo() {
       {node !== undefined && (
         <div className="grid h-min gap-3 rounded-lg bg-white p-3 shadow-lg">
           <WindowTitle label="Person:" icon={<UserRound />} />
-          <TextInput onBlur={updateName} defaultValue={node.name} />
-          <TextInput defaultValue={node.location.name} />
+          <TextInput
+            ref={nameRef}
+            onBlur={updateName}
+            defaultValue={node.name}
+          />
+          <TextInput ref={placeRef} defaultValue={node.location.name} />
           {Array.from(node.links).length > 0 && <div>Relationships:</div>}
           {editState.node !== undefined && (
             <div>
