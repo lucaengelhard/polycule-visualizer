@@ -1,4 +1,3 @@
-import Link from "../classes/link";
 import {
   checkGraphDataType,
   typeCheckNode,
@@ -85,8 +84,6 @@ export function update(
           newLink.type.name = payload.name;
         }
 
-        console.log(newLink);
-
         update("links", newLink, "change", false);
       });
 
@@ -107,13 +104,12 @@ export function update(
   db[type][i] = payload;
   length = Object.keys(db[type]).length;
 
-  console.log(
-    type,
-    db,
-    render === true || render === undefined ? "render" : "no render",
-  );
-
   if (render === true || render === undefined) {
+    console.log(
+      type,
+      db,
+      render === true || render === undefined ? "render" : "no render",
+    );
     switch (type) {
       case "nodes":
         document.dispatchEvent(NodeUpDate);

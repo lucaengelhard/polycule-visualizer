@@ -49,8 +49,9 @@ export function LinkTypeUpdate(
     if (Object.prototype.hasOwnProperty.call(db.linkTypes, Key)) {
       const LinkType = db.linkTypes[Key];
 
-      if (LinkType.id in DBState.nodes) {
+      if (LinkType.id in DBState.linkTypes) {
         const StateLinkType = DBState.linkTypes[LinkType.id];
+
         if (
           StateLinkType.name !== LinkType.name ||
           StateLinkType.color !== LinkType.color
