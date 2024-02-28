@@ -125,6 +125,7 @@ export default function AddRelationship() {
             setItems={setLinkTypes}
             extendable={true}
             color={true}
+            visibleElements={5}
           />
           <Button
             label="Add Relationship"

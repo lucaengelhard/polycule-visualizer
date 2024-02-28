@@ -120,13 +120,17 @@ export function RadioInput({
   setItems,
   color,
   extendable,
+  visibleElements,
 }: {
   items: Types.RadioItems;
   setItems: React.Dispatch<React.SetStateAction<Types.RadioItems>>;
   color?: boolean;
   extendable?: boolean;
+  visibleElements?: number;
 }) {
   const [itemsArray, setItemsArray] = useState<Types.RadioItem[]>();
+  const [maxHeight, setMaxHeight] = useState<string | undefined>(undefined);
+  const itemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const newArray = [];
@@ -145,21 +149,38 @@ export function RadioInput({
     }
   }
 
+  useEffect(() => {
+    if (itemRef.current) {
+      if (visibleElements !== undefined && visibleElements > 0) {
+        setMaxHeight(`${visibleElements * itemRef.current.clientHeight}px`);
+      }
+    }
+  }, [visibleElements]);
+
   return (
     <div>
-      {itemsArray?.map((_item, index) => (
-        <RadioInputItem
-          key={index}
-          index={index}
+      <div
+        className="no-scrollbar mb-3 shadow-xl"
+        style={{ maxHeight: maxHeight, overflow: "auto" }}
+      >
+        {itemsArray?.map((_item, index) => (
+          <RadioInputItem
+            key={index}
+            index={index}
+            items={items}
+            setItems={setItems}
+            onClick={onClick}
+            color={color}
+          />
+        ))}
+      </div>
+      {extendable && (
+        <AddRadioItem
+          ref={itemRef}
           items={items}
           setItems={setItems}
-          onClick={onClick}
           color={color}
         />
-      ))}
-
-      {extendable && (
-        <AddRadioItem items={items} setItems={setItems} color={color} />
       )}
     </div>
   );
@@ -240,15 +261,18 @@ function RadioInputItem({
   );
 }
 
-function AddRadioItem({
-  items,
-  setItems,
-  color,
-}: {
-  items: Types.RadioItems;
-  setItems: React.Dispatch<React.SetStateAction<Types.RadioItems>>;
-  color?: boolean;
-}) {
+const AddRadioItem = forwardRef(function AddRadioItem(
+  {
+    items,
+    setItems,
+    color,
+  }: {
+    items: Types.RadioItems;
+    setItems: React.Dispatch<React.SetStateAction<Types.RadioItems>>;
+    color?: boolean;
+  },
+  ref?: React.ForwardedRef<HTMLDivElement>,
+) {
   const [divColor, setDivColor] = useState("#ffffff");
   const [name, setName] = useState<string | undefined>();
   const textInputRef = useRef<HTMLInputElement>(null);
@@ -276,6 +300,7 @@ function AddRadioItem({
 
   return (
     <div
+      ref={ref}
       className="mt-1 flex items-center justify-between gap-3 rounded-lg p-1 pl-3 shadow-lg"
       style={divStyle}
     >
@@ -303,4 +328,4 @@ function AddRadioItem({
       )}
     </div>
   );
-}
+});
