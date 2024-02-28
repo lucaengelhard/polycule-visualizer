@@ -37,6 +37,15 @@ export function typeCheckLink(input: unknown): input is Link {
     (input as Link).distance === undefined ||
     (input as Link).id === undefined
   ) {
+    console.log(
+      input,
+      (input as Link).source,
+      (input as Link).target,
+      (input as Link).type,
+      (input as Link).distance,
+      (input as Link).id,
+    );
+
     return false;
   }
 
@@ -47,6 +56,7 @@ export function typeCheckLink(input: unknown): input is Link {
     typeof (input as Link).distance !== "number" ||
     typeof (input as Link).id !== "number"
   ) {
+    console.log(input);
     return false;
   }
 
@@ -91,7 +101,16 @@ export function checkGraphDataType(input: unknown): input is Types.DBData {
   }
 
   if (Object.keys((input as Types.DBData).links).length > 0) {
-    if (!typeCheckLink((input as Types.DBData).links)) {
+    let check = true;
+    Object.values((input as Types.DBData).links).forEach((link) => {
+      if (check) {
+        if (!typeCheckLink(link)) {
+          check = false;
+        }
+      }
+    });
+
+    if (!check) {
       return false;
     }
   }
@@ -101,7 +120,16 @@ export function checkGraphDataType(input: unknown): input is Types.DBData {
   }
 
   if (Object.keys((input as Types.DBData).nodes).length > 0) {
-    if (!typeCheckNode((input as Types.DBData).nodes)) {
+    let check = true;
+    Object.values((input as Types.DBData).nodes).forEach((node) => {
+      if (check) {
+        if (!typeCheckNode(node)) {
+          check = false;
+        }
+      }
+    });
+
+    if (!check) {
       return false;
     }
   }

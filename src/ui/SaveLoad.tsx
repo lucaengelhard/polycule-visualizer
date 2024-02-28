@@ -1,6 +1,8 @@
 import { FolderUp, Save } from "lucide-react";
 import { db, set } from "../db/db";
 import { Button } from "./Components";
+import { useContext } from "react";
+import { DBContext } from "../App";
 
 export function SaveDB() {
   function save() {
@@ -20,6 +22,7 @@ export function SaveDB() {
 }
 
 export function ImportDB() {
+  const { setDBState } = useContext(DBContext);
   function importJSON() {
     const fileUploadElement = document.createElement("input");
     fileUploadElement.type = "file";
@@ -39,9 +42,10 @@ export function ImportDB() {
 
         reader.addEventListener("load", (e) => {
           if (typeof e.target?.result === "string") {
-            set(e.target.result);
+            set(e.target.result, false);
 
             console.log(db);
+            setDBState({ ...db });
           }
         });
       }

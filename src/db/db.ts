@@ -101,7 +101,7 @@ export function update(
   return length;
 }
 
-export function set(input: unknown) {
+export function set(input: unknown, render?: boolean) {
   let res = input;
   if (typeof input === "string") {
     res = JSON.parse(input);
@@ -112,7 +112,9 @@ export function set(input: unknown) {
     db.links = res.links;
     db.linkTypes = res.linkTypes;
 
-    document.dispatchEvent(dbUpDate);
+    if (render === true || render === undefined) {
+      document.dispatchEvent(dbUpDate);
+    }
   } else {
     throw new Error("Parsing Error");
   }

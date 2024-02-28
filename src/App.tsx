@@ -14,17 +14,17 @@ export default function App() {
 
   useEffect(() => {
     document.addEventListener("dbUpDate", () => {
-      //console.log(db.nodes);
-      //setDBState({ ...db });
+      console.log(db);
+      setDBState({ ...db });
     });
 
     document.addEventListener("NodeUpdate", () => {
-      NodeRender(DBState, setDBState);
+      NodeUpdate(DBState, setDBState);
     });
 
     document.addEventListener("LinkUpdate", () => {
       LinkUpdate(DBState, setDBState);
-      NodeRender(DBState, setDBState);
+      NodeUpdate(DBState, setDBState);
     });
 
     document.addEventListener("LinkTypeUpdate", () => {
@@ -39,9 +39,9 @@ export default function App() {
   );
 }
 
-function LinkTypeUpdate(
+export function LinkTypeUpdate(
   DBState: Types.DBData,
-  setDBState: React.Dispatch<React.SetStateAction<Types.DBData>>,
+  setDBState: React.Dispatch<Types.DBData>,
 ) {
   const changeLinkTypes: Types.LinkTypeList = {};
 
@@ -71,7 +71,7 @@ function LinkTypeUpdate(
 
 function LinkUpdate(
   DBState: Types.DBData,
-  setDBState: React.Dispatch<React.SetStateAction<Types.DBData>>,
+  setDBState: React.Dispatch<Types.DBData>,
 ) {
   const changeLinks: Types.LinkList = {};
 
@@ -104,9 +104,9 @@ function LinkUpdate(
   });
 }
 
-function NodeRender(
+function NodeUpdate(
   DBState: Types.DBData,
-  setDBState: React.Dispatch<React.SetStateAction<Types.DBData>>,
+  setDBState: React.Dispatch<Types.DBData>,
 ) {
   const changeNodes: Types.NodeList = {};
 

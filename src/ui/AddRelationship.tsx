@@ -1,14 +1,13 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { DBContext } from "../App";
+import { DBContext, LinkTypeUpdate } from "../App";
 import { Button, RadioInput, TextInput } from "./Components";
 import { Link, Users, XCircle } from "lucide-react";
 import * as Types from "../types/types";
 import Classes from "../classes";
 import { update } from "../db/db";
-import { getNewIndex } from "../utils/helpers";
 
 export default function AddRelationship() {
-  const { DBState } = useContext(DBContext);
+  const { DBState, setDBState } = useContext(DBContext);
   const [open, setOpen] = useState(false);
   const [linkTypes, setLinkTypes] = useState<Types.RadioItems>({ items: {} });
   const [prevLinkItemIds, setPrevLinkItemIds] = useState<string[]>([]);
@@ -44,21 +43,19 @@ export default function AddRelationship() {
 
     setPrevLinkItemIds(Object.keys(linkTypes.items));
 
-    const index = parseInt(difference[0]);
+    difference.forEach((key) => {
+      const id = parseInt(key);
 
-    if (linkTypes.items[index]) {
-      const newLinkType: Types.LinkType = {
-        name: linkTypes.items[index].name,
-        color: linkTypes.items[index].color ?? "#ffffff",
-        id:
-          Object.keys(DBState.linkTypes).length === 0 &&
-          !(index in DBState.linkTypes)
-            ? index
-            : getNewIndex(DBState.linkTypes),
-      };
+      if (linkTypes.items[id]) {
+        const newLinkType: Types.LinkType = {
+          name: linkTypes.items[id].name,
+          color: linkTypes.items[id].color ?? "#ffffff",
+          id: id,
+        };
 
-      update("linkTypes", newLinkType, "add");
-    }
+        update("linkTypes", newLinkType, "change", true);
+      }
+    });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [linkTypes.items]);
@@ -80,7 +77,9 @@ export default function AddRelationship() {
               id: index,
             };
 
-            update("linkTypes", newLinkType, "change");
+            console.log(newLinkType);
+
+            update("linkTypes", newLinkType, "change", true);
           }
         }
       }
