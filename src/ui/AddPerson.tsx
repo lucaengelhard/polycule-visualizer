@@ -30,7 +30,7 @@ export default function AddPerson() {
         name: name,
         location: location,
         id: getNewIndex(DBState.nodes),
-        relationships: {},
+        links: [],
       },
       "add",
     );

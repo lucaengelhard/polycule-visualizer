@@ -1,4 +1,3 @@
-import Link from "../classes/link";
 import {
   checkGraphDataType,
   typeCheckNode,
@@ -22,18 +21,44 @@ const LinkTypeUpdate = new Event("LinkTypeUpdate");
 
 export function update(
   type: "nodes" | "links" | "linkTypes",
-  payload: Types.Node | Link | Types.LinkType,
+  payload: unknown,
   action: "add" | "change",
+  render?: boolean,
 ) {
   switch (type) {
     case "nodes":
-      typeCheckNode(payload);
+      if (!typeCheckNode(payload)) throw new Error("Node Parsing Error");
       break;
     case "links":
-      typeCheckLink(payload);
+      if (typeCheckLink(payload)) {
+        const newSource: Types.Node = {
+          name: payload.source.name,
+          links: [...db.nodes[payload.source.id].links, payload.id],
+          id: payload.source.id,
+          location: payload.source.location,
+        };
+
+        const newTarget: Types.Node = {
+          name: payload.target.name,
+          links: [...db.nodes[payload.target.id].links, payload.id],
+          id: payload.target.id,
+          location: payload.target.location,
+        };
+
+        update("nodes", newSource, "change", false);
+
+        update("nodes", newTarget, "change", false);
+
+        payload.source = newSource;
+        payload.target = newTarget;
+      } else {
+        throw new Error("Link Parsing Error");
+      }
+
       break;
     case "linkTypes":
-      typeCheckLinkType(payload);
+      if (!typeCheckLinkType(payload))
+        throw new Error("Link Type Parsing Error");
       break;
     default:
       throw new Error("No type defined");
@@ -50,19 +75,27 @@ export function update(
   db[type][i] = payload;
   length = Object.keys(db[type]).length;
 
-  switch (type) {
-    case "nodes":
-      document.dispatchEvent(NodeUpDate);
-      break;
-    case "links":
-      document.dispatchEvent(LinkUpdate);
-      break;
-    case "linkTypes":
-      document.dispatchEvent(LinkTypeUpdate);
-      break;
-    default:
-      document.dispatchEvent(dbUpDate);
-      break;
+  console.log(
+    type,
+    db,
+    render === true || render === undefined ? "render" : "no render",
+  );
+
+  if (render === true || render === undefined) {
+    switch (type) {
+      case "nodes":
+        document.dispatchEvent(NodeUpDate);
+        break;
+      case "links":
+        document.dispatchEvent(LinkUpdate);
+        break;
+      case "linkTypes":
+        document.dispatchEvent(LinkTypeUpdate);
+        break;
+      default:
+        document.dispatchEvent(dbUpDate);
+        break;
+    }
   }
 
   return length;

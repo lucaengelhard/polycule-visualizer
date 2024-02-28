@@ -24,7 +24,7 @@ export type Node = {
   name: string;
   location: Position;
   index?: number;
-  relationships: LinkList;
+  links: (keyof LinkList)[];
   dx?: number;
   dy?: number;
   x?: number;

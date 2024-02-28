@@ -6,15 +6,22 @@ export function typeCheckNode(input: unknown): input is Types.Node {
     (input as Types.Node).id === undefined ||
     (input as Types.Node).name === undefined ||
     (input as Types.Node).location === undefined ||
-    (input as Types.Node).relationships === undefined
+    (input as Types.Node).links === undefined ||
+    (input as Types.Node).location.name === undefined ||
+    (input as Types.Node).location.lat === undefined ||
+    (input as Types.Node).location.lon === undefined
   ) {
     return false;
   }
 
   if (
-    (input as Types.Node).location.name === undefined ||
-    (input as Types.Node).location.lat === undefined ||
-    (input as Types.Node).location.lon === undefined
+    typeof (input as Types.Node).id !== "number" ||
+    typeof (input as Types.Node).name !== "string" ||
+    typeof (input as Types.Node).location !== "object" ||
+    typeof (input as Types.Node).links !== "object" ||
+    typeof (input as Types.Node).location.name !== "string" ||
+    typeof (input as Types.Node).location.lat !== "string" ||
+    typeof (input as Types.Node).location.lon !== "string"
   ) {
     return false;
   }
@@ -27,8 +34,27 @@ export function typeCheckLink(input: unknown): input is Link {
     (input as Link).source === undefined ||
     (input as Link).target === undefined ||
     (input as Link).type === undefined ||
-    (input as Link).distance === undefined
+    (input as Link).distance === undefined ||
+    (input as Link).id === undefined
   ) {
+    return false;
+  }
+
+  if (
+    typeof (input as Link).source !== "object" ||
+    typeof (input as Link).target !== "object" ||
+    typeof (input as Link).type !== "object" ||
+    typeof (input as Link).distance !== "number" ||
+    typeof (input as Link).id !== "number"
+  ) {
+    return false;
+  }
+
+  if (!typeCheckNode((input as Link).source)) {
+    return false;
+  }
+
+  if (!typeCheckNode((input as Link).target)) {
     return false;
   }
 
@@ -45,10 +71,18 @@ export function typeCheckLinkType(input: unknown): input is Types.LinkType {
     (input as Types.LinkType).name === undefined ||
     (input as Types.LinkType).id === undefined
   ) {
-    return true;
+    return false;
   }
 
-  return false;
+  if (
+    typeof (input as Types.LinkType).color !== "string" ||
+    typeof (input as Types.LinkType).name !== "string" ||
+    typeof (input as Types.LinkType).id !== "number"
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 export function checkGraphDataType(input: unknown): input is Types.DBData {
