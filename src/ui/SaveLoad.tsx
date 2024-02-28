@@ -12,7 +12,7 @@ export function SaveDB() {
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement("a");
-    const filename = `polycule-visualizer-${new Date().getUTCFullYear()}-${new Date().getUTCMonth() + 1}-${new Date().getDate()}`;
+    const filename = `polycule-visualizer-${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}`;
 
     link.download = filename;
     link.href = url;
