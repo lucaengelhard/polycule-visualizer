@@ -160,7 +160,7 @@ export function RadioInput({
   return (
     <div>
       <div
-        className="no-scrollbar mb-3 shadow-xl"
+        className="no-scrollbar mb-3 rounded-lg shadow-xl"
         style={{ maxHeight: maxHeight, overflow: "auto" }}
       >
         {itemsArray?.map((_item, index) => (
