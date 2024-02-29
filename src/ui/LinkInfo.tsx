@@ -8,10 +8,11 @@ import {
   UserRound,
   XCircle,
 } from "lucide-react";
-import { Button, RadioInput, WindowTitle } from "./Components";
-import * as Types from "../types/types";
-import { remove, update } from "../db/db";
+
+import * as Types from "../types";
+import { remove, update } from "../db";
 import ClassLink from "../classes/link";
+import { Button, RadioInput, WindowTitle } from "./components";
 
 export default function LinkInfo() {
   const { editState, setEditState } = useContext(EditContext);

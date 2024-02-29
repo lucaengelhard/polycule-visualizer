@@ -1,5 +1,5 @@
 import Link from "../classes/link";
-import * as Types from "./types";
+import * as Types from ".";
 
 export function typeCheckNode(input: unknown): input is Types.Node {
   if (

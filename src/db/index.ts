@@ -6,7 +6,7 @@ import {
   typeCheckLinkType,
 } from "../types/typechecks";
 
-import * as Types from "../types/types";
+import * as Types from "../types";
 import { getNewIndex } from "../utils/helpers";
 
 export const db: Types.DBData = {
@@ -29,8 +29,6 @@ export function update(
   switch (type) {
     case "nodes": {
       if (!typeCheckNode(payload)) throw new Error("Node Parsing Error");
-
-      console.log(payload);
 
       if (action === "change") {
         Array.from(payload.links).forEach((id) => {

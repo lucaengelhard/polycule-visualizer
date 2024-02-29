@@ -1,11 +1,12 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { DBContext } from "../App";
-import { Button, RadioInput, TextInput, WindowTitle } from "./Components";
-import { Link, XCircle } from "lucide-react";
-import * as Types from "../types/types";
 
-import { remove, update } from "../db/db";
+import { Link, XCircle } from "lucide-react";
+import * as Types from "../types";
+
+import { remove, update } from "../db";
 import ClassLink from "../classes/link";
+import { Button, RadioInput, TextInput, WindowTitle } from "./components";
 
 export default function AddRelationship() {
   const { DBState } = useContext(DBContext);

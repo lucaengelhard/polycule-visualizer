@@ -1,11 +1,11 @@
-import { Button, TextInput, WindowTitle } from "./Components";
-import * as Types from "../types/types";
+import * as Types from "../types";
 import { useContext, useEffect, useRef, useState } from "react";
 import { DBContext, EditContext } from "../App";
 import { hexToRGBA } from "../utils/helpers";
 import { Pencil, Trash2, UserRound, XCircle } from "lucide-react";
-import { remove, update } from "../db/db";
+import { remove, update } from "../db";
 import { geoCode } from "../utils/geocode";
+import { Button, TextInput, WindowTitle } from "./components";
 
 export default function NodeInfo() {
   const { editState, setEditState } = useContext(EditContext);

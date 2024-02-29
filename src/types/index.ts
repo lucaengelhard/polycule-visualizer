@@ -1,4 +1,4 @@
-import ClassLink from "../classes/link";
+import Link from "../classes/link";
 
 // Component types //
 export type ButtonType = "confirm" | "deny" | undefined;
@@ -56,11 +56,11 @@ export type NodeList = {
 };
 
 export type LinkList = {
-  [key: number]: ClassLink;
+  [key: number]: Link;
 };
 
 export type LinkTypeList = {
   [key: number]: LinkType;
 };
 
-export type DBType = Node | ClassLink | LinkType;
+export type DBType = Node | Link | LinkType;

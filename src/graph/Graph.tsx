@@ -11,7 +11,7 @@ import * as d3 from "d3";
 import * as Types from "../types/types-old";
 import { clamp, distanceScale, findFullSourceTarget } from "../utils/helpers";
 import { Pencil } from "lucide-react";
-import { change } from "../db/db";
+import { change } from "../db";
 import { geoCode } from "../utils/geocode";
 
 export default function Graph({ graph }: { graph: Types.GraphData }) {

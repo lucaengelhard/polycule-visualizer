@@ -1,10 +1,11 @@
 import { useContext, useRef, useState } from "react";
 import { DBContext } from "../App";
-import { Button, TextInput, WindowTitle } from "./Components";
+
 import { UserRoundPlus, XCircle } from "lucide-react";
 import { geoCode } from "../utils/geocode";
-import { update } from "../db/db";
+import { update } from "../db";
 import { getNewIndex } from "../utils/helpers";
+import { Button, TextInput, WindowTitle } from "./components";
 
 export default function AddPerson() {
   const { DBState } = useContext(DBContext);

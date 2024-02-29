@@ -1,136 +1,10 @@
 import { CheckCircle, Circle, Link2, PlusCircle, Trash2 } from "lucide-react";
-import * as Types from "../types/types";
-import { ReactNode, forwardRef, useEffect, useRef, useState } from "react";
-import { getNewIndex, hexToRGBA, rgbaStringToHex } from "../utils/helpers";
+import * as Types from "../../types";
+import { forwardRef, useEffect, useRef, useState } from "react";
+import { getNewIndex, hexToRGBA, rgbaStringToHex } from "../../utils/helpers";
+import { Button, ColorInput, TextInput } from ".";
 
-export function Button({
-  label,
-  icon,
-  onClick,
-  type,
-  additionalClasses,
-}: {
-  label?: string;
-  icon?: ReactNode;
-  onClick?: () => void;
-  type?: Types.ButtonType;
-  additionalClasses?: string;
-}) {
-  const [conditionalClasses, setConditonalClasses] = useState(
-    "outline-offset-0 outline-blue-500 hover:outline",
-  );
-
-  useEffect(() => {
-    switch (type) {
-      case "confirm":
-        setConditonalClasses("hover:bg-green-500");
-        break;
-      case "deny":
-        setConditonalClasses("hover:bg-red-500");
-        break;
-      default:
-        setConditonalClasses("outline-offset-0 outline-blue-500 hover:outline");
-        break;
-    }
-  }, [type]);
-
-  return (
-    <button
-      onClick={onClick}
-      className={
-        "flex h-min w-min gap-3 whitespace-nowrap rounded-lg bg-white p-3 shadow-xl transition-colors " +
-        conditionalClasses +
-        " " +
-        additionalClasses
-      }
-    >
-      {icon}
-      {label}
-    </button>
-  );
-}
-
-export function WindowTitle({
-  label,
-  icon,
-}: {
-  label?: string;
-  icon?: ReactNode;
-}) {
-  return (
-    <div className="flex gap-3 font-bold">
-      {icon}
-      {label}
-    </div>
-  );
-}
-
-export const TextInput = forwardRef(function TextInput(
-  {
-    defaultValue,
-    value,
-    placeholder,
-    onChange,
-    onInput,
-    onBlur,
-    additionalClasses,
-  }: {
-    defaultValue?: string;
-    value?: string;
-    placeholder?: string;
-    onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    onInput?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    onBlur?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    additionalClasses?: string;
-  },
-  ref?: React.ForwardedRef<HTMLInputElement>,
-) {
-  return (
-    <input
-      className={"h-min w-min rounded-lg p-3 shadow-lg " + additionalClasses}
-      type="text"
-      defaultValue={defaultValue}
-      value={value}
-      placeholder={placeholder}
-      onChange={onChange}
-      onInput={onInput}
-      onBlur={onBlur}
-      ref={ref}
-    ></input>
-  );
-});
-
-export function ColorInput({
-  value,
-  defaultValue,
-  onChange,
-  onInput,
-  onBlur,
-  additionalClasses,
-}: {
-  value?: string;
-  defaultValue?: string;
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onInput?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  additionalClasses?: string;
-}) {
-  return (
-    <input
-      type="color"
-      className={
-        "aspect-square h-10 w-10 rounded-lg border-none " + additionalClasses
-      }
-      onChange={onChange}
-      onInput={onInput}
-      onBlur={onBlur}
-      value={value}
-      defaultValue={defaultValue}
-    />
-  );
-}
-
-export function RadioInput<Deletable extends boolean>({
+export default function RadioInput<Deletable extends boolean>({
   items,
   setItems,
   color,
@@ -198,7 +72,6 @@ export function RadioInput<Deletable extends boolean>({
     </div>
   );
 }
-
 function RadioInputItem<Deletable extends boolean>({
   index,
   items,
@@ -296,7 +169,6 @@ function RadioInputItem<Deletable extends boolean>({
     </>
   );
 }
-
 const AddRadioItem = forwardRef(function AddRadioItem(
   {
     items,

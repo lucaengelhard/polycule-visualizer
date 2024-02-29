@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react";
-import UI from "./ui/UI";
-import * as Types from "./types/types";
-import { db } from "./db/db";
+import UI from "./ui";
+import * as Types from "./types";
+import { db } from "./db";
 
 export const DBContext = createContext<{
   DBState: Types.DBData;

@@ -1,10 +1,11 @@
 import { FolderUp, Save } from "lucide-react";
-import { db, set } from "../db/db";
-import { Button } from "./Components";
+import { db, set } from "../db";
+
 import { useContext } from "react";
 import { DBContext } from "../App";
 
 import { transformSetsToArray } from "../utils/helpers";
+import { Button } from "./components";
 
 export function SaveDB() {
   function save() {

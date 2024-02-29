@@ -1,8 +1,8 @@
 import { distance, getNewIndex } from "../utils/helpers";
-import * as Types from "../types/types";
-import { db } from "../db/db";
+import * as Types from "../types";
+import { db } from "../db";
 
-export default class ClassLink {
+export default class Link {
   id: number;
   source: Types.Node;
   target: Types.Node;
