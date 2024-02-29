@@ -17,9 +17,6 @@ export default function LinkInfo() {
   const { editState, setEditState } = useContext(EditContext);
   const { DBState } = useContext(DBContext);
   const [link, setLink] = useState<ClassLink | undefined>(undefined);
-  const [partner1name, setPartner1name] = useState<string | undefined>(
-    undefined,
-  );
 
   const [linkTypes, setLinkTypes] = useState<Types.RadioItems>({
     items: {},

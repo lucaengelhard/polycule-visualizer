@@ -6,6 +6,7 @@ import NodeInfo from "./NodeInfo";
 
 import { ImportDB, SaveDB } from "./SaveLoad";
 
+//TODO: Error popup component, implement graph
 export default function UI() {
   return (
     <div>
