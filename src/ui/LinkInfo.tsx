@@ -17,6 +17,9 @@ export default function LinkInfo() {
   const { editState, setEditState } = useContext(EditContext);
   const { DBState } = useContext(DBContext);
   const [link, setLink] = useState<ClassLink | undefined>(undefined);
+  const [partner1name, setPartner1name] = useState<string | undefined>(
+    undefined,
+  );
 
   const [linkTypes, setLinkTypes] = useState<Types.RadioItems>({
     items: {},
@@ -99,6 +102,16 @@ export default function LinkInfo() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [linkTypes.items]);
 
+  useEffect(() => {
+    if (
+      editState.link !== undefined &&
+      DBState.links[editState.link] !== undefined
+    ) {
+      setLink(DBState.links[editState.link]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [DBState]);
+
   function deleteLink() {
     if (link !== undefined) {
       remove(link, true);
@@ -119,6 +132,8 @@ export default function LinkInfo() {
                 onClick={() =>
                   setEditState({ ...editState, node: link.source.id })
                 }
+                additionalClasses="transition-transform
+                hover:translate-x-2"
               />
 
               <Button
@@ -127,6 +142,8 @@ export default function LinkInfo() {
                 onClick={() =>
                   setEditState({ ...editState, node: link.target.id })
                 }
+                additionalClasses="transition-transform
+                hover:translate-x-2"
               />
             </div>
             <div className="grid h-min gap-3">
