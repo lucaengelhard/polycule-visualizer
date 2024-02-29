@@ -22,7 +22,10 @@ const TextInput = forwardRef(function TextInput(
 ) {
   return (
     <input
-      className={"h-min w-min rounded-lg p-3 shadow-lg " + additionalClasses}
+      className={
+        "pointer-events-auto h-min w-min rounded-lg p-3 shadow-lg " +
+        additionalClasses
+      }
       type="text"
       defaultValue={defaultValue}
       value={value}

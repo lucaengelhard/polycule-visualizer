@@ -36,7 +36,7 @@ export default function Button({
     <button
       onClick={onClick}
       className={
-        "flex h-min w-min gap-3 whitespace-nowrap rounded-lg bg-white p-3 shadow-xl transition-colors " +
+        "pointer-events-auto flex h-min w-min gap-3 whitespace-nowrap rounded-lg bg-white p-3 shadow-xl transition-colors " +
         conditionalClasses +
         " " +
         additionalClasses

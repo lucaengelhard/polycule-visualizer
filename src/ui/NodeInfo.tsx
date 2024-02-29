@@ -74,7 +74,7 @@ export default function NodeInfo() {
   async function deleteNode() {
     const choice = await confirm({
       title: `Delete ${node.name}`,
-      description: `Are you sure you want to delete ${node.name}`,
+      description: `Are you sure you want to delete Person ${node.name} and all their relationships?`,
       confirmBtnLabel: "Yes",
     });
 

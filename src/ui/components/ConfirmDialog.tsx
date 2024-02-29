@@ -54,8 +54,8 @@ export function ConfirmDialogProvider({
       {children}
       <Alert
         {...state}
-        onClose={() => fn.current(false)}
-        onConfirm={() => fn.current(true)}
+        onClose={() => fn.current !== null && fn.current(false)}
+        onConfirm={() => fn.current !== null && fn.current(true)}
       />
     </ConfirmDialog.Provider>
   );

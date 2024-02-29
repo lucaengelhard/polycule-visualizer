@@ -17,7 +17,8 @@ export default function ColorInput({
     <input
       type="color"
       className={
-        "aspect-square h-10 w-10 rounded-lg border-none " + additionalClasses
+        "pointer-events-auto aspect-square h-10 w-10 rounded-lg border-none " +
+        additionalClasses
       }
       onChange={onChange}
       onInput={onInput}

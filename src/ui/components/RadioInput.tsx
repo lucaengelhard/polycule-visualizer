@@ -44,7 +44,7 @@ export default function RadioInput<Deletable extends boolean>({
   return (
     <div>
       <div
-        className="no-scrollbar mb-3 rounded-lg shadow-xl"
+        className="no-scrollbar pointer-events-auto mb-3 rounded-lg shadow-xl"
         style={{ maxHeight: maxHeight, overflow: "auto" }}
       >
         {Object.values(items.items).map((value, index) => (

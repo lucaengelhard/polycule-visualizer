@@ -13,6 +13,7 @@ import * as Types from "../types";
 import { remove, update } from "../db";
 import ClassLink from "../classes/link";
 import { Button, RadioInput, WindowTitle } from "./components";
+import useConfirm from "./components/ConfirmDialog";
 
 export default function LinkInfo() {
   const { editState, setEditState } = useContext(EditContext);
@@ -110,8 +111,16 @@ export default function LinkInfo() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [DBState]);
 
-  function deleteLink() {
-    if (link !== undefined) {
+  const confirm = useConfirm();
+
+  async function deleteLink() {
+    const choice = await confirm({
+      title: `Delete Relationship`,
+      description: `Are you sure you want to delete the Relationship between ${link?.source.name} and ${link?.target.name}?`,
+      confirmBtnLabel: "Yes",
+    });
+
+    if (choice && link !== undefined) {
       remove(link, true);
       setEditState({ ...editState, link: undefined });
     }
