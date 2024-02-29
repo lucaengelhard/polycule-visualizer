@@ -179,14 +179,20 @@ function SearchField({
   }
 
   function textBlur() {
-    if (textRef.current && suggestions[0].name !== undefined) {
-      if (textRef.current.value.length === 0) {
-        setSuggestions([]);
-        return;
-      }
-      if (textRef.current.value === suggestions[0].name) {
-        setResult(suggestions[0]);
-        setSuggestions([]);
+    if (suggestions[0] !== undefined) {
+      if (textRef.current && suggestions[0].name !== undefined) {
+        if (textRef.current.value.length === 0) {
+          setSuggestions([]);
+          return;
+        }
+        if (
+          textRef.current.value.toLowerCase() ===
+          suggestions[0].name.toLowerCase()
+        ) {
+          textRef.current.value = suggestions[0].name;
+          setResult(suggestions[0]);
+          setSuggestions([]);
+        }
       }
     }
   }
