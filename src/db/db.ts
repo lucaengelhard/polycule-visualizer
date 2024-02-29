@@ -153,12 +153,14 @@ export function remove<T extends Types.DBType>(payload: T, render?: boolean) {
   if (typeCheckNode(payload)) {
     delete db.nodes[payload.id];
 
-    for (const key in db.links) {
-      if (Object.prototype.hasOwnProperty.call(db.links, key)) {
-        const link = db.links[key];
+    if (Array.from(payload.links).length > 0) {
+      for (const key in db.links) {
+        if (Object.prototype.hasOwnProperty.call(db.links, key)) {
+          const link = db.links[key];
 
-        if (link.source.id === payload.id || link.target.id === payload.id) {
-          remove(db.links[key], false);
+          if (link.source.id === payload.id || link.target.id === payload.id) {
+            remove(db.links[key], false);
+          }
         }
       }
     }
@@ -187,6 +189,39 @@ export function remove<T extends Types.DBType>(payload: T, render?: boolean) {
   }
 
   if (typeCheckLinkType(payload)) {
+    delete db.linkTypes[payload.id];
+
+    for (const key in db.links) {
+      if (Object.prototype.hasOwnProperty.call(db.links, key)) {
+        const link = db.links[key];
+
+        if (
+          link.type.id === payload.id &&
+          Object.keys(db.linkTypes).length > 0
+        ) {
+          db.links[key].type =
+            db.linkTypes[
+              typeof Object.keys(db.linkTypes)[0] === "string"
+                ? parseInt(Object.keys(db.linkTypes)[0])
+                : typeof Object.keys(db.linkTypes)[0] === "number"
+                  ? (Object.keys(db.linkTypes)[0] as unknown as number)
+                  : 0
+            ];
+        } else if (link.type.id === payload.id) {
+          const fallbackType: Types.LinkType = {
+            name: "Relationship Type",
+            color: "#ffffff",
+            id: 0,
+          };
+
+          db.linkTypes = { [fallbackType.id]: fallbackType };
+          db.links[key].type = fallbackType;
+
+          console.log(db.linkTypes);
+        }
+      }
+    }
+
     if (render === true || render === undefined) {
       document.dispatchEvent(LinkTypeUpdate);
     }

@@ -27,9 +27,8 @@ export default function App() {
     node?: keyof Types.NodeList;
     link?: keyof Types.LinkList;
   }>({
-    //TODO: return to undefined after tests
-    node: 0,
-    link: 0,
+    node: undefined,
+    link: undefined,
   });
 
   useEffect(() => {
@@ -86,10 +85,19 @@ export function LinkTypeUpdate(
     }
   }
 
-  setDBState({
-    ...DBState,
-    linkTypes: { ...DBState.linkTypes, ...changeLinkTypes },
-  });
+  if (
+    Object.keys(DBState.linkTypes).length <= Object.keys(db.linkTypes).length
+  ) {
+    setDBState({
+      ...DBState,
+      linkTypes: { ...DBState.linkTypes, ...changeLinkTypes },
+    });
+  } else {
+    setDBState({
+      ...DBState,
+      linkTypes: db.linkTypes,
+    });
+  }
 }
 
 function LinkUpdate(
@@ -152,8 +160,15 @@ function NodeUpdate(
     }
   }
 
-  setDBState({
-    ...DBState,
-    nodes: { ...DBState.nodes, ...changeNodes },
-  });
+  if (Object.keys(DBState.nodes).length <= Object.keys(db.nodes).length) {
+    setDBState({
+      ...DBState,
+      nodes: { ...DBState.nodes, ...changeNodes },
+    });
+  } else {
+    setDBState({
+      ...DBState,
+      nodes: db.nodes,
+    });
+  }
 }

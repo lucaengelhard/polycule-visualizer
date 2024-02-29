@@ -143,19 +143,9 @@ export function RadioInput({
   extendable?: boolean;
   visibleElements?: number;
 }) {
-  const [itemsArray, setItemsArray] = useState<Types.RadioItem[]>();
   const [maxHeight, setMaxHeight] = useState<string | undefined>(undefined);
 
   const itemRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const newArray = [];
-    for (const item in items.items) {
-      newArray.push(items.items[item]);
-    }
-
-    setItemsArray(newArray);
-  }, [items]);
 
   function onClick(index: number) {
     if (items.selected?.id === index) {
@@ -179,10 +169,10 @@ export function RadioInput({
         className="no-scrollbar mb-3 rounded-lg shadow-xl"
         style={{ maxHeight: maxHeight, overflow: "auto" }}
       >
-        {itemsArray?.map((_item, index) => (
+        {Object.values(items.items).map((value, index) => (
           <RadioInputItem
             key={index}
-            index={index}
+            index={value.id}
             items={items}
             setItems={setItems}
             onClick={onClick}
@@ -237,12 +227,9 @@ function RadioInputItem({
     const newItem = item;
     newItem.name = event.target.value;
 
-    const newItems = { ...items.items };
-    newItems[index] = newItem;
-
     setItems({
       ...items,
-      items: newItems,
+      items: { ...items.items, [index]: newItem },
     });
   }
 
@@ -250,42 +237,47 @@ function RadioInputItem({
     const newItem = item;
     newItem.color = event.target.value;
 
-    const newItems = { ...items.items };
-    newItems[index] = newItem;
-
     setItems({
       ...items,
-      items: newItems,
+      items: { ...items.items, [index]: newItem },
     });
   }
 
   return (
-    <div
-      style={divStyle}
-      className="mt-1 flex items-center justify-between gap-3 rounded-lg p-1 pl-3 shadow-lg"
-    >
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => {
-            onClick(item.id);
-          }}
+    <>
+      {" "}
+      {item !== undefined && (
+        <div
+          style={divStyle}
+          className="mt-1 flex items-center justify-between gap-3 rounded-lg p-1 pl-3 shadow-lg"
         >
-          {item.id === items.selected?.id ? <CheckCircle /> : <Circle />}
-        </button>
-        <TextInput
-          ref={textRef}
-          defaultValue={item.name}
-          onBlur={(e) => setName(e)}
-        />
-      </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                onClick(item.id);
+              }}
+            >
+              {item.id === items.selected?.id ? <CheckCircle /> : <Circle />}
+            </button>
+            <TextInput
+              ref={textRef}
+              defaultValue={item.name}
+              onBlur={(e) => setName(e)}
+            />
+          </div>
 
-      {color && (
-        <div className="flex items-center gap-1 p-1">
-          {" "}
-          <ColorInput value={item.color} onChange={(e) => setColor(e)} />{" "}
+          {color && (
+            <div className="flex items-center gap-1 p-1">
+              {" "}
+              <ColorInput
+                value={item.color}
+                onInput={(e) => setColor(e)}
+              />{" "}
+            </div>
+          )}
         </div>
       )}
-    </div>
+    </>
   );
 }
 
