@@ -4,12 +4,13 @@ import {
   CornerDownLeft,
   CornerUpLeft,
   Link,
+  Trash2,
   UserRound,
   XCircle,
 } from "lucide-react";
 import { Button, RadioInput, WindowTitle } from "./Components";
 import * as Types from "../types/types";
-import { update } from "../db/db";
+import { remove, update } from "../db/db";
 import ClassLink from "../classes/link";
 
 export default function LinkInfo() {
@@ -98,6 +99,13 @@ export default function LinkInfo() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [linkTypes.items]);
 
+  function deleteLink() {
+    if (link !== undefined) {
+      remove(link, true);
+      setEditState({ ...editState, link: undefined });
+    }
+  }
+
   return (
     <>
       {link !== undefined && (
@@ -134,14 +142,17 @@ export default function LinkInfo() {
             visibleElements={5}
           />
 
-          <Button
-            label="Close"
-            icon={<XCircle />}
-            type="deny"
-            onClick={() => {
-              setEditState({ ...editState, link: undefined });
-            }}
-          />
+          <div className="flex justify-between">
+            <Button
+              label="Close"
+              icon={<XCircle />}
+              type="deny"
+              onClick={() => {
+                setEditState({ ...editState, link: undefined });
+              }}
+            />
+            <Button type="deny" icon={<Trash2 />} onClick={deleteLink} />
+          </div>
         </div>
       )}
     </>

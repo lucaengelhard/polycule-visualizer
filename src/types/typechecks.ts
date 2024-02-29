@@ -35,15 +35,6 @@ export function typeCheckLink(input: unknown): input is Link {
     (input as Link).distance === undefined ||
     (input as Link).id === undefined
   ) {
-    console.log(
-      input,
-      (input as Link).source,
-      (input as Link).target,
-      (input as Link).type,
-      (input as Link).distance,
-      (input as Link).id,
-    );
-
     return false;
   }
 

@@ -62,3 +62,5 @@ export type LinkList = {
 export type LinkTypeList = {
   [key: number]: LinkType;
 };
+
+export type DBType = Node | ClassLink | LinkType;

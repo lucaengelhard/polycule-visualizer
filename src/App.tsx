@@ -28,7 +28,7 @@ export default function App() {
     link?: keyof Types.LinkList;
   }>({
     //TODO: return to undefined after tests
-    node: undefined,
+    node: 0,
     link: 0,
   });
 

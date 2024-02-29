@@ -148,3 +148,47 @@ export function set(input: unknown, render?: boolean) {
     throw new Error("Parsing Error");
   }
 }
+
+export function remove<T extends Types.DBType>(payload: T, render?: boolean) {
+  if (typeCheckNode(payload)) {
+    delete db.nodes[payload.id];
+
+    for (const key in db.links) {
+      if (Object.prototype.hasOwnProperty.call(db.links, key)) {
+        const link = db.links[key];
+
+        if (link.source.id === payload.id || link.target.id === payload.id) {
+          remove(db.links[key], false);
+        }
+      }
+    }
+
+    if (render === true || render === undefined) {
+      document.dispatchEvent(NodeUpDate);
+    }
+  }
+
+  if (typeCheckLink(payload)) {
+    delete db.links[payload.id];
+
+    for (const key in db.nodes) {
+      if (Object.prototype.hasOwnProperty.call(db.nodes, key)) {
+        const node = db.nodes[key];
+
+        if (node.links.has(payload.id)) {
+          node.links.delete(payload.id);
+        }
+      }
+    }
+
+    if (render === true || render === undefined) {
+      document.dispatchEvent(LinkUpdate);
+    }
+  }
+
+  if (typeCheckLinkType(payload)) {
+    if (render === true || render === undefined) {
+      document.dispatchEvent(LinkTypeUpdate);
+    }
+  }
+}

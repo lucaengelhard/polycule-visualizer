@@ -3,8 +3,8 @@ import * as Types from "../types/types";
 import { useContext, useEffect, useRef, useState } from "react";
 import { DBContext, EditContext } from "../App";
 import { hexToRGBA } from "../utils/helpers";
-import { Pencil, UserRound, XCircle } from "lucide-react";
-import { update } from "../db/db";
+import { Pencil, Trash2, UserRound, XCircle } from "lucide-react";
+import { remove, update } from "../db/db";
 
 export default function NodeInfo() {
   const { editState, setEditState } = useContext(EditContext);
@@ -44,6 +44,18 @@ export default function NodeInfo() {
     }
   }
 
+  function deleteNode() {
+    if (editState.link !== undefined && node.links !== undefined) {
+      if (Array.isArray(node.links) && node.links.includes(editState.link)) {
+        setEditState({ node: undefined, link: undefined });
+      } else if (node.links.has(editState.link)) {
+        setEditState({ node: undefined, link: undefined });
+      }
+    }
+
+    remove(node, true);
+  }
+
   return (
     <>
       {node !== undefined && (
@@ -63,14 +75,17 @@ export default function NodeInfo() {
               ))}
             </div>
           )}
-          <Button
-            label="Close"
-            icon={<XCircle />}
-            type="deny"
-            onClick={() => {
-              setEditState({ ...editState, node: undefined });
-            }}
-          />
+          <div className="flex justify-between">
+            <Button
+              label="Close"
+              icon={<XCircle />}
+              type="deny"
+              onClick={() => {
+                setEditState({ ...editState, node: undefined });
+              }}
+            />
+            <Button type="deny" icon={<Trash2 />} onClick={deleteNode} />
+          </div>
         </div>
       )}
     </>
