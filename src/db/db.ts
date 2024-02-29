@@ -1,3 +1,4 @@
+import ClassLink from "../classes/link";
 import {
   checkGraphDataType,
   typeCheckNode,
@@ -28,6 +29,39 @@ export function update(
   switch (type) {
     case "nodes": {
       if (!typeCheckNode(payload)) throw new Error("Node Parsing Error");
+
+      console.log(payload);
+
+      if (action === "change") {
+        Array.from(payload.links).forEach((id) => {
+          if (
+            db.links[id] !== undefined &&
+            db.nodes[payload.id] !== undefined &&
+            (payload.name !== db.nodes[payload.id].name ||
+              payload.location.name !== db.nodes[payload.id].location.name)
+          ) {
+            let newSource: Types.Node = db.links[id].source;
+            let newTarget: Types.Node = db.links[id].target;
+            if (db.links[id].source.id === payload.id) {
+              newSource = payload;
+            } else {
+              newSource = db.links[id].source;
+            }
+
+            if (db.links[id].target.id === payload.id) {
+              newTarget = payload;
+            } else {
+              newTarget = db.links[id].target;
+            }
+
+            db.links[id] = new ClassLink(
+              { partner1: newSource, partner2: newTarget },
+              db.links[id].type,
+            );
+          }
+        });
+      }
+
       break;
     }
     case "links": {

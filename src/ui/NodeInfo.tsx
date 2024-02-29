@@ -5,6 +5,7 @@ import { DBContext, EditContext } from "../App";
 import { hexToRGBA } from "../utils/helpers";
 import { Pencil, Trash2, UserRound, XCircle } from "lucide-react";
 import { remove, update } from "../db/db";
+import { geoCode } from "../utils/geocode";
 
 export default function NodeInfo() {
   const { editState, setEditState } = useContext(EditContext);
@@ -44,6 +45,29 @@ export default function NodeInfo() {
     }
   }
 
+  async function updateLocation(event: React.ChangeEvent<HTMLInputElement>) {
+    if (editState.node !== undefined) {
+      if (event.target.value.length === 0)
+        throw new Error("String of length 0 not allowed");
+
+      const newLocation = await geoCode(event.target.value);
+      update(
+        "nodes",
+        {
+          name: node.name,
+          location: {
+            name: event.target.value,
+            lat: newLocation.lat,
+            lon: newLocation.lon,
+          },
+          id: node.id,
+          links: new Set(node.links),
+        },
+        "change",
+      );
+    }
+  }
+
   function deleteNode() {
     if (editState.link !== undefined && node.links !== undefined) {
       if (Array.isArray(node.links) && node.links.includes(editState.link)) {
@@ -66,7 +90,11 @@ export default function NodeInfo() {
             onBlur={updateName}
             defaultValue={node.name}
           />
-          <TextInput ref={placeRef} defaultValue={node.location.name} />
+          <TextInput
+            ref={placeRef}
+            onBlur={updateLocation}
+            defaultValue={node.location.name}
+          />
           {Array.from(node.links).length > 0 && <div>Relationships:</div>}
           {editState.node !== undefined && (
             <div>

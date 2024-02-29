@@ -140,6 +140,7 @@ export default function LinkInfo() {
             extendable={true}
             color={true}
             visibleElements={5}
+            deletable={false}
           />
 
           <div className="flex justify-between">
