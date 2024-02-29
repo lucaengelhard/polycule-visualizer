@@ -1,4 +1,4 @@
-import { CheckCircle, Circle, PlusCircle } from "lucide-react";
+import { CheckCircle, Circle, Link2, PlusCircle, Trash2 } from "lucide-react";
 import * as Types from "../types/types";
 import { ReactNode, forwardRef, useEffect, useRef, useState } from "react";
 import { getNewIndex, hexToRGBA, rgbaStringToHex } from "../utils/helpers";
@@ -130,18 +130,22 @@ export function ColorInput({
   );
 }
 
-export function RadioInput({
+export function RadioInput<Deletable extends boolean>({
   items,
   setItems,
   color,
   extendable,
   visibleElements,
+  deletable,
+  deleteID,
 }: {
   items: Types.RadioItems;
   setItems: React.Dispatch<React.SetStateAction<Types.RadioItems>>;
   color?: boolean;
   extendable?: boolean;
   visibleElements?: number;
+  deletable: Deletable;
+  deleteID?: Deletable extends true ? (id: number) => void : undefined;
 }) {
   const [maxHeight, setMaxHeight] = useState<string | undefined>(undefined);
 
@@ -177,6 +181,8 @@ export function RadioInput({
             setItems={setItems}
             onClick={onClick}
             color={color}
+            deletable={deletable}
+            deleteID={deleteID}
           />
         ))}
       </div>
@@ -186,24 +192,29 @@ export function RadioInput({
           items={items}
           setItems={setItems}
           color={color}
+          deletable={deletable}
         />
       )}
     </div>
   );
 }
 
-function RadioInputItem({
+function RadioInputItem<Deletable extends boolean>({
   index,
   items,
   setItems,
   onClick,
   color,
+  deletable,
+  deleteID,
 }: {
   index: number;
   items: Types.RadioItems;
   setItems: React.Dispatch<React.SetStateAction<Types.RadioItems>>;
   onClick: (index: number) => void;
   color?: boolean;
+  deletable?: Deletable;
+  deleteID?: Deletable extends true ? (id: number) => void : undefined;
 }) {
   const [item, setItem] = useState(items.items[index]);
 
@@ -266,15 +277,20 @@ function RadioInputItem({
             />
           </div>
 
-          {color && (
-            <div className="flex items-center gap-1 p-1">
-              {" "}
-              <ColorInput
-                value={item.color}
-                onInput={(e) => setColor(e)}
-              />{" "}
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {color && (
+              <div className="flex items-center gap-1 p-1">
+                {" "}
+                <ColorInput
+                  value={item.color}
+                  onInput={(e) => setColor(e)}
+                />{" "}
+              </div>
+            )}
+            {deletable && deleteID && (
+              <Button icon={<Trash2 />} onClick={() => deleteID(item.id)} />
+            )}
+          </div>
         </div>
       )}
     </>
@@ -286,10 +302,12 @@ const AddRadioItem = forwardRef(function AddRadioItem(
     items,
     setItems,
     color,
+    deletable,
   }: {
     items: Types.RadioItems;
     setItems: React.Dispatch<React.SetStateAction<Types.RadioItems>>;
     color?: boolean;
+    deletable?: boolean;
   },
   ref?: React.ForwardedRef<HTMLDivElement>,
 ) {
@@ -325,27 +343,34 @@ const AddRadioItem = forwardRef(function AddRadioItem(
       style={divStyle}
     >
       <div className="flex items-center gap-2">
-        <button onClick={onClick}>
-          <PlusCircle />
-        </button>
+        {deletable !== true ? (
+          <button onClick={onClick}>
+            <PlusCircle />
+          </button>
+        ) : (
+          <Link2 />
+        )}
+
         <TextInput
           ref={textInputRef}
           onBlur={(e) => setName(e.target.value)}
           placeholder="Add relationship type"
         />
       </div>
-
-      {color && (
-        <div className="flex items-center gap-1 p-1">
-          {" "}
-          <ColorInput
-            defaultValue={divColor}
-            onChange={(e) =>
-              setDivColor(hexToRGBA(e.target.value, 0.5) ?? "#ffffff")
-            }
-          />{" "}
-        </div>
-      )}
+      <div className="flex items-center gap-2">
+        {color && (
+          <div className="flex items-center gap-1 p-1">
+            {" "}
+            <ColorInput
+              defaultValue={divColor}
+              onChange={(e) =>
+                setDivColor(hexToRGBA(e.target.value, 0.5) ?? "#ffffff")
+              }
+            />{" "}
+          </div>
+        )}
+        {deletable && <Button icon={<PlusCircle />} onClick={onClick} />}
+      </div>
     </div>
   );
 });

@@ -4,7 +4,7 @@ import { Button, RadioInput, TextInput, WindowTitle } from "./Components";
 import { Link, XCircle } from "lucide-react";
 import * as Types from "../types/types";
 
-import { update } from "../db/db";
+import { remove, update } from "../db/db";
 import ClassLink from "../classes/link";
 
 export default function AddRelationship() {
@@ -101,6 +101,10 @@ export default function AddRelationship() {
     update("links", rel, "add");
   }
 
+  function deleteLinkType(id: number) {
+    remove(DBState.linkTypes[id], true);
+  }
+
   return (
     <div>
       {!open && (
@@ -125,6 +129,8 @@ export default function AddRelationship() {
             extendable={true}
             color={true}
             visibleElements={5}
+            deletable={true}
+            deleteID={deleteLinkType}
           />
           <Button
             label="Add Relationship"
