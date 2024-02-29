@@ -7,12 +7,15 @@ import { remove, update } from "../db";
 import { geoCode } from "../utils/geocode";
 import { Button, TextInput, WindowTitle } from "./components";
 
+import useConfirm from "./components/ConfirmDialog";
+
 export default function NodeInfo() {
   const { editState, setEditState } = useContext(EditContext);
   const { DBState } = useContext(DBContext);
   const [node, setNode] = useState(DBState.nodes[editState.node ?? -1]);
   const nameRef = useRef<HTMLInputElement>(null);
   const placeRef = useRef<HTMLInputElement>(null);
+  const confirm = useConfirm();
 
   useEffect(() => {
     setNode(DBState.nodes[editState.node ?? -1]);
@@ -68,16 +71,24 @@ export default function NodeInfo() {
     }
   }
 
-  function deleteNode() {
-    if (editState.link !== undefined && node.links !== undefined) {
-      if (Array.isArray(node.links) && node.links.includes(editState.link)) {
-        setEditState({ node: undefined, link: undefined });
-      } else if (node.links.has(editState.link)) {
-        setEditState({ node: undefined, link: undefined });
-      }
-    }
+  async function deleteNode() {
+    const choice = await confirm({
+      title: `Delete ${node.name}`,
+      description: `Are you sure you want to delete ${node.name}`,
+      confirmBtnLabel: "Yes",
+    });
 
-    remove(node, true);
+    if (choice) {
+      if (editState.link !== undefined && node.links !== undefined) {
+        if (Array.isArray(node.links) && node.links.includes(editState.link)) {
+          setEditState({ node: undefined, link: undefined });
+        } else if (node.links.has(editState.link)) {
+          setEditState({ node: undefined, link: undefined });
+        }
+      }
+
+      remove(node, true);
+    }
   }
 
   return (

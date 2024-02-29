@@ -2,6 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import UI from "./ui";
 import * as Types from "./types";
 import { db } from "./db";
+import { ConfirmDialogProvider } from "./ui/components/ConfirmDialog";
 
 export const DBContext = createContext<{
   DBState: Types.DBData;
@@ -54,7 +55,9 @@ export default function App() {
   return (
     <EditContext.Provider value={{ editState, setEditState }}>
       <DBContext.Provider value={{ DBState, setDBState }}>
-        <UI />
+        <ConfirmDialogProvider>
+          <UI />
+        </ConfirmDialogProvider>
       </DBContext.Provider>
     </EditContext.Provider>
   );
