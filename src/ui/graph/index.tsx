@@ -1,8 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { DBContext, EditContext } from "../../App";
 import * as Types from "../../types";
 import { distanceScale } from "../../utils/helpers";
 import { ForceGraph2D } from "react-force-graph";
+
 import Link from "../../classes/link";
 
 type GraphNode = Omit<Types.Node, "id"> & {
@@ -14,23 +15,34 @@ type GraphLink = Omit<Omit<Link, "source">, "target"> & {
   target: string;
 };
 
+type GraphData = {
+  nodes: GraphNode[];
+  links: GraphLink[];
+};
+
 export default function Graph() {
   const { DBState } = useContext(DBContext);
   const { setEditState } = useContext(EditContext);
+  const graphRef = useRef();
 
-  const [graphData, setGraphData] = useState<{
-    nodes: GraphNode[];
-    links: GraphLink[];
-  }>();
+  const [graphData, setGraphData] = useState<GraphData>();
 
   useEffect(() => {
-    const nodes = Object.values(DBState.nodes).map((node) => {
+    const d3ForceLink = graphRef.current.d3Force("link");
+
+    if (d3ForceLink) {
+      d3ForceLink.distance((link) => distanceScale(link.distance));
+    }
+  }, []);
+
+  useEffect(() => {
+    const nodes: GraphNode[] = Object.values(DBState.nodes).map((node) => {
       return {
         ...node,
         id: node.id.toString(),
       };
     });
-    const links = Object.values(DBState.links).map((link) => {
+    const links: GraphLink[] = Object.values(DBState.links).map((link) => {
       return {
         ...link,
         source: link.source.id.toString(),
@@ -42,15 +54,18 @@ export default function Graph() {
 
   return (
     <ForceGraph2D
+      ref={graphRef}
       graphData={graphData}
+      nodeRelSize={10}
       nodeColor={() => "#000000"}
-      nodeLabel={(node) => node.name}
       onNodeClick={(node) =>
         setEditState({ node: parseInt(node.id), link: undefined })
       }
       linkColor={(link) => link.type.color}
       linkWidth={3}
       onLinkClick={(link) => setEditState({ node: undefined, link: link.id })}
+      cooldownTicks={100}
+      onEngineStop={() => graphRef.current.zoomToFit(400, 100)}
     />
   );
 }

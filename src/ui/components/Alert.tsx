@@ -19,7 +19,7 @@ export default function Alert({
   return (
     <>
       {isOpen && (
-        <div className="pointer-events-auto fixed inset-0 bg-black bg-opacity-60">
+        <div className="pointer-events-auto fixed inset-0 z-20 bg-black bg-opacity-60">
           <div className="absolute left-1/2 top-1/2 z-10 h-min w-min -translate-x-1/2 -translate-y-1/2 rounded-lg  bg-red-500 p-3 shadow-xl">
             <div className="flex gap-3 whitespace-nowrap font-bold text-white">
               <AlertOctagon />
