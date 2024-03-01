@@ -2,8 +2,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { DBContext, EditContext } from "../../App";
 import * as Types from "../../types";
 import { distanceScale } from "../../utils/helpers";
-import { ForceGraph2D } from "react-force-graph";
-
+import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
 import Link from "../../classes/link";
 
 type GraphNode = Omit<Types.Node, "id"> & {
@@ -23,16 +22,17 @@ type GraphData = {
 export default function Graph() {
   const { DBState } = useContext(DBContext);
   const { setEditState } = useContext(EditContext);
-  const graphRef = useRef();
+  const graphRef = useRef<ForceGraphMethods<GraphNode, GraphLink>>();
 
   const [graphData, setGraphData] = useState<GraphData>();
 
   useEffect(() => {
-    const d3ForceLink = graphRef.current.d3Force("link");
+    if (graphRef.current === undefined) return;
+    const graphMethods = graphRef.current;
+    const d3ForceLink = graphMethods.d3Force("link");
 
-    if (d3ForceLink) {
-      d3ForceLink.distance((link) => distanceScale(link.distance));
-    }
+    if (d3ForceLink === undefined) return;
+    d3ForceLink.distance((link: GraphLink) => distanceScale(link.distance));
   }, []);
 
   useEffect(() => {
@@ -61,11 +61,16 @@ export default function Graph() {
       onNodeClick={(node) =>
         setEditState({ node: parseInt(node.id), link: undefined })
       }
+      nodeCanvasObjectMode={() => "after"}
+      nodeCanvasObject={(node, ctx, globalScale) => {}}
       linkColor={(link) => link.type.color}
       linkWidth={3}
       onLinkClick={(link) => setEditState({ node: undefined, link: link.id })}
       cooldownTicks={100}
-      onEngineStop={() => graphRef.current.zoomToFit(400, 100)}
+      onEngineStop={() => {
+        if (graphRef.current === undefined) return;
+        return graphRef.current.zoomToFit(400, 100);
+      }}
     />
   );
 }
