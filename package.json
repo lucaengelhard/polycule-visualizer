@@ -14,7 +14,6 @@
     "lucide-react": "^0.338.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-force-graph": "^1.44.3",
     "react-force-graph-2d": "^1.25.4"
   },
   "devDependencies": {
