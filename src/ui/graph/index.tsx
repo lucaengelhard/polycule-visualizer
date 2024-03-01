@@ -1,123 +1,156 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { DBContext, EditContext } from "../../App";
 import * as Types from "../../types";
-import { distanceScale } from "../../utils/helpers";
+import { convertObjectToNumberArray, distanceScale } from "../../utils/helpers";
 import Link from "../../classes/link";
 import * as d3 from "d3";
 
 export default function Graph() {
   const { DBState } = useContext(DBContext);
-  const [graph, setGraph] = useState(DBState);
-
   const { setEditState } = useContext(EditContext);
+  const [graph, setGraph] = useState<Types.GraphData | undefined>(undefined);
 
   const canvasRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
-    setGraph(DBState);
+    reloadGraph();
   }, [setGraph, DBState]);
 
   useEffect(() => {
+    console.log(graph);
+
+    if (graph === undefined) return;
+
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    if (!width || !height) return;
+    const svg = d3.select(canvasRef.current);
 
-    const canvas = d3.select(canvasRef.current);
+    svg.selectAll("g").remove();
 
-    if (canvas === null || canvas === undefined) return;
+    const simulation = d3
+      .forceSimulation(graph.nodes)
+      .force("charge", d3.forceManyBody().strength(-3000))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force(
+        "link",
+        d3
+          .forceLink(graph.links)
+          .id((node: unknown) => (node as Types.Node).id)
+          .distance((link) => distanceScale(link.distance)),
+      )
+      .force("x", d3.forceX())
+      .force("y", d3.forceY())
+      .force(
+        "radial",
+        d3.forceRadial(Math.min(width, height) - 500, width / 2, height / 2),
+      );
 
-    const nodes = Object.values(graph.nodes).map((node) => node);
-    const links = Object.values(graph.links).map((link) => link);
-    //TODO: const noLinkLinks -> for linkforce of nodes that don't have link
-    const simulation = createSimulation(nodes, width, height, links);
+    const link = svg
+      .append("g")
+      .selectAll("line")
+      .data(graph.links)
+      .enter()
+      .append("line")
+      .attr("stroke", (link) => link.type.color)
+      .attr("stroke-width", "3")
+      .attr("fill", "none");
 
-    function createSimulation(
-      nodes: Types.Node[],
-      width: number,
-      height: number,
-      links: Link[],
-    ) {
-      return d3
-        .forceSimulation(nodes)
-        .force("charge", d3.forceManyBody().strength(-3000))
-        .force("center", d3.forceCenter(width / 2, height / 2))
-        .force(
-          "link",
-          d3
-            .forceLink(links)
-            .id((node: unknown) => (node as Types.Node).id)
-            .distance((link) => distanceScale(link.distance)),
-        )
-        .force("x", d3.forceX())
-        .force("y", d3.forceY())
-        .force(
-          "radial",
-          d3.forceRadial(Math.min(width, height) - 500, width / 2, height / 2),
-        )
-        .on("tick", onSimulationTick);
+    const node = svg
+      .append("g")
+      .selectAll("circle")
+      .data(graph.nodes)
+      .enter()
+      .append("circle")
+      .attr("class", "node pointer-events-auto cursor-pointer")
+      .attr("r", 8)
+      .call(
+        d3
+          .drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .on("end", dragended) as any,
+        undefined,
+      )
+      .on("click", (_e, node) => {
+        setEditState({ node: node.id, link: undefined });
+      });
+
+    const label = svg
+      .append("g")
+      .selectAll("text")
+      .data(graph.nodes)
+      .enter()
+      .append("text")
+      .attr("class", "pointer-events-none")
+      .attr("text-anchor", "middle")
+      .attr("font-size", 20)
+      .text((node) => node.name)
+      .attr("dx", 21)
+      .attr("dy", -12);
+
+    simulation.on("tick", ticked);
+
+    function ticked() {
+      node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+      label.attr("x", (d) => d.x).attr("y", (d) => d.y);
+
+      if (graph === undefined) return;
+      link
+        .attr("x1", (d) => graph.nodes[d.source.id].x ?? 0)
+        .attr("y1", (d) => graph.nodes[d.source.id].y ?? 0)
+        .attr("x2", (d) => graph.nodes[d.target.id].x ?? 0)
+        .attr("y2", (d) => graph.nodes[d.target.id].y ?? 0);
     }
 
-    function onSimulationTick() {
-      canvas
-        .selectAll(".link")
-        .data(links)
-        .join("line")
-        .attr("class", "link")
-        .attr("stroke", (link) => link.type.color)
-        .attr("stroke-width", "3")
-        .attr("fill", "none")
-        .attr("x1", (link) => (link.source.x ? link.source.x : 0))
-        .attr("y1", (link) => (link.source.y ? link.source.y : 0))
-        .attr("x2", (link) => (link.target.x ? link.target.x : 0))
-        .attr("y2", (link) => (link.target.y ? link.target.y : 0));
-
-      canvas
-        .selectAll(".node")
-        .data(nodes)
-        .join("circle")
-        .attr("class", "node pointer-events-auto cursor-pointer")
-        .attr("r", 8)
-        .attr("cx", (node) => (node.x ? node.x : 0))
-        .attr("cy", (node) => (node.y ? node.y : 0))
-        .on("click", (_e, d) => {
-          setEditState({ link: undefined, node: d.id });
-        })
-        .call(
-          d3
-            .drag()
-            .on("start", (event: any, d: Types.Node) => {
-              if (!event.active) simulation.alphaTarget(0.3).restart();
-              d.fx = d.x;
-              d.fy = d.y;
-            })
-            .on("drag", (event: any, d: Types.Node) => {
-              d.fx = event.x;
-              d.fy = event.y;
-            })
-            .on("end", (event: any, d: Types.Node) => {
-              if (!event.active) simulation.alphaTarget(0);
-              d.fx = null;
-              d.fy = null;
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            }) as any,
-          undefined,
-        );
-
-      canvas
-        .selectAll(".label")
-        .data(nodes)
-        .join("text")
-        .attr("class", "label pointer-events-none")
-        .attr("text-anchor", "middle")
-        .attr("font-size", 20)
-        .text((node) => node.name)
-        .attr("x", (node) => (node.x ? node.x : 0))
-        .attr("y", (node) => (node.y ? node.y : 0))
-        .attr("dx", 21)
-        .attr("dy", -12);
+    function dragstarted(event, d) {
+      if (!event.active) simulation.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
     }
+
+    function dragged(event, d) {
+      d.fx = event.x;
+      d.fy = event.y;
+    }
+
+    function dragended(event, d) {
+      if (!event.active) simulation.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+    }
+
+    // Cleanup function
+    return () => {
+      simulation.on("tick", null); // remove tick event listener
+    };
   }, [graph, setEditState]);
+
+  function reloadGraph() {
+    //TODO: const noLinkLinks -> for linkforce of nodes that don't have link
+    const placeHolderNode: Types.Node = {
+      name: "Node",
+      id: -1,
+      location: { name: "Cala Santany", lat: 39.330987, lon: 3.145875 },
+      links: new Set(),
+    };
+
+    const placeHolderLink: Link = {
+      id: -1,
+      source: placeHolderNode,
+      target: placeHolderNode,
+      type: { name: "placeholder", id: -1, color: "#ffffff" },
+      distance: 0,
+    };
+
+    const nodes = convertObjectToNumberArray(DBState.nodes, placeHolderNode);
+    const links = convertObjectToNumberArray(DBState.links, placeHolderLink);
+    //if (!nodes || !links) return;
+
+    setGraph({ nodes: nodes, links: links });
+  }
+
   return (
     <svg
       ref={canvasRef}

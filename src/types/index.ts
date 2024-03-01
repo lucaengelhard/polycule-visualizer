@@ -76,3 +76,9 @@ export type DBBufferStatus = {
   links: boolean | undefined;
   linkTypes: boolean | undefined;
 };
+
+//Graph Data
+export type GraphData = {
+  nodes: Node[];
+  links: Link[];
+};

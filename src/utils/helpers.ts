@@ -180,3 +180,33 @@ export function bufferTimeCalculator(
 ): boolean {
   return Date.now() - lastDate.getTime() < bufferTime;
 }
+
+type NumberKeyObject<T> = {
+  [key: number]: T; // Replace 'any' with the type of values in your object
+};
+
+export function convertObjectToNumberArray<T>(
+  obj: NumberKeyObject<T>,
+  placeholder: T,
+): T[] {
+  const keys = Object.keys(obj)
+    .map(Number)
+    .sort((a, b) => a - b);
+
+  if (keys.length === 0) return [];
+
+  const resultArray = Array(keys[keys.length - 1] + 1); // Create an array with enough space
+
+  keys.forEach((key) => {
+    resultArray[key] = obj[key];
+  });
+
+  for (let i = 0; i < resultArray.length; i++) {
+    const element = resultArray[i];
+    if (element === undefined) {
+      resultArray[i] = placeholder;
+    }
+  }
+
+  return resultArray;
+}
