@@ -32,6 +32,10 @@ export default function NodeInfo() {
   }, [node]);
 
   function updateName(event: React.ChangeEvent<HTMLInputElement>) {
+    if (event.target.value === node.name) {
+      return;
+    }
+
     if (editState.node !== undefined) {
       if (event.target.value.length === 0)
         throw new Error("String of length 0 not allowed");
@@ -49,6 +53,10 @@ export default function NodeInfo() {
   }
 
   async function updateLocation(event: React.ChangeEvent<HTMLInputElement>) {
+    if (event.target.value === node.location.name) {
+      return;
+    }
+
     if (editState.node !== undefined) {
       if (event.target.value.length === 0)
         throw new Error("String of length 0 not allowed");
