@@ -11,20 +11,25 @@ import Graph from "./graph";
 export default function UI() {
   return (
     <div>
-      <Graph />
-      <div className="flex w-full justify-between gap-3 p-3">
-        <div className="flex gap-3">
-          <AddPerson />
-          <AddRelationship />
-        </div>
-        <div className="flex gap-3">
-          <SaveDB />
-          <ImportDB />
-        </div>
+      <div className="fixed inset-0 z-0">
+        <Graph />
       </div>
-      <div className="flex h-min w-min gap-3 p-3">
-        <NodeInfo />
-        <LinkInfo />
+
+      <div className="pointer-events-none fixed inset-0 z-10">
+        <div className="flex w-full justify-between gap-3 p-3">
+          <div className="flex gap-3">
+            <AddPerson />
+            <AddRelationship />
+          </div>
+          <div className="flex gap-3">
+            <SaveDB />
+            <ImportDB />
+          </div>
+        </div>
+        <div className="flex h-min w-min gap-3 p-3">
+          <NodeInfo />
+          <LinkInfo />
+        </div>
       </div>
     </div>
   );
