@@ -24,8 +24,13 @@ export default function LinkInfo() {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    setLink(DBState.links[editState.link ?? -1] ?? undefined);
-  }, [DBState.links, editState.link]);
+    if (editState.link !== undefined) {
+      setLink(DBState.links[editState.link]);
+      console.log(DBState.links[editState.link]);
+    } else {
+      setLink(undefined);
+    }
+  }, [DBState.links, editState.link, DBState]);
 
   //Update Linktypes
   useEffect(() => {
@@ -76,7 +81,7 @@ export default function LinkInfo() {
 
   //Update DB on internal Link change
   useEffect(() => {
-    if (link !== undefined) {
+    if (link !== undefined && DBState.links[link.id] !== undefined) {
       // Update on type change
       if (link?.type.id !== DBState.links[link.id].type.id) {
         update("links", link, "change", true);
