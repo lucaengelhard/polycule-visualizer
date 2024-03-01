@@ -34,7 +34,7 @@ export default function App() {
 
   useEffect(() => {
     document.addEventListener("dbUpDate", () => {
-      console.log(db);
+      //console.log(db);
       setDBState({ ...db });
     });
 

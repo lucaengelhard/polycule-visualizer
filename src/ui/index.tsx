@@ -12,7 +12,7 @@ export default function UI() {
   return (
     <div>
       <Graph />
-      <div className="pointer-events-none flex w-full justify-between gap-3 p-3">
+      <div className="flex w-full justify-between gap-3 p-3">
         <div className="flex gap-3">
           <AddPerson />
           <AddRelationship />
@@ -22,7 +22,7 @@ export default function UI() {
           <ImportDB />
         </div>
       </div>
-      <div className="pointer-events-none flex h-min w-min gap-3 p-3">
+      <div className="flex h-min w-min gap-3 p-3">
         <NodeInfo />
         <LinkInfo />
       </div>

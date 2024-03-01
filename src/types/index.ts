@@ -64,3 +64,15 @@ export type LinkTypeList = {
 };
 
 export type DBType = Node | Link | LinkType;
+
+export type DBRenderTimes = {
+  nodes: Date | undefined;
+  links: Date | undefined;
+  linkTypes: Date | undefined;
+};
+
+export type DBBufferStatus = {
+  nodes: boolean | undefined;
+  links: boolean | undefined;
+  linkTypes: boolean | undefined;
+};

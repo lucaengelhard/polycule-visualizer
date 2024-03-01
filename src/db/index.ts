@@ -7,7 +7,7 @@ import {
 } from "../types/typechecks";
 
 import * as Types from "../types";
-import { getNewIndex } from "../utils/helpers";
+import { bufferTimeCalculator, getNewIndex } from "../utils/helpers";
 
 export const db: Types.DBData = {
   nodes: {},
@@ -19,6 +19,18 @@ const dbUpDate = new Event("dbUpDate");
 const NodeUpDate = new Event("NodeUpdate");
 const LinkUpdate = new Event("LinkUpdate");
 const LinkTypeUpdate = new Event("LinkTypeUpdate");
+
+const DBRenderTimes: Types.DBRenderTimes = {
+  nodes: undefined,
+  links: undefined,
+  linkTypes: undefined,
+};
+
+const DBBufferStatus: Types.DBBufferStatus = {
+  nodes: undefined,
+  links: undefined,
+  linkTypes: undefined,
+};
 
 export function update(
   type: "nodes" | "links" | "linkTypes",
@@ -120,6 +132,15 @@ export function update(
         update("links", newLink, "change", false);
       });
 
+      if (
+        action === "change" &&
+        db.linkTypes[payload.id] !== undefined &&
+        payload.color === db.linkTypes[payload.id].color &&
+        payload.name === db.linkTypes[payload.id].name
+      ) {
+        render = false;
+      }
+
       break;
     }
     default:
@@ -138,28 +159,50 @@ export function update(
   length = Object.keys(db[type]).length;
 
   if (render === true || render === undefined) {
+    if (
+      DBRenderTimes[type] !== undefined &&
+      bufferTimeCalculator(DBRenderTimes[type] as Date, 10)
+    ) {
+      DBBufferStatus[type] = true;
+      setTimeout(() => {
+        if (DBBufferStatus[type]) {
+          console.log(type);
+          DBBufferStatus[type] = false;
+          document.dispatchEvent(dbUpDate);
+        }
+      }, 3000);
+      return length;
+    }
+
     console.log(
       type,
       db,
       render === true || render === undefined ? "render" : "no render",
     );
-    switch (type) {
-      case "nodes":
-        document.dispatchEvent(NodeUpDate);
-        break;
-      case "links":
-        document.dispatchEvent(LinkUpdate);
-        break;
-      case "linkTypes":
-        document.dispatchEvent(LinkTypeUpdate);
-        break;
-      default:
-        document.dispatchEvent(dbUpDate);
-        break;
-    }
+
+    DBRenderTimes[type] = new Date();
+    DBBufferStatus[type] = false;
+    triggerEvent(type);
   }
 
   return length;
+}
+
+function triggerEvent(type: "nodes" | "links" | "linkTypes") {
+  switch (type) {
+    case "nodes":
+      document.dispatchEvent(NodeUpDate);
+      break;
+    case "links":
+      document.dispatchEvent(LinkUpdate);
+      break;
+    case "linkTypes":
+      document.dispatchEvent(LinkTypeUpdate);
+      break;
+    default:
+      document.dispatchEvent(dbUpDate);
+      break;
+  }
 }
 
 export function set(input: unknown, render?: boolean) {

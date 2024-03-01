@@ -91,9 +91,13 @@ function RadioInputItem<Deletable extends boolean>({
 }) {
   const [item, setItem] = useState(items.items[index]);
 
-  const divStyle = {
-    backgroundColor: hexToRGBA(item.color ?? "#ffffff", 0.5) ?? "#ffffff",
-  };
+  let divStyle = {};
+
+  if (item !== undefined) {
+    divStyle = {
+      backgroundColor: hexToRGBA(item.color ?? "#ffffff", 0.5) ?? "#ffffff",
+    };
+  }
 
   useEffect(() => {
     setItem(items.items[index]);

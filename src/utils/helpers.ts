@@ -112,7 +112,7 @@ export function clamp(num: number, min: number, max: number) {
 export function distanceScale(input: number) {
   const mappedValue = mapRange(input, 0, 500, 0, 1);
 
-  console.log(mappedValue);
+  //console.log(mappedValue);
 
   return 1 / (1 + Math.exp(-(mappedValue - 1) * 5));
 }
@@ -172,4 +172,11 @@ export function transformSetsToArray(input: unknown): unknown {
 
   // Base case: return unchanged for non-object, non-array, non-Set values
   return input;
+}
+
+export function bufferTimeCalculator(
+  lastDate: Date,
+  bufferTime: number,
+): boolean {
+  return Date.now() - lastDate.getTime() < bufferTime;
 }

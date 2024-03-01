@@ -18,101 +18,122 @@ import useConfirm from "./components/ConfirmDialog";
 export default function LinkInfo() {
   const { editState, setEditState } = useContext(EditContext);
   const { DBState } = useContext(DBContext);
+
   const [link, setLink] = useState<ClassLink | undefined>(undefined);
+  const [linkTypes, setLinkTypes] = useState<Types.RadioItems>({ items: {} });
 
-  const [linkTypes, setLinkTypes] = useState<Types.RadioItems>({
-    items: {},
-  });
-  const [prevLinkTypes, setPrevLinkTypes] = useState<Types.RadioItemList>({});
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (
-      editState.link !== undefined &&
-      DBState.links[editState.link] !== undefined
-    ) {
-      setLink(DBState.links[editState.link]);
+    setLink(DBState.links[editState.link ?? -1] ?? undefined);
+  }, [DBState.links, editState.link]);
 
-      const radioItemList: Types.RadioItemList = {};
-
-      for (const key in DBState.linkTypes) {
-        if (Object.prototype.hasOwnProperty.call(DBState.linkTypes, key)) {
-          const linkType = DBState.linkTypes[key];
-
-          const newRadioItem: Types.RadioItem = {
-            id: linkType.id,
-            name: linkType.name,
-            color: linkType.color,
-          };
-
-          radioItemList[linkType.id] = newRadioItem;
-        }
-      }
-
-      setLinkTypes({
-        items: { ...radioItemList },
-        selected: {
-          name: DBState.links[editState.link].type.name,
-          id: DBState.links[editState.link].type.id,
-          color: DBState.links[editState.link].type.color,
-        },
-      });
-    } else {
-      setLink(undefined);
-      setLinkTypes({ items: {}, selected: undefined });
-    }
-  }, [editState.link, DBState.links, DBState.linkTypes]);
-
-  //Update DB on TypeList change
+  //Update Linktypes
   useEffect(() => {
-    const difference = Object.keys(linkTypes.items).filter(
-      (key) => !Object.keys(prevLinkTypes).includes(key),
-    );
+    const radioItemList: Types.RadioItemList = {};
 
-    if (difference.length > 0) {
-      difference.forEach((idString) => {
-        const id = parseInt(idString);
-        const newLinkType: Types.LinkType = {
-          name: linkTypes.items[id].name,
-          color: linkTypes.items[id].color ?? "#ffffff",
-          id: id,
+    for (const key in DBState.linkTypes) {
+      if (Object.prototype.hasOwnProperty.call(DBState.linkTypes, key)) {
+        const linkType = DBState.linkTypes[key];
+
+        const newRadioItem: Types.RadioItem = {
+          id: linkType.id,
+          name: linkType.name,
+          color: linkType.color,
         };
 
-        update("linkTypes", newLinkType, "change", true);
-      });
-    } else {
-      Object.keys(linkTypes.items).forEach((idString) => {
-        const id = parseInt(idString);
+        radioItemList[linkType.id] = newRadioItem;
+      }
+    }
 
-        if (
-          linkTypes.items[id].color !== DBState.linkTypes[id].color ||
-          linkTypes.items[id].name !== DBState.linkTypes[id].name
-        ) {
-          const newLinkType: Types.LinkType = {
-            name: linkTypes.items[id].name,
-            color: linkTypes.items[id].color ?? "#ffffff",
-            id: id,
-          };
+    setLinkTypes({
+      selected: link !== undefined ? link.type : undefined,
+      items: { ...radioItemList },
+    });
+  }, [DBState.linkTypes, link]);
 
-          update("linkTypes", newLinkType, "change", true);
-        }
+  //Update Link on selected Change
+  useEffect(() => {
+    if (
+      linkTypes.selected !== undefined &&
+      (link?.type.id !== linkTypes.selected.id ||
+        link?.type.name !== linkTypes.selected.name) &&
+      link !== undefined
+    ) {
+      setLink({
+        ...link,
+        type: {
+          id: linkTypes.items[linkTypes.selected.id].id,
+          name: linkTypes.items[linkTypes.selected.id].name,
+          color:
+            linkTypes.items[linkTypes.selected.id].color !== undefined
+              ? (linkTypes.items[linkTypes.selected.id].color as string)
+              : "#ffffff",
+        },
       });
     }
-    setPrevLinkTypes(linkTypes.items);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linkTypes.selected]);
+
+  //Update DB on internal Link change
+  useEffect(() => {
+    if (link !== undefined) {
+      // Update on type change
+      if (link?.type.id !== DBState.links[link.id].type.id) {
+        update("links", link, "change", true);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [link]);
+
+  //Update Linktypes when type is added
+  useEffect(() => {
+    if (Object.keys(linkTypes.items).length > 0) {
+      const changed: Types.RadioItem[] = [];
+      const added: Types.RadioItem[] = [];
+      Object.values(linkTypes.items).forEach((item) => {
+        //Check if Item already exists -> If not create it
+        if (DBState.linkTypes[item.id] === undefined) {
+          added.push(item);
+          return;
+        }
+
+        changed.push(item);
+      });
+
+      added.forEach((item, index) =>
+        update("linkTypes", item, "add", index === added.length - 1),
+      );
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [linkTypes.items]);
 
+  //Update Linktype properties on change
   useEffect(() => {
-    if (
-      editState.link !== undefined &&
-      DBState.links[editState.link] !== undefined
-    ) {
-      setLink(DBState.links[editState.link]);
+    for (const key in linkTypes.items) {
+      if (Object.prototype.hasOwnProperty.call(linkTypes.items, key)) {
+        const element = linkTypes.items[key];
+        const index = parseInt(key);
+
+        if (DBState.linkTypes[key] !== undefined) {
+          if (
+            DBState.linkTypes[key].color !== element.color ||
+            DBState.linkTypes[key].name !== element.name
+          ) {
+            const newLinkType: Types.LinkType = {
+              name: linkTypes.items[key].name,
+              color: linkTypes.items[key].color ?? "#ffffff",
+              id: index,
+            };
+
+            update("linkTypes", newLinkType, "change", true);
+          }
+        }
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [DBState]);
+  }, [linkTypes.items]);
 
   const confirm = useConfirm();
-
   async function deleteLink() {
     const choice = await confirm({
       title: `Delete Relationship`,
