@@ -31,7 +31,7 @@ export default function Graph() {
       .forceSimulation(graph.nodes)
       .force(
         "charge",
-        d3.forceManyBody().strength((node) => (node.id !== -1 ? -3000 : 0)),
+        d3.forceManyBody().strength((node) => (node.id !== -1 ? -300 : 0)),
       )
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force(

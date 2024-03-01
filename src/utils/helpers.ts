@@ -1,3 +1,5 @@
+import { db } from "../db";
+
 export function hexToRGBA(hex: string, alpha?: number): string | null {
   if (alpha === undefined) {
     alpha = 1;
@@ -110,11 +112,9 @@ export function clamp(num: number, min: number, max: number) {
 }
 
 export function distanceScale(input: number) {
-  const mappedValue = mapRange(input, 0, 500, 0, 1);
+  const distanceArray = Object.values(db.links).map((link) => link.distance);
 
-  //console.log(mappedValue);
-
-  return 1 / (1 + Math.exp(-(mappedValue - 1) * 5));
+  return mapRange(input, 0, Math.max(...distanceArray), 100, 1000);
 }
 
 function mapRange(
