@@ -1,148 +1,91 @@
-import { PlusCircle, UserRoundPlus } from "lucide-react";
-import { createContext, useContext, useRef, useState } from "react";
-import * as Types from "../types/types";
-import { add, db } from "../db/db";
+import { useContext, useRef, useState } from "react";
+import { DBContext } from "../App";
+
+import { UserRoundPlus, XCircle } from "lucide-react";
 import { geoCode } from "../utils/geocode";
-import { InputOpenContext } from "./UI";
+import { update } from "../db";
+import { getNewIndex } from "../utils/helpers";
+import { Button, TextInput, WindowTitle } from "./components";
 
-const AddPersonContext = createContext<{
-  addPersonState: { name: string; locationString: string };
-  setAddPersonState: React.Dispatch<
-    React.SetStateAction<{ name: string; locationString: string }>
-  >;
-  nameInputField: React.RefObject<HTMLInputElement>;
-  locationInputField: React.RefObject<HTMLInputElement>;
-}>(null);
+export default function AddPerson() {
+  const { DBState } = useContext(DBContext);
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState<string | undefined>(undefined);
+  const [locationstring, setLocationstring] = useState<string | undefined>(
+    undefined,
+  );
 
-export function AddPerson() {
-  const { setAddPersonOpen } = useContext(InputOpenContext);
-  const [addPersonState, setAddPersonState] = useState({
-    name: "",
-    locationString: "",
-  });
+  const nameRef = useRef<HTMLInputElement>(null);
+  const locationRef = useRef<HTMLInputElement>(null);
 
-  const nameInputField = useRef<HTMLInputElement>(null);
-  const locationInputField = useRef<HTMLInputElement>(null);
+  async function submit() {
+    if (locationstring === undefined || locationstring.length === 0)
+      throw new Error("Location undefined");
+    if (name === undefined || name.length === 0)
+      throw new Error("Name undefined");
+    const location = await geoCode(locationstring);
 
-  async function addPerson() {
-    if (addPersonState.name.length === 0) {
-      throw new Error("Person name undefined");
+    update(
+      "nodes",
+      {
+        name: name,
+        location: location,
+        id: getNewIndex(DBState.nodes),
+        links: new Set([]),
+      },
+      "add",
+    );
+
+    setName(undefined);
+    setLocationstring(undefined);
+
+    if (nameRef.current) {
+      nameRef.current.value = "";
     }
 
-    if (addPersonState.name.length === 0) {
-      throw new Error("location undefined");
-    }
-
-    const personLocation = await geoCode(addPersonState.locationString);
-
-    const person: Types.Person = {
-      id: db.nodes.length,
-      name: addPersonState.name,
-      location: personLocation,
-      relationships: [],
-    };
-
-    const length = add({ payload: person, type: "node" });
-    if (length !== undefined) {
-      const index = length - 1;
-      console.log(db.nodes[index]);
-    } else {
-      throw new Error("Adding to DB Failed");
-    }
-
-    if (nameInputField.current !== null) {
-      nameInputField.current.value = "";
-      addPersonState.name = "";
-    }
-
-    if (locationInputField.current !== null) {
-      locationInputField.current.value = "";
-      addPersonState.locationString = "";
+    if (locationRef.current) {
+      locationRef.current.value = "";
     }
   }
 
   return (
-    <AddPersonContext.Provider
-      value={{
-        addPersonState,
-        setAddPersonState,
-        nameInputField,
-        locationInputField,
-      }}
-    >
-      <fieldset className="absolute left-3 top-3 m-0 inline-block rounded-lg bg-white p-3 shadow-lg">
-        <InputPersonName />
-        <InputPersonLocation />
-        <div className="flex gap-3">
-          <button
-            onClick={addPerson}
-            className="mt-3 flex gap-3 rounded-lg p-3 shadow-lg transition-colors hover:bg-green-500"
-          >
-            <PlusCircle />
-            Submit
-          </button>
-          <button
-            onClick={() => setAddPersonOpen(false)}
-            className="mt-3 flex gap-3 rounded-lg p-3 shadow-lg transition-colors hover:bg-red-500"
-          >
-            Cancel
-          </button>
+    <div>
+      {!open && (
+        <Button
+          label="Add Person"
+          icon={<UserRoundPlus />}
+          onClick={() => setOpen(true)}
+        />
+      )}
+      {open && (
+        <div className="grid gap-3 rounded-lg bg-white p-3 shadow-lg">
+          <WindowTitle label="Add Person:" icon={<UserRoundPlus />} />
+          <TextInput
+            ref={nameRef}
+            placeholder="Name"
+            onBlur={(e) => setName(e.target.value)}
+          />
+          <TextInput
+            ref={locationRef}
+            placeholder="Location"
+            onBlur={(e) => setLocationstring(e.target.value)}
+          />
+          <Button
+            label="Add Person"
+            icon={<UserRoundPlus />}
+            type="confirm"
+            onClick={submit}
+          />
+          <Button
+            label="Close"
+            icon={<XCircle />}
+            type="deny"
+            onClick={() => {
+              setOpen(false);
+            }}
+          />
         </div>
-      </fieldset>
-    </AddPersonContext.Provider>
-  );
-}
-function InputPersonName() {
-  const { addPersonState, setAddPersonState, nameInputField } =
-    useContext(AddPersonContext);
-
-  function changeName(event: React.ChangeEvent<HTMLInputElement>) {
-    addPersonState.name = event.target.value;
-    setAddPersonState(addPersonState);
-  }
-  return (
-    <input
-      ref={nameInputField}
-      onInput={changeName}
-      className="block rounded-lg p-3 shadow-lg"
-      type="text"
-      name="personName"
-      placeholder="Name"
-    />
-  );
-}
-function InputPersonLocation() {
-  const { addPersonState, setAddPersonState, locationInputField } =
-    useContext(AddPersonContext);
-  function getLocation(event: React.ChangeEvent<HTMLInputElement>) {
-    addPersonState.locationString = event.target.value;
-
-    setAddPersonState(addPersonState);
-  }
-
-  return (
-    <input
-      ref={locationInputField}
-      onInput={getLocation}
-      className="mt-2 block rounded-lg p-3 shadow-lg"
-      type="text"
-      name="personLocation"
-      placeholder="Location"
-    />
-  );
-}
-
-export function AddPersonButton() {
-  const { setAddPersonOpen, setAddRelOpen } = useContext(InputOpenContext);
-  return (
-    <button
-      onClick={() => {
-        setAddPersonOpen(true);
-        setAddRelOpen(false);
-      }}
-      className="flex gap-3 rounded-lg bg-white p-3 shadow-xl outline-offset-0 outline-blue-500 hover:outline"
-    >
-      <UserRoundPlus /> Add Person
-    </button>
+      )}
+    </div>
   );
 }

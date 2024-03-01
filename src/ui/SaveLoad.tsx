@@ -1,48 +1,47 @@
 import { FolderUp, Save } from "lucide-react";
-import { db, set } from "../db/db";
+import { db, set } from "../db";
 
-export default function SaveLoad() {
-  return (
-    <div className="pointer-events-auto flex gap-3 ">
-      <SaveDB />
-      <ImportDB />
-    </div>
-  );
-}
+import { useContext } from "react";
+import { DBContext } from "../App";
 
-function SaveDB() {
+import { transformSetsToArray } from "../utils/helpers";
+import { Button } from "./components";
+
+export function SaveDB() {
   function save() {
-    const saveString = JSON.stringify(db);
+    const saveDB = transformSetsToArray(db);
+
+    const saveString = JSON.stringify(saveDB);
+
+    console.log(JSON.parse(saveString));
 
     const blob = new Blob([saveString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement("a");
-    link.download = "polycule-visualizer";
+
+    const date = new Date();
+    const filename = `polycule-visualizer-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+
+    link.download = filename;
     link.href = url;
     link.click();
     link.remove();
   }
 
-  return (
-    <button
-      className="z-10 flex gap-3 rounded-lg bg-white p-3 shadow-xl outline-offset-0 outline-blue-500 hover:outline"
-      onClick={save}
-    >
-      <Save />
-    </button>
-  );
+  return <Button icon={<Save />} onClick={save} />;
 }
 
-function ImportDB() {
+export function ImportDB() {
+  const { setDBState } = useContext(DBContext);
   function importJSON() {
     const fileUploadElement = document.createElement("input");
     fileUploadElement.type = "file";
     fileUploadElement.accept = ".json";
-
     fileUploadElement.click();
 
     fileUploadElement.addEventListener("change", () => {
+      setDBState({ nodes: {}, links: {}, linkTypes: {} });
       const files = fileUploadElement.files;
 
       if (files?.length ?? 0 > 0) {
@@ -55,21 +54,18 @@ function ImportDB() {
 
         reader.addEventListener("load", (e) => {
           if (typeof e.target?.result === "string") {
-            set(e.target.result);
-
-            console.log(db);
+            try {
+              set(e.target.result, false);
+              console.log(db);
+              setDBState({ ...db });
+            } catch (error) {
+              throw new Error(`${error} while importing`);
+            }
           }
         });
       }
     });
   }
 
-  return (
-    <button
-      className="flex gap-3 rounded-lg bg-white p-3 shadow-xl outline-offset-0 outline-blue-500 hover:outline"
-      onClick={importJSON}
-    >
-      <FolderUp />
-    </button>
-  );
+  return <Button icon={<FolderUp />} onClick={importJSON} />;
 }
