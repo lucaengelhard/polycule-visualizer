@@ -29,6 +29,7 @@ export default function Graph() {
 
     const simulation = d3
       .forceSimulation(graph.nodes)
+      .alphaDecay(0.2)
       .force(
         "charge",
         d3.forceManyBody().strength((node) => (node.id !== -1 ? -300 : 0)),
@@ -41,11 +42,11 @@ export default function Graph() {
           .id((node: unknown) => (node as Types.Node).id)
           .distance((link) => distanceScale(link.distance)),
       )
-      .force("x", d3.forceX())
-      .force("y", d3.forceY())
       .force(
         "radial",
-        d3.forceRadial(Math.min(width, height) - 500, width / 2, height / 2),
+        d3
+          .forceRadial(Math.min(width, height) - 600, width / 2, height / 2)
+          .strength(1.5),
       );
 
     const link = svg
@@ -131,7 +132,6 @@ export default function Graph() {
   }, [graph, setEditState]);
 
   function reloadGraph() {
-    //TODO: const noLinkLinks -> for linkforce of nodes that don't have link
     const placeHolderNode: Types.Node = {
       name: "Node",
       id: -1,
@@ -149,7 +149,6 @@ export default function Graph() {
 
     const nodes = convertObjectToNumberArray(DBState.nodes, placeHolderNode);
     const links = convertObjectToNumberArray(DBState.links, placeHolderLink);
-    //if (!nodes || !links) return;
 
     setGraph({ nodes: nodes, links: links });
   }
