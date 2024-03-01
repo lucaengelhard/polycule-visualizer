@@ -54,10 +54,13 @@ export function ImportDB() {
 
         reader.addEventListener("load", (e) => {
           if (typeof e.target?.result === "string") {
-            set(e.target.result, false);
-
-            console.log(db);
-            setDBState({ ...db });
+            try {
+              set(e.target.result, false);
+              console.log(db);
+              setDBState({ ...db });
+            } catch (error) {
+              throw new Error(`${error} while importing`);
+            }
           }
         });
       }
