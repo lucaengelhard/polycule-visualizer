@@ -61,8 +61,6 @@ export default function Graph() {
       onNodeClick={(node) =>
         setEditState({ node: parseInt(node.id), link: undefined })
       }
-      nodeCanvasObjectMode={() => "after"}
-      nodeCanvasObject={(node, ctx, globalScale) => {}}
       linkColor={(link) => link.type.color}
       linkWidth={3}
       onLinkClick={(link) => setEditState({ node: undefined, link: link.id })}
