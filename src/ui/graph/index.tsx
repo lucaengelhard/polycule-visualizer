@@ -12,6 +12,8 @@ export default function Graph() {
 
   const canvasRef = useRef<SVGSVGElement | null>(null);
 
+  console.log("render");
+
   useEffect(() => {
     reloadGraph();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -30,9 +32,13 @@ export default function Graph() {
     const simulation = d3
       .forceSimulation(graph.nodes)
       .alphaDecay(0.2)
+
       .force(
         "charge",
-        d3.forceManyBody().strength((node) => (node.id !== -1 ? -300 : 0)),
+        d3
+          .forceManyBody()
+          .strength((node) => (node.id !== -1 ? -300 : 0))
+          .distanceMax(100),
       )
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force(
