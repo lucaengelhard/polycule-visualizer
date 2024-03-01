@@ -26,7 +26,6 @@ export default function LinkInfo() {
   useEffect(() => {
     if (editState.link !== undefined) {
       setLink(DBState.links[editState.link]);
-      console.log(DBState.links[editState.link]);
     } else {
       setLink(undefined);
     }

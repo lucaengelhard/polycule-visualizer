@@ -160,7 +160,7 @@ function NodeRelListItem({
     <>
       {DBState.links[linkId] && (
         <div
-          className="group mt-3 flex cursor-pointer items-center justify-between rounded-lg p-3 shadow-lg transition-transform first:mt-0 hover:translate-x-2"
+          className="group pointer-events-auto mt-3 flex cursor-pointer items-center justify-between rounded-lg p-3 shadow-lg transition-transform first:mt-0 hover:translate-x-2"
           style={divStyle}
           onClick={() => setEditState({ ...editState, link: linkId })}
         >

@@ -114,7 +114,7 @@ export function clamp(num: number, min: number, max: number) {
 export function distanceScale(input: number) {
   const distanceArray = Object.values(db.links).map((link) => link.distance);
 
-  return mapRange(input, 0, Math.max(...distanceArray), 100, 1000);
+  return mapRange(input, 0, Math.max(...distanceArray), 100, 500);
 }
 
 function mapRange(

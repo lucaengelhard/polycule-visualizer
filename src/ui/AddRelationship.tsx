@@ -241,7 +241,7 @@ function SearchListItem({
   textRef: React.RefObject<HTMLInputElement>;
 }) {
   return (
-    <li className="cursor-pointer rounded-lg p-3 outline-offset-0 outline-blue-500 hover:outline">
+    <li className="pointer-events-auto cursor-pointer rounded-lg p-3 outline-offset-0 outline-blue-500 hover:outline">
       <button
         className="w-full text-left"
         onClick={() => {
