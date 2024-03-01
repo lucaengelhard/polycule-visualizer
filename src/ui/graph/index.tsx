@@ -45,7 +45,7 @@ export default function Graph() {
       .force(
         "radial",
         d3
-          .forceRadial(Math.min(width, height) - 600, width / 2, height / 2)
+          .forceRadial(Math.min(width, height) - 700, width / 2, height / 2)
           .strength(1.5),
       );
 
