@@ -14,11 +14,10 @@ export default function Graph() {
 
   useEffect(() => {
     reloadGraph();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setGraph, DBState]);
 
   useEffect(() => {
-    console.log(graph);
-
     if (graph === undefined) return;
 
     const width = window.innerWidth;
@@ -30,7 +29,10 @@ export default function Graph() {
 
     const simulation = d3
       .forceSimulation(graph.nodes)
-      .force("charge", d3.forceManyBody().strength(-3000))
+      .force(
+        "charge",
+        d3.forceManyBody().strength((node) => (node.id !== -1 ? -3000 : 0)),
+      )
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force(
         "link",
@@ -50,6 +52,7 @@ export default function Graph() {
       .append("g")
       .selectAll("line")
       .data(graph.links)
+
       .enter()
       .append("line")
       .attr("stroke", (link) => link.type.color)
@@ -63,7 +66,7 @@ export default function Graph() {
       .enter()
       .append("circle")
       .attr("class", "node pointer-events-auto cursor-pointer")
-      .attr("r", 8)
+      .attr("r", (d) => (d.id !== -1 ? 8 : 0))
       .call(
         d3
           .drag()
@@ -86,7 +89,7 @@ export default function Graph() {
       .attr("class", "pointer-events-none")
       .attr("text-anchor", "middle")
       .attr("font-size", 20)
-      .text((node) => node.name)
+      .text((node) => (node.id !== -1 ? node.name : ""))
       .attr("dx", 21)
       .attr("dy", -12);
 
