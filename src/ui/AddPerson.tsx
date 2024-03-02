@@ -49,43 +49,23 @@ export default function AddPerson() {
   }
 
   return (
-    <div>
-      {!open && (
-        <Button
-          label="Add Person"
-          icon={<UserRoundPlus />}
-          onClick={() => setOpen(true)}
-        />
-      )}
-      {open && (
-        <div className="grid gap-3 rounded-lg bg-white p-3 shadow-lg">
-          <WindowTitle label="Add Person:" icon={<UserRoundPlus />} />
-          <TextInput
-            ref={nameRef}
-            placeholder="Name"
-            onBlur={(e) => setName(e.target.value)}
-          />
-          <TextInput
-            ref={locationRef}
-            placeholder="Location"
-            onBlur={(e) => setLocationstring(e.target.value)}
-          />
-          <Button
-            label="Add Person"
-            icon={<UserRoundPlus />}
-            type="confirm"
-            onClick={submit}
-          />
-          <Button
-            label="Close"
-            icon={<XCircle />}
-            type="deny"
-            onClick={() => {
-              setOpen(false);
-            }}
-          />
-        </div>
-      )}
+    <div className="grid gap-3">
+      <TextInput
+        ref={nameRef}
+        placeholder="Name"
+        onBlur={(e) => setName(e.target.value)}
+      />
+      <TextInput
+        ref={locationRef}
+        placeholder="Location"
+        onBlur={(e) => setLocationstring(e.target.value)}
+      />
+      <Button
+        label="Add Person"
+        icon={<UserRoundPlus />}
+        type="confirm"
+        onClick={submit}
+      />
     </div>
   );
 }
