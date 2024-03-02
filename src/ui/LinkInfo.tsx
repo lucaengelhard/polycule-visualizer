@@ -1,18 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import { DBContext, EditContext } from "../App";
-import {
-  CornerDownLeft,
-  CornerUpLeft,
-  Link,
-  Trash2,
-  UserRound,
-  XCircle,
-} from "lucide-react";
+import { CornerDownLeft, CornerUpLeft, Trash2, UserRound } from "lucide-react";
 
 import * as Types from "../types";
 import { remove, update } from "../db";
 import ClassLink from "../classes/link";
-import { Button, RadioInput, WindowTitle } from "./components";
+import { Button, RadioInput } from "./components";
 import useConfirm from "./components/ConfirmDialog";
 
 export default function LinkInfo() {
@@ -155,32 +148,35 @@ export default function LinkInfo() {
     <>
       {link !== undefined && (
         <div className="grid h-min gap-3 rounded-lg bg-white p-3 shadow-lg">
-          <div className="flex items-center gap-3">
-            <div className="grid gap-3">
-              <Button
-                label={link.source.name}
-                icon={<UserRound />}
-                onClick={() =>
-                  setEditState({ ...editState, node: link.source.id })
-                }
-                additionalClasses="transition-transform
+          <div className="flex w-full justify-between">
+            <div className="flex items-center gap-3">
+              <div className="grid gap-3">
+                <Button
+                  label={link.source.name}
+                  icon={<UserRound />}
+                  onClick={() =>
+                    setEditState({ ...editState, node: link.source.id })
+                  }
+                  additionalClasses="transition-transform
                 hover:translate-x-2"
-              />
+                />
 
-              <Button
-                label={link.target.name}
-                icon={<UserRound />}
-                onClick={() =>
-                  setEditState({ ...editState, node: link.target.id })
-                }
-                additionalClasses="transition-transform
+                <Button
+                  label={link.target.name}
+                  icon={<UserRound />}
+                  onClick={() =>
+                    setEditState({ ...editState, node: link.target.id })
+                  }
+                  additionalClasses="transition-transform
                 hover:translate-x-2"
-              />
+                />
+              </div>
+              <div className="grid h-min gap-3">
+                <CornerUpLeft />
+                <CornerDownLeft />
+              </div>
             </div>
-            <div className="grid h-min gap-3">
-              <CornerUpLeft />
-              <CornerDownLeft />
-            </div>
+            <Button type="deny" icon={<Trash2 />} onClick={deleteLink} />
           </div>
           <RadioInput
             items={linkTypes}
@@ -191,9 +187,7 @@ export default function LinkInfo() {
             deletable={false}
           />
 
-          <div className="flex justify-between">
-            <Button type="deny" icon={<Trash2 />} onClick={deleteLink} />
-          </div>
+          <div className=""></div>
         </div>
       )}
     </>
