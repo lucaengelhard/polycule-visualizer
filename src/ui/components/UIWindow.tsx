@@ -1,6 +1,7 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useContext, useEffect, useState } from "react";
 import { Button, WindowTitle } from ".";
 import Draggable from "react-draggable";
+import { WindowContext } from "..";
 
 export default function UIWindow({
   children,
@@ -19,7 +20,22 @@ export default function UIWindow({
   closeAction?: () => void;
   openAction?: () => void;
 }) {
+  const { windowState, setWindowState } = useContext(WindowContext);
   const [open, setOpen] = useState(false);
+  const [id, setId] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    // Increment count on mount
+    setWindowState((prevState) => {
+      setId(prevState.count + 1);
+      return { ...prevState, count: prevState.count + 1 };
+    });
+  }, [setWindowState]);
+
+  function setLastWindowState() {
+    if (id === undefined) return;
+    setWindowState({ ...windowState, last: id });
+  }
 
   useEffect(() => {
     if (openCondition !== undefined) {
@@ -53,8 +69,10 @@ export default function UIWindow({
   return (
     <div className="h-min w-min">
       {open && (
-        <Draggable>
-          <div className="absolute z-10 h-min w-min cursor-pointer rounded-lg bg-white p-3 shadow-lg">
+        <Draggable onMouseDown={setLastWindowState}>
+          <div
+            className={`absolute z-10 h-min w-min cursor-pointer rounded-lg bg-white p-3 shadow-lg ${id === windowState.last && "z-20"}`}
+          >
             <WindowTitle label={header?.label} icon={header?.icon} />
             {children}
             {closeButton && (
