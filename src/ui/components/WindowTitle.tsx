@@ -8,7 +8,7 @@ export default function WindowTitle({
   icon?: ReactNode;
 }) {
   return (
-    <div className="pointer-events-auto flex gap-3 font-bold">
+    <div className="pointer-events-auto flex gap-3 whitespace-nowrap font-bold">
       {icon}
       {label}
     </div>

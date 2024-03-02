@@ -1,16 +1,16 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { DBContext } from "../App";
 
-import { Link, XCircle } from "lucide-react";
+import { Link } from "lucide-react";
 import * as Types from "../types";
 
 import { remove, update } from "../db";
 import ClassLink from "../classes/link";
-import { Button, RadioInput, TextInput, WindowTitle } from "./components";
+import { Button, RadioInput, TextInput } from "./components";
 
 export default function AddRelationship() {
   const { DBState } = useContext(DBContext);
-  const [open, setOpen] = useState(false);
+
   const [linkTypes, setLinkTypes] = useState<Types.RadioItems>({ items: {} });
   const [prevLinkItemIds, setPrevLinkItemIds] = useState<string[]>([]);
   const [partner1, setPartner1] = useState<Types.Node | undefined>(undefined);
@@ -107,48 +107,27 @@ export default function AddRelationship() {
   }
 
   return (
-    <div>
-      {!open && (
-        <Button
-          label="Add Relationship"
-          icon={<Link />}
-          onClick={() => setOpen(true)}
-        />
-      )}
+    <div className="grid gap-3 rounded-lg bg-white p-3 shadow-lg">
+      <div className="flex gap-3">
+        <SearchField setResult={setPartner1} />
+        <SearchField setResult={setPartner2} />
+      </div>
 
-      {open && (
-        <div className="grid gap-3 rounded-lg bg-white p-3 shadow-lg">
-          <WindowTitle label="Add Relationship:" icon={<Link />} />
-          <div className="flex gap-3">
-            <SearchField setResult={setPartner1} />
-            <SearchField setResult={setPartner2} />
-          </div>
-
-          <RadioInput
-            items={linkTypes}
-            setItems={setLinkTypes}
-            extendable={true}
-            color={true}
-            visibleElements={5}
-            deletable={true}
-            deleteID={deleteLinkType}
-          />
-          <Button
-            label="Add Relationship"
-            icon={<Link />}
-            type="confirm"
-            onClick={submit}
-          />
-          <Button
-            label="Close"
-            icon={<XCircle />}
-            type="deny"
-            onClick={() => {
-              setOpen(false);
-            }}
-          />
-        </div>
-      )}
+      <RadioInput
+        items={linkTypes}
+        setItems={setLinkTypes}
+        extendable={true}
+        color={true}
+        visibleElements={5}
+        deletable={true}
+        deleteID={deleteLinkType}
+      />
+      <Button
+        label="Add Relationship"
+        icon={<Link />}
+        type="confirm"
+        onClick={submit}
+      />
     </div>
   );
 }

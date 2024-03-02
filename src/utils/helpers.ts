@@ -117,7 +117,7 @@ export function distanceScale(input: number) {
   return mapRange(input, 0, Math.max(...distanceArray), 100, 500);
 }
 
-function mapRange(
+export function mapRange(
   value: number,
   fromMin: number,
   fromMax: number,

@@ -2,10 +2,10 @@ import * as Types from "../types";
 import { useContext, useEffect, useRef, useState } from "react";
 import { DBContext, EditContext } from "../App";
 import { hexToRGBA } from "../utils/helpers";
-import { Pencil, Trash2, UserRound, XCircle } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { remove, update } from "../db";
 import { geoCode } from "../utils/geocode";
-import { Button, TextInput, WindowTitle } from "./components";
+import { Button, TextInput } from "./components";
 
 import useConfirm from "./components/ConfirmDialog";
 
@@ -100,42 +100,25 @@ export default function NodeInfo() {
   }
 
   return (
-    <>
-      {node !== undefined && (
-        <div className="grid h-min gap-3 rounded-lg bg-white p-3 shadow-lg">
-          <WindowTitle label="Person:" icon={<UserRound />} />
-          <TextInput
-            ref={nameRef}
-            onBlur={updateName}
-            defaultValue={node.name}
-          />
-          <TextInput
-            ref={placeRef}
-            onBlur={updateLocation}
-            defaultValue={node.location.name}
-          />
-          {Array.from(node.links).length > 0 && <div>Relationships:</div>}
-          {editState.node !== undefined && (
-            <div>
-              {Array.from(node.links).map((linkId) => (
-                <NodeRelListItem key={linkId} linkId={linkId} editNode={node} />
-              ))}
-            </div>
-          )}
-          <div className="flex justify-between">
-            <Button
-              label="Close"
-              icon={<XCircle />}
-              type="deny"
-              onClick={() => {
-                setEditState({ ...editState, node: undefined });
-              }}
-            />
-            <Button type="deny" icon={<Trash2 />} onClick={deleteNode} />
-          </div>
+    <div className="grid h-min gap-3 rounded-lg bg-white p-3 shadow-lg">
+      <TextInput ref={nameRef} onBlur={updateName} defaultValue={node.name} />
+      <TextInput
+        ref={placeRef}
+        onBlur={updateLocation}
+        defaultValue={node.location.name}
+      />
+      {Array.from(node.links).length > 0 && <div>Relationships:</div>}
+      {editState.node !== undefined && (
+        <div>
+          {Array.from(node.links).map((linkId) => (
+            <NodeRelListItem key={linkId} linkId={linkId} editNode={node} />
+          ))}
         </div>
       )}
-    </>
+      <div className="flex justify-between">
+        <Button type="deny" icon={<Trash2 />} onClick={deleteNode} />
+      </div>
+    </div>
   );
 }
 
