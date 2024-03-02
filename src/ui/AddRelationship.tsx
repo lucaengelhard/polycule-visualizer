@@ -2,12 +2,47 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { DBContext } from "../App";
 
 import { Link } from "lucide-react";
-import * as Types from "../types";
+import { Types } from "../types";
 
 import { remove, update } from "../db";
 import ClassLink from "../classes/link";
-import { Button, RadioInput, TextInput } from "./components";
+import { Button, TextInput } from "./components";
+import RadioInput from "./components/RadioInput";
 
+export default function AddRelationship() {
+  const { DBState } = useContext(DBContext);
+
+  function onSelectedChange(selectedItem: Types.RadioItem | undefined) {
+    console.log(selectedItem);
+  }
+
+  function onItemChanged(changedItem: Types.RadioItem) {
+    console.log(changedItem);
+  }
+
+  function onItemAdded(addedItem: Types.RadioItem) {
+    console.log(addedItem);
+  }
+
+  function onItemDeleted(deltedItem: Types.RadioItem) {
+    console.log(deltedItem);
+  }
+
+  return (
+    <RadioInput
+      inputItems={DBState.linkTypes}
+      deletable={true}
+      colorMode={true}
+      extendable={true}
+      onSelectedChange={onSelectedChange}
+      onItemChanged={onItemChanged}
+      onItemAdded={onItemAdded}
+      onItemDeleted={onItemDeleted}
+    />
+  );
+}
+
+/*
 export default function AddRelationship() {
   const { DBState } = useContext(DBContext);
 
@@ -235,3 +270,4 @@ function SearchListItem({
     </li>
   );
 }
+*/

@@ -56,7 +56,7 @@ export default function UI() {
                 openButton={{ label: "Add Relationship", icon: <Link /> }}
                 closeButton={{ label: "Close", icon: <XCircle /> }}
               >
-                <AddRelationship />
+                {<AddRelationship />}
               </UIWindow>
             </div>
             <div className="flex gap-3">
