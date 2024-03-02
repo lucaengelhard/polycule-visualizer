@@ -30,7 +30,7 @@ export function WindowContextProvider({ children }: { children: ReactNode }) {
   );
 }
 
-//TODO: Error popup component, last interacted window on top
+//TODO: Error popup component
 export default function UI() {
   const { editState, setEditState } = useContext(EditContext);
 

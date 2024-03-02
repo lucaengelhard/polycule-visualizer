@@ -220,7 +220,7 @@ const AddRadioItem = forwardRef(function AddRadioItem(
     >
       <div className="flex items-center gap-2">
         {deletable !== true ? (
-          <button onClick={onClick}>
+          <button className="pointer-events-auto" onClick={onClick}>
             <PlusCircle />
           </button>
         ) : (
