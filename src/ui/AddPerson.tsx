@@ -1,15 +1,12 @@
-import { useContext, useRef, useState } from "react";
-import { DBContext } from "../App";
+import { useRef, useState } from "react";
 
 import { UserRoundPlus } from "lucide-react";
 import { geoCode } from "../utils/geocode";
 import { update } from "../db";
-import { getNewIndex } from "../utils/helpers";
+
 import { Button, TextInput } from "./components";
 
 export default function AddPerson() {
-  const { DBState } = useContext(DBContext);
-
   const [name, setName] = useState<string | undefined>(undefined);
   const [locationstring, setLocationstring] = useState<string | undefined>(
     undefined,
@@ -30,7 +27,7 @@ export default function AddPerson() {
       {
         name: name,
         location: location,
-        id: getNewIndex(DBState.nodes),
+        id: -10,
         links: new Set([]),
       },
       "add",
