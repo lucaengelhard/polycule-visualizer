@@ -1,4 +1,4 @@
-import { UserRoundPlus, XCircle } from "lucide-react";
+import { Link, UserRound, UserRoundPlus, XCircle } from "lucide-react";
 import AddPerson from "./AddPerson";
 import AddRelationship from "./AddRelationship";
 
@@ -8,9 +8,12 @@ import NodeInfo from "./NodeInfo";
 import { ImportDB, SaveDB } from "./SaveLoad";
 import UIWindow from "./components/UIWindow";
 import Graph from "./graph";
+import { useContext } from "react";
+import { EditContext } from "../App";
 
-//TODO: Error popup component
+//TODO: Error popup component, last interacted window on top
 export default function UI() {
+  const { editState, setEditState } = useContext(EditContext);
   return (
     <div>
       <div className="fixed inset-0 z-0">
@@ -28,7 +31,13 @@ export default function UI() {
               <AddPerson />
             </UIWindow>
 
-            <AddRelationship />
+            <UIWindow
+              header={{ label: "Add Relationship:", icon: <Link /> }}
+              openButton={{ label: "Add Relationship", icon: <Link /> }}
+              closeButton={{ label: "Close", icon: <XCircle /> }}
+            >
+              <AddRelationship />
+            </UIWindow>
           </div>
           <div className="flex gap-3">
             <SaveDB />
@@ -36,8 +45,23 @@ export default function UI() {
           </div>
         </div>
         <div className="flex h-min w-min gap-3 p-3">
-          <NodeInfo />
-          <LinkInfo />
+          <UIWindow
+            header={{ label: "Person:", icon: <UserRound /> }}
+            closeButton={{ label: "Close", icon: <XCircle /> }}
+            openCondition={editState.node !== undefined}
+            closeAction={() => setEditState({ ...editState, node: undefined })}
+          >
+            <NodeInfo />
+          </UIWindow>
+
+          <UIWindow
+            header={{ label: "Relationship:", icon: <Link /> }}
+            closeButton={{ label: "Close", icon: <XCircle /> }}
+            openCondition={editState.link !== undefined}
+            closeAction={() => setEditState({ ...editState, link: undefined })}
+          >
+            <LinkInfo />
+          </UIWindow>
         </div>
       </div>
     </div>

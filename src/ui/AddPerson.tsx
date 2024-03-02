@@ -1,15 +1,15 @@
 import { useContext, useRef, useState } from "react";
 import { DBContext } from "../App";
 
-import { UserRoundPlus, XCircle } from "lucide-react";
+import { UserRoundPlus } from "lucide-react";
 import { geoCode } from "../utils/geocode";
 import { update } from "../db";
 import { getNewIndex } from "../utils/helpers";
-import { Button, TextInput, WindowTitle } from "./components";
+import { Button, TextInput } from "./components";
 
 export default function AddPerson() {
   const { DBState } = useContext(DBContext);
-  const [open, setOpen] = useState(false);
+
   const [name, setName] = useState<string | undefined>(undefined);
   const [locationstring, setLocationstring] = useState<string | undefined>(
     undefined,
@@ -49,7 +49,7 @@ export default function AddPerson() {
   }
 
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-3 rounded-lg  p-3 shadow-lg">
       <TextInput
         ref={nameRef}
         placeholder="Name"

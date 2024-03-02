@@ -155,7 +155,6 @@ export default function LinkInfo() {
     <>
       {link !== undefined && (
         <div className="grid h-min gap-3 rounded-lg bg-white p-3 shadow-lg">
-          <WindowTitle label="Relationship:" icon={<Link />} />
           <div className="flex items-center gap-3">
             <div className="grid gap-3">
               <Button
@@ -193,14 +192,6 @@ export default function LinkInfo() {
           />
 
           <div className="flex justify-between">
-            <Button
-              label="Close"
-              icon={<XCircle />}
-              type="deny"
-              onClick={() => {
-                setEditState({ ...editState, link: undefined });
-              }}
-            />
             <Button type="deny" icon={<Trash2 />} onClick={deleteLink} />
           </div>
         </div>

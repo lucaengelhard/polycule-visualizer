@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Button, WindowTitle } from ".";
 import Draggable from "react-draggable";
 
@@ -7,19 +7,46 @@ export default function UIWindow({
   header,
   openButton,
   closeButton,
+  openCondition,
+  closeAction,
+  openAction,
 }: {
   children: ReactNode;
   header?: { label?: string; icon?: ReactNode };
   openButton?: { label?: string; icon?: ReactNode };
   closeButton?: { label?: string; icon?: ReactNode };
+  openCondition?: boolean;
+  closeAction?: () => void;
+  openAction?: () => void;
 }) {
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    if (openCondition !== undefined) {
+      setOpen(openCondition);
+    }
+  }, [openCondition]);
+
   function toggle() {
     if (open) {
+      closeWindow();
+    } else {
+      openWindow();
+    }
+  }
+  function closeWindow() {
+    if (closeAction === undefined) {
       setOpen(false);
     } else {
+      closeAction();
+    }
+  }
+
+  function openWindow() {
+    if (openAction === undefined) {
       setOpen(true);
+    } else {
+      openAction();
     }
   }
 
@@ -35,7 +62,7 @@ export default function UIWindow({
                 <Button
                   label={closeButton.label}
                   icon={closeButton.icon}
-                  onClick={() => setOpen(false)}
+                  onClick={closeWindow}
                   type="deny"
                 />
               </div>
