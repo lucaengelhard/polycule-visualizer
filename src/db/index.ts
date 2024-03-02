@@ -285,7 +285,7 @@ export function remove<T extends Types.DBType>(payload: T, render?: boolean) {
         } else if (link.type.id === payload.id) {
           const fallbackType: Types.LinkType = {
             name: "Relationship Type",
-            color: "#ffffff",
+            color: "#777777",
             id: 0,
           };
 

@@ -30,7 +30,7 @@ export function WindowContextProvider({ children }: { children: ReactNode }) {
   );
 }
 
-//TODO: Error popup component
+//TODO: Error popup component & manual DBContext reload Button
 export default function UI() {
   const { editState, setEditState } = useContext(EditContext);
 
