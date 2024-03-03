@@ -1,25 +1,45 @@
 import { useContext } from "react";
 import { DBContext, EditContext } from "../App";
-import { CornerDownLeft, CornerUpLeft, Trash2, UserRound } from "lucide-react";
+import {
+  CornerDownLeft,
+  CornerUpLeft,
+  Trash2,
+  UserRound,
+  History,
+} from "lucide-react";
 
 import { Types } from "../types";
 import ClassLink from "../classes/link";
 import { Button, RadioInput } from "./components";
 import useConfirm from "./components/ConfirmDialog";
 import { remove, update } from "../db/db";
+import { HistoryLink } from "../types/types";
 
 export default function LinkInfo() {
   const { DBState } = useContext(DBContext);
   const { editState, setEditState } = useContext(EditContext);
+
   const confirm = useConfirm();
 
   let link: ClassLink | undefined = undefined;
+  let historyLink: HistoryLink | undefined = undefined;
+  let isHistory = false;
 
   if (
     editState.link !== undefined &&
     DBState.links[editState.link] !== undefined
   ) {
     link = DBState.links[editState.link];
+  }
+
+  if (
+    link !== undefined &&
+    link.history !== undefined &&
+    editState.linkHistory !== undefined &&
+    link.history[editState.linkHistory] !== undefined
+  ) {
+    isHistory = true;
+    historyLink = link.history[editState.linkHistory];
   }
 
   async function deleteLink() {
@@ -31,19 +51,40 @@ export default function LinkInfo() {
 
     if (choice && link !== undefined) {
       remove(link, true);
-      setEditState({ ...editState, link: undefined });
+      setEditState({ ...editState, link: undefined, linkHistory: undefined });
     }
   }
 
   function onSelectedChange(selectedItem: Types.RadioItem | undefined) {
     if (selectedItem !== undefined) {
+      if (
+        isHistory &&
+        historyLink !== undefined &&
+        link?.history !== undefined
+      ) {
+        update(
+          "links",
+          {
+            ...link,
+            history: {
+              ...link?.history,
+              [historyLink.id]: {
+                ...link?.history[historyLink.id],
+                type: DBState.linkTypes[selectedItem.id],
+              },
+            },
+          },
+          "change",
+          true,
+        );
+        return;
+      }
       update(
         "links",
         { ...link, type: DBState.linkTypes[selectedItem.id] },
         "change",
         true,
       );
-      return;
     }
   }
 
@@ -106,7 +147,24 @@ export default function LinkInfo() {
                 <CornerDownLeft />
               </div>
             </div>
-            <Button type="deny" icon={<Trash2 />} onClick={deleteLink} />
+            <div>
+              <div className="flex gap-2">
+                {isHistory && historyLink !== undefined && (
+                  <div className="rounded-lg bg-white p-3 shadow-lg">
+                    {new Date(historyLink.date).toLocaleDateString(undefined, {
+                      dateStyle: "medium",
+                    })}
+                  </div>
+                )}
+                <Button
+                  icon={<History />}
+                  onClick={() =>
+                    setEditState({ ...editState, linkHistoryOpen: true })
+                  }
+                />
+                <Button type="deny" icon={<Trash2 />} onClick={deleteLink} />
+              </div>
+            </div>
           </div>
           <div>
             <RadioInput
@@ -118,7 +176,13 @@ export default function LinkInfo() {
               onItemChanged={onItemChanged}
               onItemAdded={onItemAdded}
               onItemDeleted={onItemDeleted}
-              selected={link ? link.type : undefined}
+              selected={
+                isHistory && historyLink !== undefined
+                  ? historyLink.type
+                  : link
+                    ? link.type
+                    : undefined
+              }
               addPlaceholder="Add Relationship Type"
             />
           </div>

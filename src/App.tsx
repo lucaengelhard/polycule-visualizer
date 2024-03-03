@@ -14,11 +14,15 @@ export const EditContext = createContext<{
   editState: {
     node?: keyof Types.NodeList | undefined;
     link?: keyof Types.LinkList | undefined;
+    linkHistory?: keyof Types.HistoryLinkList | undefined;
+    linkHistoryOpen?: boolean;
   };
   setEditState: React.Dispatch<
     React.SetStateAction<{
       node?: keyof Types.NodeList | undefined;
       link?: keyof Types.LinkList | undefined;
+      linkHistory?: keyof Types.HistoryLinkList | undefined;
+      linkHistoryOpen?: boolean;
     }>
   >;
 }>(null);
@@ -28,9 +32,13 @@ export default function App() {
   const [editState, setEditState] = useState<{
     node?: keyof Types.NodeList;
     link?: keyof Types.LinkList;
+    linkHistory?: keyof Types.HistoryLinkList;
+    linkHistoryOpen?: boolean;
   }>({
     node: undefined,
     link: undefined,
+    linkHistory: undefined,
+    linkHistoryOpen: false,
   });
 
   useEffect(() => {
