@@ -1,4 +1,4 @@
-import { Link, UserRound, UserRoundPlus, XCircle } from "lucide-react";
+import { History, Link, UserRound, UserRoundPlus, XCircle } from "lucide-react";
 import AddPerson from "./AddPerson";
 import AddRelationship from "./AddRelationship";
 
@@ -10,6 +10,7 @@ import UIWindow from "./components/UIWindow";
 import Graph from "./graph";
 import { ReactNode, createContext, useContext, useState } from "react";
 import { DBContext, EditContext } from "../App";
+import { EditLinkHistory } from "./EditLinkHistory";
 
 export const WindowContext = createContext<{
   windowState: { count: number; last?: number };
@@ -86,10 +87,30 @@ export default function UI() {
                   closeButton={{ label: "Close", icon: <XCircle /> }}
                   openCondition={editState.link !== undefined}
                   closeAction={() =>
-                    setEditState({ ...editState, link: undefined })
+                    setEditState({
+                      ...editState,
+                      link: undefined,
+                      linkHistory: undefined,
+                    })
                   }
                 >
                   <LinkInfo />
+                </UIWindow>
+              )}
+            {editState.linkHistoryOpen === true &&
+              editState.link !== undefined && (
+                <UIWindow
+                  header={{ label: "Relationship history:", icon: <History /> }}
+                  closeButton={{ label: "Close", icon: <XCircle /> }}
+                  openCondition={editState.linkHistoryOpen === true}
+                  closeAction={() =>
+                    setEditState({
+                      ...editState,
+                      linkHistoryOpen: false,
+                    })
+                  }
+                >
+                  <EditLinkHistory linkID={editState.link} />
                 </UIWindow>
               )}
           </div>

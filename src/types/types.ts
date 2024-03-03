@@ -15,6 +15,7 @@ export type RadioItem = {
 
 // DB types //
 export type Node = {
+  date?: number;
   id: number;
   name: string;
   location: Position;
@@ -74,7 +75,7 @@ export type DBBufferStatus = {
 
 //History Types
 export interface HistoryLink extends Link {
-  date: Date;
+  date: number;
 }
 
 export type HistoryLinkList = {

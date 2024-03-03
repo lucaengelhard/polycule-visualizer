@@ -68,7 +68,7 @@ export default function UIWindow({
   }
 
   return (
-    <div className="h-min max-h-screen w-min">
+    <div className="pointer-events-auto h-min max-h-screen w-min">
       {open && (
         <Draggable onMouseDown={setLastWindowState}>
           <div

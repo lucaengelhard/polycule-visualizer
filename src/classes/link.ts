@@ -3,6 +3,7 @@ import { Types } from "../types";
 import { db } from "../db/db";
 
 export default class Link {
+  date?: number;
   id: number;
   source: Types.Node;
   target: Types.Node;
