@@ -33,7 +33,7 @@ export default function Graph() {
 
     if (d3ForceLink === undefined) return;
     d3ForceLink.distance((link: GraphLink) => distanceScale(link.distance));
-  }, []);
+  }, [graphData]);
 
   useEffect(() => {
     const nodes: GraphNode[] = Object.values(DBState.nodes).map((node) => {
@@ -43,14 +43,21 @@ export default function Graph() {
       };
     });
     const links: GraphLink[] = Object.values(DBState.links).map((link) => {
-      return {
-        ...link,
-        source: link.source.id.toString(),
-        target: link.target.id.toString(),
+      const newSource = link.source.id.toString();
+      const newTarget = link.target.id.toString();
+
+      const newLink: GraphLink = {
+        id: link.id,
+        type: link.type,
+        distance: link.distance,
+        source: newSource,
+        target: newTarget,
       };
+
+      return newLink;
     });
 
-    setGraphData({ nodes: nodes, links: links });
+    setGraphData({ nodes: [...nodes], links: [...links] });
   }, [DBState.links, DBState.nodes]);
 
   return (

@@ -9,7 +9,7 @@ import { ImportDB, SaveDB } from "./SaveLoad";
 import UIWindow from "./components/UIWindow";
 import Graph from "./graph";
 import { ReactNode, createContext, useContext, useState } from "react";
-import { EditContext } from "../App";
+import { DBContext, EditContext } from "../App";
 
 export const WindowContext = createContext<{
   windowState: { count: number; last?: number };
@@ -33,6 +33,7 @@ export function WindowContextProvider({ children }: { children: ReactNode }) {
 //TODO: Error popup component & manual DBContext reload Button
 export default function UI() {
   const { editState, setEditState } = useContext(EditContext);
+  const { DBState } = useContext(DBContext);
 
   return (
     <WindowContextProvider>
@@ -65,30 +66,32 @@ export default function UI() {
             </div>
           </div>
           <div className="flex h-min w-min gap-3 p-3">
-            {editState.node !== undefined && (
-              <UIWindow
-                header={{ label: "Person:", icon: <UserRound /> }}
-                closeButton={{ label: "Close", icon: <XCircle /> }}
-                openCondition={editState.node !== undefined}
-                closeAction={() =>
-                  setEditState({ ...editState, node: undefined })
-                }
-              >
-                <NodeInfo />
-              </UIWindow>
-            )}
-            {editState.link !== undefined && (
-              <UIWindow
-                header={{ label: "Relationship:", icon: <Link /> }}
-                closeButton={{ label: "Close", icon: <XCircle /> }}
-                openCondition={editState.link !== undefined}
-                closeAction={() =>
-                  setEditState({ ...editState, link: undefined })
-                }
-              >
-                <LinkInfo />
-              </UIWindow>
-            )}
+            {editState.node !== undefined &&
+              DBState.nodes[editState.node] !== undefined && (
+                <UIWindow
+                  header={{ label: "Person:", icon: <UserRound /> }}
+                  closeButton={{ label: "Close", icon: <XCircle /> }}
+                  openCondition={editState.node !== undefined}
+                  closeAction={() =>
+                    setEditState({ ...editState, node: undefined })
+                  }
+                >
+                  <NodeInfo />
+                </UIWindow>
+              )}
+            {editState.link !== undefined &&
+              DBState.links[editState.link] !== undefined && (
+                <UIWindow
+                  header={{ label: "Relationship:", icon: <Link /> }}
+                  closeButton={{ label: "Close", icon: <XCircle /> }}
+                  openCondition={editState.link !== undefined}
+                  closeAction={() =>
+                    setEditState({ ...editState, link: undefined })
+                  }
+                >
+                  <LinkInfo />
+                </UIWindow>
+              )}
           </div>
         </div>
       </div>

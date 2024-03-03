@@ -252,8 +252,6 @@ function importLinksToDBLinks(importLinks: Types.LinkList): Types.LinkList {
 }
 
 export function remove<T extends Types.DBType>(payload: T, render?: boolean) {
-  console.log(payload);
-
   if (typeCheckNode(payload)) {
     delete db.nodes[payload.id];
 
