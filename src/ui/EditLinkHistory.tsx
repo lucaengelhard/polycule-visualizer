@@ -4,6 +4,9 @@ import { hexToRGBA } from "../utils/helpers";
 
 import ClassLink from "../classes/link";
 import { Types } from "../types";
+import { RadioInput } from "./components";
+
+import { remove, update } from "../db/db";
 
 export function EditLinkHistory({ linkID }: { linkID: number }) {
   const { DBState } = useContext(DBContext);
@@ -19,6 +22,9 @@ export function EditLinkHistory({ linkID }: { linkID: number }) {
           ))}
         </div>
       )}
+      <div className="mt-3">
+        <AddLinkHistoryItem />
+      </div>
     </div>
   );
 }
@@ -55,6 +61,68 @@ function LinkHistoryItem({
           },
         )}
       {current && "Current State"}
+    </div>
+  );
+}
+
+function AddLinkHistoryItem() {
+  const { DBState } = useContext(DBContext);
+  const [selected, setSelected] = useState<Types.LinkType | undefined>(
+    undefined,
+  );
+  const [date, setDate] = useState(new Date());
+
+  function onSelectedChange(selectedItem: Types.RadioItem | undefined) {
+    if (selectedItem !== undefined) {
+      setSelected(DBState.linkTypes[selectedItem?.id]);
+      return;
+    }
+    setSelected(undefined);
+  }
+
+  function onItemChanged(changedItem: Types.RadioItem) {
+    update(
+      "linkTypes",
+      { color: changedItem.color, id: changedItem.id, name: changedItem.name },
+      "change",
+      true,
+    );
+  }
+
+  function onItemAdded(addedItem: Types.RadioItem) {
+    update(
+      "linkTypes",
+      { color: addedItem.color, id: addedItem.id, name: addedItem.name },
+      "add",
+      true,
+    );
+  }
+
+  function onItemDeleted(deltedItem: Types.RadioItem) {
+    remove(DBState.linkTypes[deltedItem.id], true);
+  }
+
+  function onDateChange(
+    date: Date | null,
+    event: React.SyntheticEvent<any, Event> | undefined,
+  ) {
+    console.log(date);
+    console.log(event);
+  }
+
+  return (
+    <div>
+      <RadioInput
+        items={DBState.linkTypes}
+        colorMode={true}
+        extendable={true}
+        onSelectedChange={onSelectedChange}
+        onItemChanged={onItemChanged}
+        onItemAdded={onItemAdded}
+        onItemDeleted={onItemDeleted}
+        selected={selected}
+        addPlaceholder="Add Relationship Type"
+      />
     </div>
   );
 }
