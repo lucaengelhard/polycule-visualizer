@@ -1,252 +1,231 @@
-import { CheckCircle, Circle, Link2, PlusCircle, Trash2 } from "lucide-react";
-import * as Types from "../../types";
-import { forwardRef, useEffect, useRef, useState } from "react";
-import { getNewIndex, hexToRGBA, rgbaStringToHex } from "../../utils/helpers";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Types } from "../../types";
+import { CheckCircle, Circle, Link, PlusCircle, Trash2 } from "lucide-react";
 import { Button, ColorInput, TextInput } from ".";
+import { getNewIndex, hexToRGBA } from "../../utils/helpers";
 
-export default function RadioInput<Deletable extends boolean>({
-  items,
-  setItems,
-  color,
+//Todo: Manual selected set prop
+export default function RadioInput<T extends Types.RadioItemList>({
   extendable,
-  visibleElements,
+  items,
+  colorMode,
   deletable,
-  deleteID,
+  onSelectedChange,
+  onItemAdded,
+  onItemChanged,
+  onItemDeleted,
+  selected,
+  addPlaceholder,
 }: {
-  items: Types.RadioItems;
-  setItems: React.Dispatch<React.SetStateAction<Types.RadioItems>>;
-  color?: boolean;
+  deletable?: boolean;
+  colorMode?: boolean;
   extendable?: boolean;
-  visibleElements?: number;
-  deletable: Deletable;
-  deleteID?: Deletable extends true ? (id: number) => void : undefined;
+  items: T;
+  onSelectedChange: (selectedItem: Types.RadioItem | undefined) => void;
+  onItemChanged: (changedItem: Types.RadioItem) => void;
+  onItemAdded: (addedItem: Types.RadioItem) => void;
+  onItemDeleted: (deltedItem: Types.RadioItem) => void;
+  selected?: Types.RadioItem;
+  addPlaceholder?: string;
 }) {
-  const [maxHeight, setMaxHeight] = useState<string | undefined>(undefined);
+  const toggleSelected = useCallback(
+    (id: number) => {
+      if (items === undefined) return;
+      onSelectedChange(items[id]);
+    },
+    [items, onSelectedChange],
+  );
 
-  const itemRef = useRef<HTMLDivElement>(null);
+  const updateItem = useCallback(
+    (id: number, name: string, color: string | undefined) => {
+      if (items === undefined) return;
 
-  function onClick(index: number) {
-    if (items.selected?.id === index) {
-      setItems({ ...items, selected: undefined });
-    } else {
-      setItems({ ...items, selected: items.items[index] });
-    }
-  }
+      onItemChanged({ id: id, name: name, color: color });
+    },
+    [items, onItemChanged],
+  );
 
-  useEffect(() => {
-    if (itemRef.current) {
-      if (visibleElements !== undefined && visibleElements > 0) {
-        setMaxHeight(`${visibleElements * itemRef.current.clientHeight}px`);
-      }
-    }
-  }, [visibleElements]);
+  const deleteItem = useCallback(
+    (id: number) => {
+      if (items === undefined) return;
+      onItemDeleted(items[id]);
+    },
+    [items, onItemDeleted],
+  );
+
+  const addItem = useCallback(
+    (name: string, color: string) => {
+      const id = getNewIndex(items);
+      onItemAdded({
+        id: id,
+        name: name,
+        color: color,
+      });
+    },
+    [items, onItemAdded],
+  );
 
   return (
     <div>
-      <div
-        className="no-scrollbar pointer-events-auto mb-3 rounded-lg shadow-xl"
-        style={{ maxHeight: maxHeight, overflow: "auto" }}
-      >
-        {Object.values(items.items).map((value, index) => (
-          <RadioInputItem
-            key={index}
-            index={value.id}
-            items={items}
-            setItems={setItems}
-            onClick={onClick}
-            color={color}
-            deletable={deletable}
-            deleteID={deleteID}
-          />
-        ))}
+      <div>
+        {items !== undefined &&
+          Object.values(items).map((item, index) => (
+            <RadioInputItem
+              key={index}
+              item={item}
+              selected={selected?.id === item.id}
+              toggleSelected={toggleSelected}
+              updateItem={updateItem}
+              deleteItem={deleteItem}
+              deletable={deletable}
+            />
+          ))}
       </div>
-      {extendable && (
-        <AddRadioItem
-          ref={itemRef}
-          items={items}
-          setItems={setItems}
-          color={color}
-          deletable={deletable}
-        />
-      )}
+      <div>
+        {extendable && (
+          <AddRadioInputItem
+            addItem={addItem}
+            deletable={deletable}
+            colorMode={colorMode}
+            addPlaceholder={addPlaceholder}
+          />
+        )}
+      </div>
     </div>
   );
 }
+
 function RadioInputItem<Deletable extends boolean>({
-  index,
-  items,
-  setItems,
-  onClick,
-  color,
+  item,
   deletable,
-  deleteID,
+  deleteItem,
+  updateItem,
+  selected,
+  toggleSelected,
 }: {
-  index: number;
-  items: Types.RadioItems;
-  setItems: React.Dispatch<React.SetStateAction<Types.RadioItems>>;
-  onClick: (index: number) => void;
-  color?: boolean;
+  item: Types.RadioItem;
+  updateItem: (id: number, name: string, color: string | undefined) => void;
+  toggleSelected: (id: number) => void;
+  selected: boolean;
   deletable?: Deletable;
-  deleteID?: Deletable extends true ? (id: number) => void : undefined;
+  deleteItem: Deletable extends true ? (id: number) => void : undefined;
 }) {
-  const [item, setItem] = useState(items.items[index]);
+  const id = item.id;
+  const name = item.name;
+  const color = item.color;
 
-  let divStyle = {};
+  function handleDelete() {
+    if (deleteItem === undefined) return;
+    deleteItem(item.id);
+  }
 
-  if (item !== undefined) {
-    divStyle = {
-      backgroundColor: hexToRGBA(item.color ?? "#ffffff", 0.5) ?? "#ffffff",
+  const divStyle = useMemo(() => {
+    return {
+      backgroundColor: hexToRGBA(color ?? "#ffffff", 0.5) ?? "#ffffff",
     };
-  }
-
-  useEffect(() => {
-    setItem(items.items[index]);
-  }, [items, index]);
-
-  useEffect(() => {
-    if (textRef.current !== null) {
-      textRef.current.value = item.name;
-    }
-  }, [item]);
-
-  const textRef = useRef<HTMLInputElement>(null);
-
-  function setName(event: React.ChangeEvent<HTMLInputElement>) {
-    const newItem = item;
-    newItem.name = event.target.value;
-
-    setItems({
-      ...items,
-      items: { ...items.items, [index]: newItem },
-    });
-  }
-
-  function setColor(event: React.ChangeEvent<HTMLInputElement>) {
-    const newItem = item;
-    newItem.color = event.target.value;
-
-    setItems({
-      ...items,
-      items: { ...items.items, [index]: newItem },
-    });
-  }
-
-  return (
-    <>
-      {" "}
-      {item !== undefined && (
-        <div
-          style={divStyle}
-          className="mt-1 flex items-center justify-between gap-3 rounded-lg p-1 pl-3 shadow-lg"
-        >
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                onClick(item.id);
-              }}
-            >
-              {item.id === items.selected?.id ? <CheckCircle /> : <Circle />}
-            </button>
-            <TextInput
-              ref={textRef}
-              defaultValue={item.name}
-              onBlur={(e) => setName(e)}
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            {color && (
-              <div className="flex items-center gap-1 p-1">
-                {" "}
-                <ColorInput
-                  value={item.color}
-                  onInput={(e) => setColor(e)}
-                />{" "}
-              </div>
-            )}
-            {deletable && deleteID && (
-              <Button icon={<Trash2 />} onClick={() => deleteID(item.id)} />
-            )}
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-const AddRadioItem = forwardRef(function AddRadioItem(
-  {
-    items,
-    setItems,
-    color,
-    deletable,
-  }: {
-    items: Types.RadioItems;
-    setItems: React.Dispatch<React.SetStateAction<Types.RadioItems>>;
-    color?: boolean;
-    deletable?: boolean;
-  },
-  ref?: React.ForwardedRef<HTMLDivElement>,
-) {
-  const [divColor, setDivColor] = useState("#ffffff");
-  const [name, setName] = useState<string | undefined>();
-  const textInputRef = useRef<HTMLInputElement>(null);
-
-  const divStyle = {
-    backgroundColor: hexToRGBA(divColor, 0.5) ?? "#ffffff",
-  };
-
-  function onClick() {
-    if (name === undefined) {
-      throw new Error("Name is undefined");
-    }
-    const newItem: Types.RadioItem = {
-      id: getNewIndex(items.items),
-      name: name,
-      color: rgbaStringToHex(divColor) ?? "#ffffff",
-    };
-
-    setItems({ ...items, items: { ...items.items, [newItem.id]: newItem } });
-
-    if (textInputRef.current) {
-      textInputRef.current.value = "";
-    }
-  }
+  }, [color]);
 
   return (
     <div
-      ref={ref}
-      className="mt-1 flex items-center justify-between gap-3 rounded-lg p-1 pl-3 shadow-lg"
       style={divStyle}
+      className="mt-1 flex items-center justify-between gap-3 rounded-lg p-1 pl-3 shadow-lg"
     >
       <div className="flex items-center gap-2">
-        {deletable !== true ? (
-          <button className="pointer-events-auto" onClick={onClick}>
-            <PlusCircle />
-          </button>
-        ) : (
-          <Link2 />
-        )}
-
+        <button
+          className="pointer-events-auto flex items-center gap-2"
+          onClick={() => {
+            toggleSelected(id);
+          }}
+        >
+          {selected ? <CheckCircle /> : <Circle />}
+        </button>
         <TextInput
-          ref={textInputRef}
-          onBlur={(e) => setName(e.target.value)}
-          placeholder="Add relationship type"
+          defaultValue={name}
+          onBlur={(e) => updateItem(id, e.target.value, color)}
         />
       </div>
       <div className="flex items-center gap-2">
-        {color && (
+        {color !== undefined && (
           <div className="flex items-center gap-1 p-1">
-            {" "}
             <ColorInput
-              defaultValue={divColor}
-              onChange={(e) =>
-                setDivColor(hexToRGBA(e.target.value, 0.5) ?? "#ffffff")
-              }
-            />{" "}
+              defaultValue={color}
+              onInput={(e) => updateItem(id, name, e.target.value)}
+            />
           </div>
         )}
-        {deletable && <Button icon={<PlusCircle />} onClick={onClick} />}
+        {deletable && <Button icon={<Trash2 />} onClick={handleDelete} />}
       </div>
     </div>
   );
-});
+}
+
+function AddRadioInputItem({
+  deletable,
+  colorMode,
+  addItem,
+  addPlaceholder,
+}: {
+  deletable?: boolean;
+  colorMode?: boolean;
+  addItem: (name: string, color: string) => void;
+  addPlaceholder?: string;
+}) {
+  const [name, setName] = useState<string | undefined>(undefined);
+  const [color, setColor] = useState<string>("#ffffff");
+  const textRef = useRef<HTMLInputElement>(null);
+  const colorRef = useRef<HTMLInputElement>(null);
+
+  const add = useCallback(() => {
+    if (name === undefined) return;
+    if (name.length === 0) return;
+
+    addItem(name, color);
+
+    if (textRef.current === null) return;
+    textRef.current.value = "";
+
+    if (colorRef.current === null) return;
+    colorRef.current.value = "#ffffff";
+    setColor("#ffffff");
+  }, [addItem, name, color]);
+
+  const divStyle = useMemo(() => {
+    return {
+      backgroundColor: hexToRGBA(color ?? "#ffffff", 0.5) ?? "#ffffff",
+    };
+  }, [color]);
+
+  return (
+    <div
+      style={divStyle}
+      className="mt-1 flex items-center justify-between gap-3 rounded-lg p-1 pl-3 shadow-lg"
+    >
+      <div className="flex items-center gap-2">
+        {deletable ? (
+          <Link />
+        ) : (
+          <button onClick={add}>
+            <PlusCircle />
+          </button>
+        )}
+        <TextInput
+          placeholder={addPlaceholder}
+          ref={textRef}
+          onBlur={(e) => setName(e.target.value)}
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        {colorMode && (
+          <div className="flex items-center gap-1 p-1">
+            <ColorInput
+              ref={colorRef}
+              defaultValue={color}
+              onInput={(e) => setColor(e.target.value)}
+            />
+          </div>
+        )}
+        {deletable && <Button onClick={add} icon={<PlusCircle />} />}
+      </div>
+    </div>
+  );
+}

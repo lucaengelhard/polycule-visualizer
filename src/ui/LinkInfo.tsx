@@ -1,136 +1,22 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 import { DBContext, EditContext } from "../App";
 import { CornerDownLeft, CornerUpLeft, Trash2, UserRound } from "lucide-react";
 
-import * as Types from "../types";
 import { remove, update } from "../db";
-import ClassLink from "../classes/link";
+import { Types } from "../types";
 import { Button, RadioInput } from "./components";
 import useConfirm from "./components/ConfirmDialog";
 
 export default function LinkInfo() {
-  const { editState, setEditState } = useContext(EditContext);
   const { DBState } = useContext(DBContext);
-
-  const [link, setLink] = useState<ClassLink | undefined>(undefined);
-  const [linkTypes, setLinkTypes] = useState<Types.RadioItems>({ items: {} });
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (editState.link !== undefined) {
-      setLink(DBState.links[editState.link]);
-    } else {
-      setLink(undefined);
-    }
-  }, [DBState.links, editState.link, DBState]);
-
-  //Update Linktypes
-  useEffect(() => {
-    const radioItemList: Types.RadioItemList = {};
-
-    for (const key in DBState.linkTypes) {
-      if (Object.prototype.hasOwnProperty.call(DBState.linkTypes, key)) {
-        const linkType = DBState.linkTypes[key];
-
-        const newRadioItem: Types.RadioItem = {
-          id: linkType.id,
-          name: linkType.name,
-          color: linkType.color,
-        };
-
-        radioItemList[linkType.id] = newRadioItem;
-      }
-    }
-
-    setLinkTypes({
-      selected: link !== undefined ? link.type : undefined,
-      items: { ...radioItemList },
-    });
-  }, [DBState.linkTypes, link]);
-
-  //Update Link on selected Change
-  useEffect(() => {
-    if (
-      linkTypes.selected !== undefined &&
-      (link?.type.id !== linkTypes.selected.id ||
-        link?.type.name !== linkTypes.selected.name) &&
-      link !== undefined
-    ) {
-      setLink({
-        ...link,
-        type: {
-          id: linkTypes.items[linkTypes.selected.id].id,
-          name: linkTypes.items[linkTypes.selected.id].name,
-          color:
-            linkTypes.items[linkTypes.selected.id].color !== undefined
-              ? (linkTypes.items[linkTypes.selected.id].color as string)
-              : "#ffffff",
-        },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [linkTypes.selected]);
-
-  //Update DB on internal Link change
-  useEffect(() => {
-    if (link !== undefined && DBState.links[link.id] !== undefined) {
-      // Update on type change
-      if (link?.type.id !== DBState.links[link.id].type.id) {
-        update("links", link, "change", true);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [link]);
-
-  //Update Linktypes when type is added
-  useEffect(() => {
-    if (Object.keys(linkTypes.items).length > 0) {
-      const changed: Types.RadioItem[] = [];
-      const added: Types.RadioItem[] = [];
-      Object.values(linkTypes.items).forEach((item) => {
-        //Check if Item already exists -> If not create it
-        if (DBState.linkTypes[item.id] === undefined) {
-          added.push(item);
-          return;
-        }
-
-        changed.push(item);
-      });
-
-      added.forEach((item, index) =>
-        update("linkTypes", item, "add", index === added.length - 1),
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [linkTypes.items]);
-
-  //Update Linktype properties on change
-  useEffect(() => {
-    for (const key in linkTypes.items) {
-      if (Object.prototype.hasOwnProperty.call(linkTypes.items, key)) {
-        const element = linkTypes.items[key];
-        const index = parseInt(key);
-
-        if (DBState.linkTypes[key] !== undefined) {
-          if (
-            DBState.linkTypes[key].color !== element.color ||
-            DBState.linkTypes[key].name !== element.name
-          ) {
-            const newLinkType: Types.LinkType = {
-              name: linkTypes.items[key].name,
-              color: linkTypes.items[key].color ?? "#ffffff",
-              id: index,
-            };
-
-            update("linkTypes", newLinkType, "change", true);
-          }
-        }
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [linkTypes.items]);
-
+  const { editState, setEditState } = useContext(EditContext);
   const confirm = useConfirm();
+
+  const link = useMemo(() => {
+    if (editState.link === undefined) return;
+    return DBState.links[editState.link];
+  }, [DBState.links, editState.link]);
+
   async function deleteLink() {
     const choice = await confirm({
       title: `Delete Relationship`,
@@ -144,9 +30,43 @@ export default function LinkInfo() {
     }
   }
 
+  function onSelectedChange(selectedItem: Types.RadioItem | undefined) {
+    if (selectedItem !== undefined) {
+      update(
+        "links",
+        { ...link, type: DBState.linkTypes[selectedItem.id] },
+        "change",
+        true,
+      );
+      return;
+    }
+  }
+
+  function onItemChanged(changedItem: Types.RadioItem) {
+    update(
+      "linkTypes",
+      { color: changedItem.color, id: changedItem.id, name: changedItem.name },
+      "change",
+      true,
+    );
+  }
+
+  function onItemAdded(addedItem: Types.RadioItem) {
+    update(
+      "linkTypes",
+      { color: addedItem.color, id: addedItem.id, name: addedItem.name },
+      "add",
+      true,
+    );
+  }
+
+  function onItemDeleted(deltedItem: Types.RadioItem) {
+    remove(DBState.linkTypes[deltedItem.id], true);
+  }
+
   return (
     <>
-      {link !== undefined && (
+      {link && (
         <div className="grid h-min gap-3 rounded-lg bg-white p-3 shadow-lg">
           <div className="flex w-full justify-between">
             <div className="flex items-center gap-3">
@@ -155,12 +75,11 @@ export default function LinkInfo() {
                   label={link.source.name}
                   icon={<UserRound />}
                   onClick={() =>
-                    setEditState({ ...editState, node: link.source.id })
+                    setEditState({ ...editState, node: link.target.id })
                   }
                   additionalClasses="transition-transform
                 hover:translate-x-2"
                 />
-
                 <Button
                   label={link.target.name}
                   icon={<UserRound />}
@@ -170,7 +89,7 @@ export default function LinkInfo() {
                   additionalClasses="transition-transform
                 hover:translate-x-2"
                 />
-              </div>
+              </div>{" "}
               <div className="grid h-min gap-3">
                 <CornerUpLeft />
                 <CornerDownLeft />
@@ -178,16 +97,20 @@ export default function LinkInfo() {
             </div>
             <Button type="deny" icon={<Trash2 />} onClick={deleteLink} />
           </div>
-          <RadioInput
-            items={linkTypes}
-            setItems={setLinkTypes}
-            extendable={true}
-            color={true}
-            visibleElements={5}
-            deletable={false}
-          />
-
-          <div className=""></div>
+          <div>
+            <RadioInput
+              items={DBState.linkTypes}
+              deletable={true}
+              colorMode={true}
+              extendable={true}
+              onSelectedChange={onSelectedChange}
+              onItemChanged={onItemChanged}
+              onItemAdded={onItemAdded}
+              onItemDeleted={onItemDeleted}
+              selected={DBState.links[link.id].type}
+              addPlaceholder="Add Relationship Type"
+            />
+          </div>
         </div>
       )}
     </>
