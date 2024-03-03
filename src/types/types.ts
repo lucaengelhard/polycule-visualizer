@@ -15,6 +15,7 @@ export type RadioItem = {
 
 // DB types //
 export type Node = {
+  date?: number;
   id: number;
   name: string;
   location: Position;
