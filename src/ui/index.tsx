@@ -11,6 +11,7 @@ import Graph from "./graph";
 import { ReactNode, createContext, useContext, useState } from "react";
 import { DBContext, EditContext } from "../App";
 import { EditLinkHistory } from "./EditLinkHistory";
+import EditNodeHistory from "./EditNodeHistory";
 
 export const WindowContext = createContext<{
   windowState: { count: number; last?: number };
@@ -107,10 +108,28 @@ export default function UI() {
                     setEditState({
                       ...editState,
                       linkHistoryOpen: false,
+                      linkHistory: undefined,
                     })
                   }
                 >
                   <EditLinkHistory linkID={editState.link} />
+                </UIWindow>
+              )}
+            {editState.nodeHistoryOpen === true &&
+              editState.node !== undefined && (
+                <UIWindow
+                  header={{ label: "Node history:", icon: <History /> }}
+                  closeButton={{ label: "Close", icon: <XCircle /> }}
+                  openCondition={editState.nodeHistoryOpen === true}
+                  closeAction={() =>
+                    setEditState({
+                      ...editState,
+                      nodeHistoryOpen: false,
+                      nodeHistory: undefined,
+                    })
+                  }
+                >
+                  <EditNodeHistory nodeID={editState.node} />
                 </UIWindow>
               )}
           </div>

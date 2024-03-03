@@ -10,35 +10,29 @@ export const DBContext = createContext<{
   setDBState: React.Dispatch<Types.DBData>;
 }>(null);
 
+type EditState = {
+  node?: keyof Types.NodeList | undefined;
+  link?: keyof Types.LinkList | undefined;
+  linkHistory?: keyof Types.HistoryLinkList | undefined;
+  linkHistoryOpen?: boolean;
+  nodeHistory?: keyof Types.HistoryNodeList | undefined;
+  nodeHistoryOpen?: boolean;
+};
+
 export const EditContext = createContext<{
-  editState: {
-    node?: keyof Types.NodeList | undefined;
-    link?: keyof Types.LinkList | undefined;
-    linkHistory?: keyof Types.HistoryLinkList | undefined;
-    linkHistoryOpen?: boolean;
-  };
-  setEditState: React.Dispatch<
-    React.SetStateAction<{
-      node?: keyof Types.NodeList | undefined;
-      link?: keyof Types.LinkList | undefined;
-      linkHistory?: keyof Types.HistoryLinkList | undefined;
-      linkHistoryOpen?: boolean;
-    }>
-  >;
+  editState: EditState;
+  setEditState: React.Dispatch<React.SetStateAction<EditState>>;
 }>(null);
 
 export default function App() {
   const [DBState, setDBState] = useState<Types.DBData>(db);
-  const [editState, setEditState] = useState<{
-    node?: keyof Types.NodeList;
-    link?: keyof Types.LinkList;
-    linkHistory?: keyof Types.HistoryLinkList;
-    linkHistoryOpen?: boolean;
-  }>({
+  const [editState, setEditState] = useState<EditState>({
     node: undefined,
     link: undefined,
     linkHistory: undefined,
     linkHistoryOpen: false,
+    nodeHistory: undefined,
+    nodeHistoryOpen: false,
   });
 
   useEffect(() => {
@@ -162,7 +156,8 @@ function NodeUpdate(
         if (
           StateNode.name !== Node.name ||
           StateNode.location.name !== Node.location.name ||
-          StateNode.links !== Node.links
+          StateNode.links !== Node.links ||
+          StateNode.history !== Node.history
         ) {
           changeNodes[Node.id] = Node;
         }

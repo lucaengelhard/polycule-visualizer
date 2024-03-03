@@ -21,6 +21,7 @@ export type Node = {
   location: Position;
   index?: number;
   links: Set<keyof LinkList>;
+  history?: HistoryNodeList;
   dx?: number;
   dy?: number;
   x?: number;
@@ -74,12 +75,20 @@ export type DBBufferStatus = {
 };
 
 //History Types
-export interface HistoryLink extends Link {
+export interface HistoryLink extends Omit<Link, "history"> {
   date: number;
 }
 
 export type HistoryLinkList = {
   [key: number]: HistoryLink;
+};
+
+export interface HistoryNode extends Omit<Node, "history"> {
+  date: number;
+}
+
+export type HistoryNodeList = {
+  [key: number]: HistoryNode;
 };
 
 //Graph Data

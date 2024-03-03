@@ -107,9 +107,9 @@ function AddLinkHistoryItem({ linkID }: { linkID: number }) {
     remove(DBState.linkTypes[deltedItem.id], true);
   }
 
-  function onDateChange(date: Date | undefined) {
-    if (date === undefined) return;
-    setDate(date);
+  function onDateChange(changeDate: Date | undefined) {
+    if (changeDate === undefined) return;
+    setDate(changeDate);
   }
 
   function submit() {
@@ -139,7 +139,7 @@ function AddLinkHistoryItem({ linkID }: { linkID: number }) {
     }
 
     //Replace current & make previous to history event
-    const currentDate = Date.now();
+    const currentDate = link.date === undefined ? Date.now() : link.date;
 
     update(
       "links",
@@ -149,7 +149,7 @@ function AddLinkHistoryItem({ linkID }: { linkID: number }) {
         date: currentDate,
         history: {
           ...link?.history,
-          [link.date === undefined ? currentDate : link.date]: {
+          [currentDate]: {
             ...link,
             date: currentDate,
             id: currentDate,
