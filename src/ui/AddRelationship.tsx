@@ -5,8 +5,8 @@ import { Link } from "lucide-react";
 import { Types } from "../types";
 import ClassLink from "../classes/link";
 
-import { remove, update } from "../db";
 import { Button, RadioInput, TextInput } from "./components";
+import { remove, update } from "../db/db";
 
 export default function AddRelationship() {
   const { DBState } = useContext(DBContext);

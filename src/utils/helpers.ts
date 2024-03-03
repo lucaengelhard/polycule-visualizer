@@ -1,4 +1,4 @@
-import { db } from "../db";
+import { db } from "../db/db";
 
 export function hexToRGBA(hex: string, alpha?: number): string | null {
   if (alpha === undefined) {

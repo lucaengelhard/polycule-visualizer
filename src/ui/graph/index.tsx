@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { DBContext, EditContext } from "../../App";
-import * as Types from "../../types";
+import { Types } from "../../types";
 import { distanceScale } from "../../utils/helpers";
 import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
 import Link from "../../classes/link";
