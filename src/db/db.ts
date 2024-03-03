@@ -81,6 +81,8 @@ export function update(
       break;
     }
     case "links": {
+      console.log(payload);
+
       if (!typeCheckLink(payload)) throw new Error("Link Parsing Error");
 
       const newSourceLinks: Set<keyof Types.LinkList> = new Set(

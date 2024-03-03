@@ -45,7 +45,6 @@ export function typeCheckLink(input: unknown): input is Link {
     typeof (input as Link).distance !== "number" ||
     typeof (input as Link).id !== "number"
   ) {
-    console.log(input);
     return false;
   }
 
