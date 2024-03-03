@@ -103,6 +103,12 @@ export function distance(
     if (unit == "N") {
       dist = dist * 0.8684;
     }
+    if (dist < 100) {
+      dist = 100;
+    }
+
+    console.log(dist);
+
     return dist;
   }
 }
@@ -112,9 +118,16 @@ export function clamp(num: number, min: number, max: number) {
 }
 
 export function distanceScale(input: number) {
+  if (Number.isNaN(input)) {
+    return 100;
+  }
   const distanceArray = Object.values(db.links).map((link) => link.distance);
 
-  return mapRange(input, 0, Math.max(...distanceArray), 100, 500);
+  let largestDistance = Math.max(...distanceArray);
+  if (largestDistance === 0) {
+    largestDistance = 100;
+  }
+  return mapRange(input, 0, largestDistance, 100, 500);
 }
 
 export function mapRange(
