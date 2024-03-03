@@ -253,8 +253,8 @@ function AddRadioInputItem({
             />
           </div>
         )}
+        {deletable && <Button onClick={add} icon={<PlusCircle />} />}
       </div>
-      {deletable && <Button onClick={add} icon={<PlusCircle />} />}
     </div>
   );
 }

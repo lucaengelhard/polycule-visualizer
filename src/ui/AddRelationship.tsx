@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { DBContext } from "../App";
 
 import { Link } from "lucide-react";
@@ -11,134 +11,53 @@ import RadioInput from "./components/RadioInput";
 
 export default function AddRelationship() {
   const { DBState } = useContext(DBContext);
-
-  function onSelectedChange(selectedItem: Types.RadioItem | undefined) {
-    console.log(selectedItem);
-  }
-
-  function onItemChanged(changedItem: Types.RadioItem) {
-    console.log(changedItem);
-  }
-
-  function onItemAdded(addedItem: Types.RadioItem) {
-    console.log(addedItem);
-  }
-
-  function onItemDeleted(deltedItem: Types.RadioItem) {
-    console.log(deltedItem);
-  }
-
-  return (
-    <RadioInput
-      inputItems={DBState.linkTypes}
-      deletable={true}
-      colorMode={true}
-      extendable={true}
-      onSelectedChange={onSelectedChange}
-      onItemChanged={onItemChanged}
-      onItemAdded={onItemAdded}
-      onItemDeleted={onItemDeleted}
-    />
-  );
-}
-
-/*
-export default function AddRelationship() {
-  const { DBState } = useContext(DBContext);
-
-  const [linkTypes, setLinkTypes] = useState<Types.RadioItems>({ items: {} });
-  const [prevLinkItemIds, setPrevLinkItemIds] = useState<string[]>([]);
   const [partner1, setPartner1] = useState<Types.Node | undefined>(undefined);
   const [partner2, setPartner2] = useState<Types.Node | undefined>(undefined);
-
-  useEffect(() => {
-    const radioItemList: Types.RadioItemList = {};
-
-    for (const key in DBState.linkTypes) {
-      if (Object.prototype.hasOwnProperty.call(DBState.linkTypes, key)) {
-        const linkType = DBState.linkTypes[key];
-
-        const newRadioItem: Types.RadioItem = {
-          id: linkType.id,
-          name: linkType.name,
-          color: linkType.color,
-        };
-
-        radioItemList[linkType.id] = newRadioItem;
-      }
-    }
-
-    setLinkTypes({
-      items: { ...radioItemList },
-    });
-  }, [DBState.linkTypes]);
-
-  useEffect(() => {
-    const difference = Object.keys(linkTypes.items).filter(
-      (x) => !prevLinkItemIds.includes(x),
-    );
-
-    setPrevLinkItemIds(Object.keys(linkTypes.items));
-
-    difference.forEach((key) => {
-      const id = parseInt(key);
-
-      if (linkTypes.items[id]) {
-        const newLinkType: Types.LinkType = {
-          name: linkTypes.items[id].name,
-          color: linkTypes.items[id].color ?? "#ffffff",
-          id: id,
-        };
-
-        update("linkTypes", newLinkType, "change", true);
-      }
-    });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [linkTypes.items]);
-
-  useEffect(() => {
-    for (const key in linkTypes.items) {
-      if (Object.prototype.hasOwnProperty.call(linkTypes.items, key)) {
-        const element = linkTypes.items[key];
-        const index = parseInt(key);
-
-        if (DBState.linkTypes[key] !== undefined) {
-          if (
-            DBState.linkTypes[key].color !== element.color ||
-            DBState.linkTypes[key].name !== element.name
-          ) {
-            const newLinkType: Types.LinkType = {
-              name: linkTypes.items[key].name,
-              color: linkTypes.items[key].color ?? "#ffffff",
-              id: index,
-            };
-
-            update("linkTypes", newLinkType, "change", true);
-          }
-        }
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [linkTypes.items]);
+  const [selected, setSelected] = useState<Types.LinkType | undefined>(
+    undefined,
+  );
 
   function submit() {
     if (partner1 === undefined) throw new Error("Partner 1 undefined");
     if (partner2 === undefined) throw new Error("Partner 2 undefined");
-    if (linkTypes.selected === undefined) throw new Error("LinkType undefined");
+    if (selected === undefined) throw new Error("LinkType undefined");
 
-    const linkType: Types.LinkType = DBState.linkTypes[linkTypes.selected?.id];
-
-    const rel = new ClassLink(
+    const link = new ClassLink(
       { partner1: partner1, partner2: partner2 },
-      linkType,
+      DBState.linkTypes[selected.id],
     );
 
-    update("links", rel, "add");
+    update("links", link, "add", true);
   }
 
-  function deleteLinkType(id: number) {
-    remove(DBState.linkTypes[id], true);
+  function onSelectedChange(selectedItem: Types.RadioItem | undefined) {
+    if (selectedItem !== undefined) {
+      setSelected(DBState.linkTypes[selectedItem?.id]);
+      return;
+    }
+    setSelected(undefined);
+  }
+
+  function onItemChanged(changedItem: Types.RadioItem) {
+    update(
+      "linkTypes",
+      { color: changedItem.color, id: changedItem.id, name: changedItem.name },
+      "change",
+      true,
+    );
+  }
+
+  function onItemAdded(addedItem: Types.RadioItem) {
+    update(
+      "linkTypes",
+      { color: addedItem.color, id: addedItem.id, name: addedItem.name },
+      "add",
+      true,
+    );
+  }
+
+  function onItemDeleted(deltedItem: Types.RadioItem) {
+    remove(DBState.linkTypes[deltedItem.id], true);
   }
 
   return (
@@ -147,15 +66,15 @@ export default function AddRelationship() {
         <SearchField setResult={setPartner1} />
         <SearchField setResult={setPartner2} />
       </div>
-
       <RadioInput
-        items={linkTypes}
-        setItems={setLinkTypes}
-        extendable={true}
-        color={true}
-        visibleElements={5}
+        inputItems={DBState.linkTypes}
         deletable={true}
-        deleteID={deleteLinkType}
+        colorMode={true}
+        extendable={true}
+        onSelectedChange={onSelectedChange}
+        onItemChanged={onItemChanged}
+        onItemAdded={onItemAdded}
+        onItemDeleted={onItemDeleted}
       />
       <Button
         label="Add Relationship"
@@ -207,7 +126,10 @@ function SearchField({
           textRef.current.value = suggestions[0].name;
           setResult(suggestions[0]);
           setSuggestions([]);
+          return;
         }
+        setSuggestions([]);
+        textRef.current.value = "";
       }
     }
   }
@@ -270,4 +192,3 @@ function SearchListItem({
     </li>
   );
 }
-*/
