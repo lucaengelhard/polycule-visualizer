@@ -1,13 +1,12 @@
 import { useContext, useRef, useState } from "react";
 import { DBContext } from "../App";
-
 import { Link } from "lucide-react";
+
 import { Types } from "../types";
+import ClassLink from "../classes/link";
 
 import { remove, update } from "../db";
-import ClassLink from "../classes/link";
-import { Button, TextInput } from "./components";
-import RadioInput from "./components/RadioInput";
+import { Button, RadioInput, TextInput } from "./components";
 
 export default function AddRelationship() {
   const { DBState } = useContext(DBContext);
@@ -67,7 +66,7 @@ export default function AddRelationship() {
         <SearchField setResult={setPartner2} />
       </div>
       <RadioInput
-        inputItems={DBState.linkTypes}
+        items={DBState.linkTypes}
         deletable={true}
         colorMode={true}
         extendable={true}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Types } from "../../types";
 import { CheckCircle, Circle, Link, PlusCircle, Trash2 } from "lucide-react";
 import { Button, ColorInput, TextInput } from ".";
@@ -7,64 +7,37 @@ import { getNewIndex, hexToRGBA } from "../../utils/helpers";
 //Todo: Manual selected set prop
 export default function RadioInput<T extends Types.RadioItemList>({
   extendable,
-  inputItems,
+  items,
   colorMode,
   deletable,
   onSelectedChange,
   onItemAdded,
   onItemChanged,
   onItemDeleted,
+  selected,
 }: {
   deletable?: boolean;
   colorMode?: boolean;
   extendable?: boolean;
-  inputItems: T;
+  items: T;
   onSelectedChange: (selectedItem: Types.RadioItem | undefined) => void;
   onItemChanged: (changedItem: Types.RadioItem) => void;
   onItemAdded: (addedItem: Types.RadioItem) => void;
   onItemDeleted: (deltedItem: Types.RadioItem) => void;
+  selected?: Types.RadioItem;
 }) {
-  const [items, setItems] = useState<Types.RadioItemList>(inputItems);
-  const [selected, setSelected] = useState<Types.RadioItem | undefined>(
-    undefined,
-  );
-
-  useEffect(() => {
-    setItems(inputItems);
-  }, [inputItems]);
-
-  useEffect(() => {
-    onSelectedChange(selected);
-  }, [onSelectedChange, selected]);
-
   const toggleSelected = useCallback(
     (id: number) => {
       if (items === undefined) return;
-      if (selected === undefined) {
-        setSelected(items[id]);
-        return;
-      }
-      if (selected.id === id) {
-        setSelected(undefined);
-        return;
-      }
-      setSelected(items[id]);
+      onSelectedChange(items[id]);
     },
-    [items, selected],
+    [items, onSelectedChange],
   );
 
   const updateItem = useCallback(
     (id: number, name: string, color: string | undefined) => {
       if (items === undefined) return;
 
-      setItems({
-        ...items,
-        [id]: {
-          ...items[id],
-          name: name,
-          color: color,
-        },
-      });
       onItemChanged({ id: id, name: name, color: color });
     },
     [items, onItemChanged],
@@ -73,9 +46,6 @@ export default function RadioInput<T extends Types.RadioItemList>({
   const deleteItem = useCallback(
     (id: number) => {
       if (items === undefined) return;
-      const newItems = { ...items };
-      delete newItems[id];
-      setItems({ ...newItems });
       onItemDeleted(items[id]);
     },
     [items, onItemDeleted],
@@ -84,14 +54,6 @@ export default function RadioInput<T extends Types.RadioItemList>({
   const addItem = useCallback(
     (name: string, color: string) => {
       const id = getNewIndex(items);
-      setItems({
-        ...items,
-        [id]: {
-          id: id,
-          name: name,
-          color: color,
-        },
-      });
       onItemAdded({
         id: id,
         name: name,
