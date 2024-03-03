@@ -15,6 +15,12 @@ export const db: Types.DBData = {
   linkTypes: {},
 };
 
+export const noLink: Types.LinkType = {
+  name: "noLink",
+  id: -1,
+  color: "#ffffff",
+};
+
 const dbUpDate = new Event("dbUpDate");
 const NodeUpDate = new Event("NodeUpdate");
 const LinkUpdate = new Event("LinkUpdate");
@@ -212,8 +218,8 @@ export function set(input: unknown, render?: boolean) {
   }
 
   if (checkGraphDataType(res)) {
-    db.nodes = res.nodes;
-    db.links = res.links;
+    db.nodes = importNodesToDBNodes(res.nodes);
+    db.links = importLinksToDBLinks(res.links);
     db.linkTypes = res.linkTypes;
 
     if (render === true || render === undefined) {
@@ -224,7 +230,30 @@ export function set(input: unknown, render?: boolean) {
   }
 }
 
+function importNodesToDBNodes(importNodes: Types.NodeList): Types.NodeList {
+  const returnNodes = importNodes;
+
+  Object.values(importNodes).forEach((node) => {
+    returnNodes[node.id].links = new Set(node.links);
+  });
+
+  return returnNodes;
+}
+
+function importLinksToDBLinks(importLinks: Types.LinkList): Types.LinkList {
+  const returnLinks = importLinks;
+
+  Object.values(importLinks).forEach((link) => {
+    returnLinks[link.id].source.links = new Set(link.source.links);
+    returnLinks[link.id].target.links = new Set(link.target.links);
+  });
+
+  return returnLinks;
+}
+
 export function remove<T extends Types.DBType>(payload: T, render?: boolean) {
+  console.log(payload);
+
   if (typeCheckNode(payload)) {
     delete db.nodes[payload.id];
 

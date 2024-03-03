@@ -49,6 +49,7 @@ export default function Graph() {
         target: link.target.id.toString(),
       };
     });
+
     setGraphData({ nodes: nodes, links: links });
   }, [DBState.links, DBState.nodes]);
 

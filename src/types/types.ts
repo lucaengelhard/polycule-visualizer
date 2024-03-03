@@ -72,6 +72,15 @@ export type DBBufferStatus = {
   linkTypes: boolean | undefined;
 };
 
+//History Types
+export interface HistoryLink extends Link {
+  date: Date;
+}
+
+export type HistoryLinkList = {
+  [key: number]: HistoryLink;
+};
+
 //Graph Data
 export type GraphData = {
   nodes: Node[];

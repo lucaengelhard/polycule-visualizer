@@ -7,23 +7,20 @@ export default class Link {
   source: Types.Node;
   target: Types.Node;
   type: Types.LinkType;
-
-  //history?: Types.RelHistory;
   distance: number;
+  history?: Types.HistoryLinkList;
 
   constructor(
     partners: { partner1: Types.Node; partner2: Types.Node },
     type: Types.LinkType,
-
-    //history?: Types.RelHistory,
+    history?: Types.HistoryLinkList,
   ) {
     this.id = getNewIndex(db.links);
     this.source = partners.partner1;
     this.target = partners.partner2;
 
     this.type = type;
-
-    //this.history = history;
+    this.history = history;
 
     if (typeof partners.partner1.location.lat === "string") {
       partners.partner1.location.lat = parseFloat(
