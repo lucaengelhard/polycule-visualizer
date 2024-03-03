@@ -2,9 +2,9 @@ import { useRef, useState } from "react";
 
 import { UserRoundPlus } from "lucide-react";
 import { geoCode } from "../utils/geocode";
-import { update } from "../db";
 
 import { Button, TextInput } from "./components";
+import { update } from "../db/db";
 
 export default function AddPerson() {
   const [name, setName] = useState<string | undefined>(undefined);

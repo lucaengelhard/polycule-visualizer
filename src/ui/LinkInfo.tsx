@@ -2,10 +2,10 @@ import { useContext, useMemo } from "react";
 import { DBContext, EditContext } from "../App";
 import { CornerDownLeft, CornerUpLeft, Trash2, UserRound } from "lucide-react";
 
-import { remove, update } from "../db";
 import { Types } from "../types";
 import { Button, RadioInput } from "./components";
 import useConfirm from "./components/ConfirmDialog";
+import { remove, update } from "../db/db";
 
 export default function LinkInfo() {
   const { DBState } = useContext(DBContext);

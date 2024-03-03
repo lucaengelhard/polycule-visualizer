@@ -1,13 +1,14 @@
-import * as Types from "../types";
+import { Types } from "../types";
 import { useContext, useEffect, useRef, useState } from "react";
 import { DBContext, EditContext } from "../App";
 import { hexToRGBA } from "../utils/helpers";
 import { Pencil, Trash2 } from "lucide-react";
-import { remove, update } from "../db";
+
 import { geoCode } from "../utils/geocode";
 import { Button, TextInput } from "./components";
 
 import useConfirm from "./components/ConfirmDialog";
+import { update, remove } from "../db/db";
 
 export default function NodeInfo() {
   const { editState, setEditState } = useContext(EditContext);

@@ -1,6 +1,6 @@
 import { distance, getNewIndex } from "../utils/helpers";
-import * as Types from "../types";
-import { db } from "../db";
+import { Types } from "../types";
+import { db } from "../db/db";
 
 export default class Link {
   id: number;

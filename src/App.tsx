@@ -1,8 +1,9 @@
 import { createContext, useEffect, useState } from "react";
 import UI from "./ui";
 import { Types } from "./types";
-import { db } from "./db";
+
 import { ConfirmDialogProvider } from "./ui/components/ConfirmDialog";
+import { db } from "./db/db";
 
 export const DBContext = createContext<{
   DBState: Types.DBData;

@@ -1,4 +1,4 @@
-import * as Types from "../../types";
+import { Types } from "../../types";
 import { ReactNode, useEffect, useState } from "react";
 
 export default function Button({

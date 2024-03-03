@@ -1,6 +1,6 @@
-import { Position } from "../types";
+import { Types } from "../types";
 
-export async function geoCode(query: string): Promise<Position> {
+export async function geoCode(query: string): Promise<Types.Position> {
   const searchUrl = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${query}`;
 
   const res = await fetch(searchUrl);

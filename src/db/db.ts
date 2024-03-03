@@ -6,7 +6,7 @@ import {
   typeCheckLinkType,
 } from "../types/typechecks";
 
-import * as Types from "../types";
+import { Types } from "../types";
 import { bufferTimeCalculator, getNewIndex } from "../utils/helpers";
 
 export const db: Types.DBData = {
