@@ -65,27 +65,30 @@ export default function UI() {
             </div>
           </div>
           <div className="flex h-min w-min gap-3 p-3">
-            <UIWindow
-              header={{ label: "Person:", icon: <UserRound /> }}
-              closeButton={{ label: "Close", icon: <XCircle /> }}
-              openCondition={editState.node !== undefined}
-              closeAction={() =>
-                setEditState({ ...editState, node: undefined })
-              }
-            >
-              <NodeInfo />
-            </UIWindow>
-
-            <UIWindow
-              header={{ label: "Relationship:", icon: <Link /> }}
-              closeButton={{ label: "Close", icon: <XCircle /> }}
-              openCondition={editState.link !== undefined}
-              closeAction={() =>
-                setEditState({ ...editState, link: undefined })
-              }
-            >
-              <LinkInfo />
-            </UIWindow>
+            {editState.node !== undefined && (
+              <UIWindow
+                header={{ label: "Person:", icon: <UserRound /> }}
+                closeButton={{ label: "Close", icon: <XCircle /> }}
+                openCondition={editState.node !== undefined}
+                closeAction={() =>
+                  setEditState({ ...editState, node: undefined })
+                }
+              >
+                <NodeInfo />
+              </UIWindow>
+            )}
+            {editState.link !== undefined && (
+              <UIWindow
+                header={{ label: "Relationship:", icon: <Link /> }}
+                closeButton={{ label: "Close", icon: <XCircle /> }}
+                openCondition={editState.link !== undefined}
+                closeAction={() =>
+                  setEditState({ ...editState, link: undefined })
+                }
+              >
+                <LinkInfo />
+              </UIWindow>
+            )}
           </div>
         </div>
       </div>

@@ -75,6 +75,7 @@ export default function AddRelationship() {
         onItemAdded={onItemAdded}
         onItemDeleted={onItemDeleted}
         addPlaceholder="Add Relationship Type"
+        selected={selected}
       />
       <Button
         label="Add Relationship"
@@ -128,8 +129,6 @@ function SearchField({
           setSuggestions([]);
           return;
         }
-        setSuggestions([]);
-        textRef.current.value = "";
       }
     }
   }

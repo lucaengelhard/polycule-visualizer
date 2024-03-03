@@ -1,8 +1,9 @@
-import { useContext, useMemo } from "react";
+import { useContext } from "react";
 import { DBContext, EditContext } from "../App";
 import { CornerDownLeft, CornerUpLeft, Trash2, UserRound } from "lucide-react";
 
 import { Types } from "../types";
+import ClassLink from "../classes/link";
 import { Button, RadioInput } from "./components";
 import useConfirm from "./components/ConfirmDialog";
 import { remove, update } from "../db/db";
@@ -12,10 +13,14 @@ export default function LinkInfo() {
   const { editState, setEditState } = useContext(EditContext);
   const confirm = useConfirm();
 
-  const link = useMemo(() => {
-    if (editState.link === undefined) return;
-    return DBState.links[editState.link];
-  }, [DBState.links, editState.link]);
+  let link: ClassLink | undefined = undefined;
+
+  if (
+    editState.link !== undefined &&
+    DBState.links[editState.link] !== undefined
+  ) {
+    link = DBState.links[editState.link];
+  }
 
   async function deleteLink() {
     const choice = await confirm({
@@ -75,7 +80,10 @@ export default function LinkInfo() {
                   label={link.source.name}
                   icon={<UserRound />}
                   onClick={() =>
-                    setEditState({ ...editState, node: link.target.id })
+                    setEditState({
+                      ...editState,
+                      node: link ? link.source.id : undefined,
+                    })
                   }
                   additionalClasses="transition-transform
                 hover:translate-x-2"
@@ -84,7 +92,10 @@ export default function LinkInfo() {
                   label={link.target.name}
                   icon={<UserRound />}
                   onClick={() =>
-                    setEditState({ ...editState, node: link.target.id })
+                    setEditState({
+                      ...editState,
+                      node: link ? link.target.id : undefined,
+                    })
                   }
                   additionalClasses="transition-transform
                 hover:translate-x-2"
@@ -107,7 +118,7 @@ export default function LinkInfo() {
               onItemChanged={onItemChanged}
               onItemAdded={onItemAdded}
               onItemDeleted={onItemDeleted}
-              selected={DBState.links[link.id].type}
+              selected={link ? link.type : undefined}
               addPlaceholder="Add Relationship Type"
             />
           </div>

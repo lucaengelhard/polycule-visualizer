@@ -166,7 +166,7 @@ export function update(
       DBBufferStatus[type] = true;
       setTimeout(() => {
         if (DBBufferStatus[type]) {
-          console.log(type);
+          //console.log(type);
           DBBufferStatus[type] = false;
           document.dispatchEvent(dbUpDate);
         }
