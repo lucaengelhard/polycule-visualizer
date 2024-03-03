@@ -108,6 +108,7 @@ export default function LinkInfo() {
               onItemAdded={onItemAdded}
               onItemDeleted={onItemDeleted}
               selected={DBState.links[link.id].type}
+              addPlaceholder="Add Relationship Type"
             />
           </div>
         </div>

@@ -74,6 +74,7 @@ export default function AddRelationship() {
         onItemChanged={onItemChanged}
         onItemAdded={onItemAdded}
         onItemDeleted={onItemDeleted}
+        addPlaceholder="Add Relationship Type"
       />
       <Button
         label="Add Relationship"

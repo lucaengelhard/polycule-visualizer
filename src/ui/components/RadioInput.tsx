@@ -15,6 +15,7 @@ export default function RadioInput<T extends Types.RadioItemList>({
   onItemChanged,
   onItemDeleted,
   selected,
+  addPlaceholder,
 }: {
   deletable?: boolean;
   colorMode?: boolean;
@@ -25,6 +26,7 @@ export default function RadioInput<T extends Types.RadioItemList>({
   onItemAdded: (addedItem: Types.RadioItem) => void;
   onItemDeleted: (deltedItem: Types.RadioItem) => void;
   selected?: Types.RadioItem;
+  addPlaceholder?: string;
 }) {
   const toggleSelected = useCallback(
     (id: number) => {
@@ -85,6 +87,7 @@ export default function RadioInput<T extends Types.RadioItemList>({
             addItem={addItem}
             deletable={deletable}
             colorMode={colorMode}
+            addPlaceholder={addPlaceholder}
           />
         )}
       </div>
@@ -160,10 +163,12 @@ function AddRadioInputItem({
   deletable,
   colorMode,
   addItem,
+  addPlaceholder,
 }: {
   deletable?: boolean;
   colorMode?: boolean;
   addItem: (name: string, color: string) => void;
+  addPlaceholder?: string;
 }) {
   const [name, setName] = useState<string | undefined>(undefined);
   const [color, setColor] = useState<string>("#ffffff");
@@ -203,7 +208,11 @@ function AddRadioInputItem({
             <PlusCircle />
           </button>
         )}
-        <TextInput ref={textRef} onBlur={(e) => setName(e.target.value)} />
+        <TextInput
+          placeholder={addPlaceholder}
+          ref={textRef}
+          onBlur={(e) => setName(e.target.value)}
+        />
       </div>
       <div className="flex items-center gap-2">
         {colorMode && (
