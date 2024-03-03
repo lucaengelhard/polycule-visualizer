@@ -48,6 +48,7 @@ export default function UIWindow({
       closeWindow();
     } else {
       openWindow();
+      setLastWindowState();
     }
   }
   function closeWindow() {
