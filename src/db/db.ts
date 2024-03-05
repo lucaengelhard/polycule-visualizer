@@ -17,6 +17,11 @@ export function add(payload: Types.Node | Types.Type | Link) {
   if (TypeChecks.node(payload)) {
     payload.id = Helpers.getNewIndex(data.nodes, payload.id);
     data.nodes.set(payload.id, payload);
+
+    const addEvent = new CustomEvent("db-add", {
+      detail: { payload: payload, type: "node" },
+    });
+    document.dispatchEvent(addEvent);
     return data.nodes.get(payload.id);
   }
 
@@ -38,12 +43,21 @@ export function add(payload: Types.Node | Types.Type | Link) {
       info.maxDistance = payload.distance;
     }
 
+    const addEvent = new CustomEvent("db-add", {
+      detail: { payload: payload, type: "link" },
+    });
+    document.dispatchEvent(addEvent);
     return data.links.get(payload.id);
   }
 
   if (TypeChecks.type(payload)) {
     payload.id = Helpers.getNewIndex(data.types, payload.id);
     data.types.set(payload.id, payload);
+
+    const addEvent = new CustomEvent("db-add", {
+      detail: { payload: payload, type: "type" },
+    });
+    document.dispatchEvent(addEvent);
     return data.types.get(payload.id);
   }
 
@@ -101,6 +115,11 @@ export function remove(id: number, type: "node" | "type" | "link") {
       throw new Error(`type: "${type}" is not defined`);
       break;
   }
+
+  const removeEvent = new CustomEvent("db-remove", {
+    detail: { id: id, type: type },
+  });
+  document.dispatchEvent(removeEvent);
 
   Helpers.setMaxDistance();
 }
@@ -243,6 +262,12 @@ export function update<T extends "node" | "type" | "link">(
         });
       });
     }
+
+    const updateEvent = new CustomEvent("db-update", {
+      detail: { id: id, type: type, node: refNode },
+    });
+    document.dispatchEvent(updateEvent);
+
     Helpers.setMaxDistance();
     return refNode;
   }
@@ -271,6 +296,12 @@ export function update<T extends "node" | "type" | "link">(
     if (toChangeLink.snapshots !== undefined) {
       refLink.snapshots = toChangeLink.snapshots;
     }
+
+    const updateEvent = new CustomEvent("db-update", {
+      detail: { id: id, type: type, node: refLink },
+    });
+    document.dispatchEvent(updateEvent);
+
     Helpers.setMaxDistance();
     return refLink;
   }
@@ -282,6 +313,11 @@ export function update<T extends "node" | "type" | "link">(
     const toChangeType = toChange as Omit<Partial<Types.Type>, "id">;
 
     refType = { ...refType, ...toChangeType };
+
+    const updateEvent = new CustomEvent("db-update", {
+      detail: { id: id, type: type, node: refType },
+    });
+    document.dispatchEvent(updateEvent);
 
     Helpers.setMaxDistance();
     return refType;
@@ -298,8 +334,17 @@ export function set(input: unknown) {
     data.links = { ...inputObject.links };
     data.nodes = { ...inputObject.nodes };
     data.types = { ...inputObject.types };
+
+    const setEvent = new CustomEvent("db-set", {
+      detail: data,
+    });
+    document.dispatchEvent(setEvent);
     Helpers.setMaxDistance();
   } else {
+    const setEvent = new CustomEvent("db-set", {
+      detail: undefined,
+    });
+    document.dispatchEvent(setEvent);
     throw "Parsing Error while setting data";
   }
 }
