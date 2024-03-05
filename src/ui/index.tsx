@@ -1,121 +1,68 @@
-import { History, Link, UserRound, UserRoundPlus, XCircle } from "lucide-react";
-import AddPerson from "./AddPerson";
-import AddRelationship from "./AddRelationship";
+import { save, set } from "@/db/db";
 
-import LinkInfo from "./LinkInfo";
-import NodeInfo from "./NodeInfo";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  //MenubarSeparator,
+  MenubarShortcut,
+  MenubarTrigger,
+} from "@/components/ui/menubar";
+import AddPerson from "./AddPerson-v2";
 
-import { ImportDB, SaveDB } from "./SaveLoad";
-import UIWindow from "./components/UIWindow";
-import Graph from "./graph";
-import { ReactNode, createContext, useContext, useState } from "react";
-import { DBContext, EditContext } from "../App";
-import { EditLinkHistory } from "./EditLinkHistory";
-
-export const WindowContext = createContext<{
-  windowState: { count: number; last?: number };
-  setWindowState: React.Dispatch<
-    React.SetStateAction<{ count: number; last?: number }>
-  >;
-}>(undefined);
-
-export function WindowContextProvider({ children }: { children: ReactNode }) {
-  const [windowState, setWindowState] = useState<{
-    count: number;
-    last?: number;
-  }>({ count: 0, last: undefined });
-  return (
-    <WindowContext.Provider value={{ windowState, setWindowState }}>
-      {children}
-    </WindowContext.Provider>
-  );
-}
-
-//TODO: Error popup component & manual DBContext reload Button
 export default function UI() {
-  const { editState, setEditState } = useContext(EditContext);
-  const { DBState } = useContext(DBContext);
+  function importDB() {
+    const fileUploadElement = document.createElement("input");
+    fileUploadElement.type = "file";
+    fileUploadElement.accept = ".json";
+    fileUploadElement.click();
 
+    fileUploadElement.addEventListener("change", () => {
+      const files = fileUploadElement.files;
+      if (files?.length ?? 0 > 0) {
+        const file = files?.item(0);
+        const reader = new FileReader();
+
+        if (file) {
+          reader.readAsText(file, "utf-8");
+        }
+
+        reader.addEventListener("load", (e) => {
+          if (typeof e.target?.result === "string") {
+            set(e.target.result);
+          }
+        });
+      }
+    });
+  }
   return (
-    <WindowContextProvider>
-      <div>
-        <div className="fixed inset-0 z-0">
-          <Graph />
-        </div>
-        <div className="pointer-events-none fixed inset-0 z-10">
-          <div className="flex w-full justify-between gap-3 p-3">
-            <div className="flex gap-3">
-              <UIWindow
-                header={{ label: "Add Person:", icon: <UserRoundPlus /> }}
-                openButton={{ label: "Add Person", icon: <UserRoundPlus /> }}
-                closeButton={{ label: "Close", icon: <XCircle /> }}
-              >
-                <AddPerson />
-              </UIWindow>
-
-              <UIWindow
-                header={{ label: "Add Relationship:", icon: <Link /> }}
-                openButton={{ label: "Add Relationship", icon: <Link /> }}
-                closeButton={{ label: "Close", icon: <XCircle /> }}
-              >
-                {<AddRelationship />}
-              </UIWindow>
-            </div>
-            <div className="flex gap-3">
-              <SaveDB />
-              <ImportDB />
-            </div>
-          </div>
-          <div className="flex h-min w-min gap-3 p-3">
-            {editState.node !== undefined &&
-              DBState.nodes[editState.node] !== undefined && (
-                <UIWindow
-                  header={{ label: "Person:", icon: <UserRound /> }}
-                  closeButton={{ label: "Close", icon: <XCircle /> }}
-                  openCondition={editState.node !== undefined}
-                  closeAction={() =>
-                    setEditState({ ...editState, node: undefined })
-                  }
-                >
-                  <NodeInfo />
-                </UIWindow>
-              )}
-            {editState.link !== undefined &&
-              DBState.links[editState.link] !== undefined && (
-                <UIWindow
-                  header={{ label: "Relationship:", icon: <Link /> }}
-                  closeButton={{ label: "Close", icon: <XCircle /> }}
-                  openCondition={editState.link !== undefined}
-                  closeAction={() =>
-                    setEditState({
-                      ...editState,
-                      link: undefined,
-                      linkHistory: undefined,
-                    })
-                  }
-                >
-                  <LinkInfo />
-                </UIWindow>
-              )}
-            {editState.linkHistoryOpen === true &&
-              editState.link !== undefined && (
-                <UIWindow
-                  header={{ label: "Relationship history:", icon: <History /> }}
-                  closeButton={{ label: "Close", icon: <XCircle /> }}
-                  openCondition={editState.linkHistoryOpen === true}
-                  closeAction={() =>
-                    setEditState({
-                      ...editState,
-                      linkHistoryOpen: false,
-                    })
-                  }
-                >
-                  <EditLinkHistory linkID={editState.link} />
-                </UIWindow>
-              )}
-          </div>
-        </div>
-      </div>
-    </WindowContextProvider>
+    <>
+      <Menubar>
+        <MenubarMenu>
+          <MenubarTrigger>File</MenubarTrigger>
+          <MenubarContent>
+            <MenubarItem onClick={save}>
+              Save <MenubarShortcut>CMD+S</MenubarShortcut>
+            </MenubarItem>
+            <MenubarItem onClick={importDB}>
+              Import <MenubarShortcut>CMD+I</MenubarShortcut>
+            </MenubarItem>
+          </MenubarContent>
+        </MenubarMenu>
+        <MenubarMenu>
+          <MenubarTrigger>Add</MenubarTrigger>
+          <MenubarContent>
+            <MenubarItem>
+              Person <MenubarShortcut>CMD+SHIFT+P</MenubarShortcut>
+            </MenubarItem>
+            <MenubarItem>
+              Relationship <MenubarShortcut>CMD+SHIFT+R</MenubarShortcut>
+            </MenubarItem>
+          </MenubarContent>
+        </MenubarMenu>
+      </Menubar>
+      <AddPerson />
+    </>
   );
 }

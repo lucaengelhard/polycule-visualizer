@@ -38,3 +38,8 @@ export type GraphData = {
   nodes: Node[];
   links: Link[];
 };
+
+export type WindowState = {
+  windows: Set<number>;
+  order: number[];
+};
