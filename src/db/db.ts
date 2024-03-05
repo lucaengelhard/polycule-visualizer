@@ -1,333 +1,351 @@
-import ClassLink from "../classes/link";
-import {
-  checkGraphDataType,
-  typeCheckNode,
-  typeCheckLink,
-  typeCheckLinkType,
-} from "../types/typechecks";
+/* eslint-disable no-case-declarations */
+import Link from "@/classes/link";
+import { Types, TypeChecks } from "@/types";
+import { Helpers } from "@/utils";
 
-import { Types } from "../types";
-import { bufferTimeCalculator, getNewIndex } from "../utils/helpers";
-
-export const db: Types.DBData = {
-  nodes: {},
-  links: {},
-  linkTypes: {},
+export const data: Types.DBData = {
+  nodes: new Map(),
+  links: new Map(),
+  types: new Map(),
 };
 
-export const noLink: Types.LinkType = {
-  name: "noLink",
-  id: -1,
-  color: "#ffffff",
-};
+export function add(payload: Types.Node | Types.Type | Link) {
+  if (TypeChecks.node(payload)) {
+    payload.id = Helpers.getNewIndex(data.nodes, payload.id);
+    data.nodes.set(payload.id, payload);
+    return data.nodes.get(payload.id);
+  }
 
-const dbUpDate = new Event("dbUpDate");
-const NodeUpDate = new Event("NodeUpdate");
-const LinkUpdate = new Event("LinkUpdate");
-const LinkTypeUpdate = new Event("LinkTypeUpdate");
+  if (TypeChecks.link(payload) && payload instanceof Link) {
+    payload.id = Helpers.getNewIndex(data.links, payload.id);
+    data.links.set(payload.id, payload);
 
-const DBRenderTimes: Types.DBRenderTimes = {
-  nodes: undefined,
-  links: undefined,
-  linkTypes: undefined,
-};
+    const source = data.nodes.get(payload.source);
+    const target = data.nodes.get(payload.target);
 
-const DBBufferStatus: Types.DBBufferStatus = {
-  nodes: undefined,
-  links: undefined,
-  linkTypes: undefined,
-};
+    if (source === undefined || target === undefined) {
+      throw new Error("source or target undefined");
+    }
 
-export function update(
-  type: "nodes" | "links" | "linkTypes",
-  payload: unknown,
-  action: "add" | "change",
-  render?: boolean,
-) {
+    source.links.add(payload.id);
+    target.links.add(payload.id);
+    return data.links.get(payload.id);
+  }
+
+  if (TypeChecks.type(payload)) {
+    payload.id = Helpers.getNewIndex(data.types, payload.id);
+    data.types.set(payload.id, payload);
+    return data.types.get(payload.id);
+  }
+
+  throw new Error("Adding payload to DB failed");
+}
+
+export function remove(id: number, type: "node" | "type" | "link") {
   switch (type) {
-    case "nodes": {
-      if (!typeCheckNode(payload)) throw new Error("Node Parsing Error");
+    case "node":
+      const node = data.nodes.get(id);
+      if (node === undefined) return;
 
-      if (action === "change") {
-        Array.from(payload.links).forEach((id) => {
-          if (
-            db.links[id] !== undefined &&
-            db.nodes[payload.id] !== undefined &&
-            (payload.name !== db.nodes[payload.id].name ||
-              payload.location.name !== db.nodes[payload.id].location.name)
-          ) {
-            let newSource: Types.Node = db.links[id].source;
-            let newTarget: Types.Node = db.links[id].target;
-            if (db.links[id].source.id === payload.id) {
-              newSource = payload;
-            } else {
-              newSource = db.links[id].source;
-            }
-
-            if (db.links[id].target.id === payload.id) {
-              newTarget = payload;
-            } else {
-              newTarget = db.links[id].target;
-            }
-
-            db.links[id] = new ClassLink(
-              { partner1: newSource, partner2: newTarget },
-              db.links[id].type,
-            );
-          }
-        });
-      }
-
-      break;
-    }
-    case "links": {
-      console.log(payload);
-
-      if (!typeCheckLink(payload)) throw new Error("Link Parsing Error");
-
-      const newSourceLinks: Set<keyof Types.LinkList> = new Set(
-        db.nodes[payload.source.id].links,
-      );
-
-      newSourceLinks.add(payload.id);
-      const newSource: Types.Node = {
-        name: payload.source.name,
-        links: newSourceLinks,
-        id: payload.source.id,
-        location: payload.source.location,
-      };
-
-      const newTargetLinks: Set<keyof Types.LinkList> = new Set(
-        db.nodes[payload.target.id].links,
-      );
-
-      newTargetLinks.add(payload.id);
-      const newTarget: Types.Node = {
-        name: payload.target.name,
-        links: newTargetLinks,
-        id: payload.target.id,
-        location: payload.target.location,
-      };
-
-      update("nodes", newSource, "change", false);
-
-      update("nodes", newTarget, "change", false);
-
-      payload.source = newSource;
-      payload.target = newTarget;
-
-      break;
-    }
-    case "linkTypes": {
-      if (!typeCheckLinkType(payload))
-        throw new Error("Link Type Parsing Error");
-
-      const toChange = Object.values(db.links).filter(
-        (link) => link.type.id === payload.id,
-      );
-
-      toChange.forEach((link) => {
-        const newLink = { ...link };
-
-        if (link.type.color !== payload.color) {
-          newLink.type.color = payload.color;
-        }
-
-        if (link.type.name !== payload.name) {
-          newLink.type.name = payload.name;
-        }
-
-        update("links", newLink, "change", false);
+      node.links.forEach((link) => {
+        data.links.delete(link);
       });
 
-      if (
-        action === "change" &&
-        db.linkTypes[payload.id] !== undefined &&
-        payload.color === db.linkTypes[payload.id].color &&
-        payload.name === db.linkTypes[payload.id].name
-      ) {
-        render = false;
+      data.nodes.delete(id);
+      break;
+    case "link":
+      const link = data.links.get(id);
+      if (link === undefined) return;
+
+      const source = data.nodes.get(link.source);
+      if (source !== undefined) {
+        source.links.delete(id);
       }
 
+      const target = data.nodes.get(link.target);
+      if (target !== undefined) {
+        target.links.delete(id);
+      }
+
+      data.links.delete(id);
       break;
-    }
-    default:
-      throw new Error("No type defined");
-  }
+    case "type":
+      const type = data.types.get(id);
 
-  let length: number | undefined = undefined;
-  let i = payload.id;
+      if (type === undefined) return;
 
-  if (action === "add") {
-    i = getNewIndex(db[type]);
-    payload.id = i;
-  }
+      const links = Array.from(data.links.values()).filter(
+        (link) => link.type === id,
+      );
 
-  db[type][i] = payload;
-  length = Object.keys(db[type]).length;
+      links.forEach((link) => {
+        const refLink = data.links.get(link.id);
+        if (refLink === undefined) return;
 
-  if (render === true || render === undefined) {
-    if (
-      DBRenderTimes[type] !== undefined &&
-      bufferTimeCalculator(DBRenderTimes[type] as Date, 10)
-    ) {
-      DBBufferStatus[type] = true;
-      setTimeout(() => {
-        if (DBBufferStatus[type]) {
-          //console.log(type);
-          DBBufferStatus[type] = false;
-          document.dispatchEvent(dbUpDate);
-        }
-      }, 3000);
-      return length;
-    }
+        //TODO: Define "noLink" link type
+        refLink.type = -1;
+      });
 
-    console.log(
-      type,
-      db,
-      render === true || render === undefined ? "render" : "no render",
-    );
-
-    DBRenderTimes[type] = new Date();
-    DBBufferStatus[type] = false;
-    triggerEvent(type);
-  }
-
-  return length;
-}
-
-function triggerEvent(type: "nodes" | "links" | "linkTypes") {
-  switch (type) {
-    case "nodes":
-      document.dispatchEvent(NodeUpDate);
-      break;
-    case "links":
-      document.dispatchEvent(LinkUpdate);
-      break;
-    case "linkTypes":
-      document.dispatchEvent(LinkTypeUpdate);
+      data.types.delete(id);
       break;
     default:
-      document.dispatchEvent(dbUpDate);
+      throw new Error(`type: "${type}" is not defined`);
       break;
   }
 }
 
-export function set(input: unknown, render?: boolean) {
-  let res = input;
-  if (typeof input === "string") {
-    res = JSON.parse(input);
-  }
+export function update<T extends "node" | "type" | "link">(
+  id: number,
+  type: T,
+  toChange: Omit<
+    Partial<
+      T extends "node"
+        ? Types.Node
+        : T extends "type"
+          ? Types.Type
+          : T extends "link"
+            ? Link
+            : undefined
+    >,
+    "id" | "source" | "target"
+  >,
+) {
+  if (type === "node") {
+    const refNode = data.nodes.get(id);
+    if (refNode === undefined) return;
 
-  if (checkGraphDataType(res)) {
-    db.nodes = importNodesToDBNodes(res.nodes);
-    db.links = importLinksToDBLinks(res.links);
-    db.linkTypes = res.linkTypes;
+    const toChangeNode = toChange as Omit<Partial<Types.Node>, "id">;
 
-    if (render === true || render === undefined) {
-      document.dispatchEvent(dbUpDate);
+    if (toChangeNode.name !== undefined) {
+      refNode.name = toChangeNode.name;
     }
-  } else {
-    throw new Error("Parsing Error");
-  }
-}
 
-function importNodesToDBNodes(importNodes: Types.NodeList): Types.NodeList {
-  const returnNodes = importNodes;
+    if (toChangeNode.date !== undefined) {
+      refNode.date = toChangeNode.date;
+    }
 
-  Object.values(importNodes).forEach((node) => {
-    returnNodes[node.id].links = new Set(node.links);
-  });
+    if (toChangeNode.links !== undefined) {
+      refNode.links = toChangeNode.links;
+    }
 
-  return returnNodes;
-}
+    if (toChangeNode.location !== undefined) {
+      refNode.location = toChangeNode.location;
+      refNode.links.forEach((id) => {
+        const link = data.links.get(id);
+        if (link === undefined) return;
 
-function importLinksToDBLinks(importLinks: Types.LinkList): Types.LinkList {
-  const returnLinks = importLinks;
+        const source = data.nodes.get(link.source);
+        const target = data.nodes.get(link.target);
 
-  Object.values(importLinks).forEach((link) => {
-    returnLinks[link.id].source.links = new Set(link.source.links);
-    returnLinks[link.id].target.links = new Set(link.target.links);
-  });
+        if (source === undefined || target === undefined) return;
 
-  return returnLinks;
-}
+        const changingNode = source.id === refNode.id ? source : target;
+        const otherNode = source.id === refNode.id ? target : source;
 
-export function remove<T extends Types.DBType>(payload: T, render?: boolean) {
-  if (typeCheckNode(payload)) {
-    delete db.nodes[payload.id];
+        link.distance = Helpers.distance(
+          changingNode.location.lat,
+          changingNode.location.lon,
+          otherNode.location.lat,
+          otherNode.location.lon,
+          "K",
+        );
+      });
+    }
 
-    if (Array.from(payload.links).length > 0) {
-      for (const key in db.links) {
-        if (Object.prototype.hasOwnProperty.call(db.links, key)) {
-          const link = db.links[key];
+    if (toChangeNode.snapshots !== undefined) {
+      refNode.snapshots = toChangeNode.snapshots;
+      toChangeNode.snapshots.forEach((snapshot) => {
+        refNode.links.forEach((id) => {
+          const link = data.links.get(id);
+          if (link === undefined) return;
 
-          if (link.source.id === payload.id || link.target.id === payload.id) {
-            remove(db.links[key], false);
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { snapshots: linkSnapshots, ...linkWithoutSnapshots } = link;
+
+          const source = data.nodes.get(link.source);
+          const target = data.nodes.get(link.target);
+
+          if (source === undefined || target === undefined) return;
+
+          const otherNode = source.id === refNode.id ? target : source;
+
+          const otherNodeSnapshot = otherNode.snapshots.get(
+            snapshot.date.getTime(),
+          );
+
+          const linkSnapshot = link.snapshots?.get(snapshot.date.getTime());
+          let newSnapshot: Types.Snapshot<Link> | undefined = undefined;
+          if (linkSnapshot === undefined) {
+            let earliestSnapshotDate: number | undefined = undefined;
+            let snapshotToUpdate: Types.Snapshot<Link> | undefined = undefined;
+            if (link.snapshots !== undefined) {
+              earliestSnapshotDate = Math.min(
+                ...Array.from(link.snapshots.keys()),
+              );
+
+              if (
+                earliestSnapshotDate !== undefined &&
+                earliestSnapshotDate > snapshot.date.getTime()
+              ) {
+                return;
+              }
+
+              snapshotToUpdate = link.getSnapshot(snapshot.date.getTime());
+            }
+
+            if (snapshotToUpdate === undefined) {
+              snapshotToUpdate = linkWithoutSnapshots;
+            }
+
+            newSnapshot = {
+              ...snapshotToUpdate,
+              distance: Helpers.distance(
+                snapshot.location.lat,
+                snapshot.location.lon,
+                otherNodeSnapshot !== undefined
+                  ? otherNodeSnapshot.location.lat
+                  : otherNode.location.lat,
+                otherNodeSnapshot !== undefined
+                  ? otherNodeSnapshot.location.lon
+                  : otherNode.location.lon,
+                "K",
+              ),
+            };
+          } else {
+            newSnapshot = {
+              ...linkSnapshot,
+              distance: Helpers.distance(
+                snapshot.location.lat,
+                snapshot.location.lon,
+                otherNodeSnapshot !== undefined
+                  ? otherNodeSnapshot.location.lat
+                  : otherNode.location.lat,
+                otherNodeSnapshot !== undefined
+                  ? otherNodeSnapshot.location.lon
+                  : otherNode.location.lon,
+                "K",
+              ),
+            };
           }
-        }
-      }
+
+          link.addSnapshot(newSnapshot);
+        });
+      });
     }
 
-    if (render === true || render === undefined) {
-      document.dispatchEvent(NodeUpDate);
+    return refNode;
+  }
+
+  if (type === "link") {
+    const refLink = data.links.get(id);
+    if (refLink === undefined) return;
+
+    const toChangeLink = toChange as Omit<
+      Partial<Link>,
+      "id" | "source" | "target"
+    >;
+
+    if (toChangeLink.date !== undefined) {
+      refLink.date = toChangeLink.date;
+    }
+
+    if (toChangeLink.distance !== undefined) {
+      refLink.distance = toChangeLink.distance;
+    }
+
+    if (toChangeLink.type !== undefined) {
+      refLink.type = toChangeLink.type;
+    }
+
+    if (toChangeLink.snapshots !== undefined) {
+      refLink.snapshots = toChangeLink.snapshots;
     }
   }
 
-  if (typeCheckLink(payload)) {
-    delete db.links[payload.id];
+  if (type === "type") {
+    let refType = data.types.get(id);
+    if (refType === undefined) return;
 
-    for (const key in db.nodes) {
-      if (Object.prototype.hasOwnProperty.call(db.nodes, key)) {
-        const node = db.nodes[key];
+    const toChangeType = toChange as Omit<Partial<Types.Type>, "id">;
 
-        if (node.links.has(payload.id)) {
-          node.links.delete(payload.id);
-        }
-      }
-    }
+    refType = { ...refType, ...toChangeType };
+  }
+}
 
-    if (render === true || render === undefined) {
-      document.dispatchEvent(LinkUpdate);
-    }
+export function set(input: unknown) {
+  let inputObject: object | undefined = undefined;
+  if (typeof input === "string") {
+    inputObject = JSON.parse(input, reviver);
   }
 
-  if (typeCheckLinkType(payload)) {
-    delete db.linkTypes[payload.id];
+  if (TypeChecks.DB(inputObject)) {
+    data.links = { ...inputObject.links };
+    data.nodes = { ...inputObject.nodes };
+    data.types = { ...inputObject.types };
+  } else {
+    throw "Parsing Error while setting data";
+  }
+}
 
-    for (const key in db.links) {
-      if (Object.prototype.hasOwnProperty.call(db.links, key)) {
-        const link = db.links[key];
+export function save() {
+  const saveString = JSON.stringify(data, replacer);
 
-        if (
-          link.type.id === payload.id &&
-          Object.keys(db.linkTypes).length > 0
-        ) {
-          db.links[key].type =
-            db.linkTypes[
-              typeof Object.keys(db.linkTypes)[0] === "string"
-                ? parseInt(Object.keys(db.linkTypes)[0])
-                : typeof Object.keys(db.linkTypes)[0] === "number"
-                  ? (Object.keys(db.linkTypes)[0] as unknown as number)
-                  : 0
-            ];
-        } else if (link.type.id === payload.id) {
-          const fallbackType: Types.LinkType = {
-            name: "Relationship Type",
-            color: "#777777",
-            id: 0,
-          };
+  const blob = new Blob([saveString], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
 
-          db.linkTypes = { [fallbackType.id]: fallbackType };
-          db.links[key].type = fallbackType;
+  const link = document.createElement("a");
 
-          console.log(db.linkTypes);
-        }
-      }
-    }
+  const date = new Date();
+  const filename = `polycule-visualizer-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 
-    if (render === true || render === undefined) {
-      document.dispatchEvent(LinkTypeUpdate);
+  link.download = filename;
+  link.href = url;
+  link.click();
+  link.remove();
+}
+
+function replacer(
+  _key: unknown,
+  value: unknown,
+): unknown | Map<string | number, unknown> {
+  if (value instanceof Map) {
+    return {
+      dataType: "Map",
+      values: Object.fromEntries(value),
+    };
+  } else if (value instanceof Set) {
+    return {
+      dataType: "Set",
+      values: Array.from(value),
+    };
+  }
+  return value;
+}
+
+function reviver(_key: unknown, value: unknown) {
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "datatype" in value &&
+    "values" in value &&
+    typeof value.datatype === "string" &&
+    (typeof value.values === "object" ||
+      typeof value.values === "string" ||
+      typeof value.values === "number" ||
+      typeof value.values === "boolean") &&
+    value.values !== null
+  ) {
+    switch (value.datatype) {
+      case "Map":
+        if (value.values === null && Array.isArray(value.values)) return value;
+        return new Map(Object.entries(value.values));
+
+      case "Set":
+        if (!Array.isArray(value.values)) return value;
+        return new Set(value.values);
+
+      default:
+        break;
     }
   }
 }
