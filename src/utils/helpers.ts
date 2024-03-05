@@ -1,4 +1,87 @@
-import { db } from "../db/db";
+import Link from "@/classes/link";
+import { DB } from "@/db";
+import { Types } from "@/types";
+
+export function findSnapshotIndex(toFind: number, snapshots: number[]): number {
+  const earliest = snapshots[0];
+  const latest = snapshots.length - 1;
+
+  if (toFind <= earliest) {
+    return earliest;
+  } else {
+    snapshots.shift();
+  }
+
+  if (toFind >= latest) {
+    return latest;
+  } else {
+    snapshots.pop();
+  }
+
+  if (snapshots.length === 0) return earliest;
+
+  const res = findSnapshotIndex(toFind, snapshots);
+
+  if (res === snapshots[0 + 1]) {
+    return snapshots[0];
+  } else {
+    return res;
+  }
+}
+
+export function getNewIndex(
+  map: Map<number, Types.Node | Types.Type | Link>,
+  index?: number,
+): number {
+  if (index === undefined) {
+    index = map.size;
+  }
+
+  if (map.has(index)) {
+    return getNewIndex(map, index + 1);
+  } else {
+    return index;
+  }
+}
+
+export function distance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+  unit: "M" | "K" | "N",
+) {
+  if (lat1 == lat2 && lon1 == lon2) {
+    return 0;
+  } else {
+    const radlat1 = (Math.PI * lat1) / 180;
+    const radlat2 = (Math.PI * lat2) / 180;
+    const theta = lon1 - lon2;
+    const radtheta = (Math.PI * theta) / 180;
+    let dist =
+      Math.sin(radlat1) * Math.sin(radlat2) +
+      Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+    if (dist > 1) {
+      dist = 1;
+    }
+    dist = Math.acos(dist);
+    dist = (dist * 180) / Math.PI;
+    dist = dist * 60 * 1.1515;
+    if (unit == "K") {
+      dist = dist * 1.609344;
+    }
+    if (unit == "N") {
+      dist = dist * 0.8684;
+    }
+    if (dist < 100) {
+      dist = 100;
+    }
+
+    console.log(dist);
+
+    return dist;
+  }
+}
 
 export function hexToRGBA(hex: string, alpha?: number): string | null {
   if (alpha === undefined) {
@@ -74,60 +157,13 @@ export function rgbaStringToHex(rgbaString: string): string | null {
   return hexColor;
 }
 
-export function distance(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-  unit: "M" | "K" | "N",
-) {
-  if (lat1 == lat2 && lon1 == lon2) {
-    return 0;
-  } else {
-    const radlat1 = (Math.PI * lat1) / 180;
-    const radlat2 = (Math.PI * lat2) / 180;
-    const theta = lon1 - lon2;
-    const radtheta = (Math.PI * theta) / 180;
-    let dist =
-      Math.sin(radlat1) * Math.sin(radlat2) +
-      Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-    if (dist > 1) {
-      dist = 1;
-    }
-    dist = Math.acos(dist);
-    dist = (dist * 180) / Math.PI;
-    dist = dist * 60 * 1.1515;
-    if (unit == "K") {
-      dist = dist * 1.609344;
-    }
-    if (unit == "N") {
-      dist = dist * 0.8684;
-    }
-    if (dist < 100) {
-      dist = 100;
-    }
-
-    console.log(dist);
-
-    return dist;
-  }
-}
-
-export function clamp(num: number, min: number, max: number) {
-  return Math.min(Math.max(num, min), max);
-}
-
 export function distanceScale(input: number) {
+  const min = 100;
   if (Number.isNaN(input)) {
-    return 100;
+    return min;
   }
-  const distanceArray = Object.values(db.links).map((link) => link.distance);
 
-  let largestDistance = Math.max(...distanceArray);
-  if (largestDistance === 0) {
-    largestDistance = 100;
-  }
-  return mapRange(input, 0, largestDistance, 100, 500);
+  return mapRange(input, 0, DB.info.maxDistance, 100, 500);
 }
 
 export function mapRange(
@@ -147,79 +183,12 @@ export function mapRange(
   return mappedValue;
 }
 
-export function getNewIndex(input: object): number {
-  let index = Object.keys(input).length;
-  let checked = false;
-  while (!checked) {
-    if (index in input) {
-      index++;
-    } else {
-      checked = true;
-    }
-  }
+export function setMaxDistance() {
+  const distanceArray = Array.from(DB.data.links.values()).map(
+    (link) => link.distance,
+  );
 
-  return index;
-}
-
-type NestedObject = {
-  [key: string]: unknown;
-};
-
-export function transformSetsToArray(input: unknown): unknown {
-  if (input instanceof Set) {
-    // If it's a Set, convert it to an array
-    return Array.from(input).map(transformSetsToArray);
-  } else if (Array.isArray(input)) {
-    // If it's an array, recursively transform each element
-    return input.map(transformSetsToArray);
-  } else if (typeof input === "object" && input !== null) {
-    // If it's an object, recursively transform each value
-    const transformedObject: NestedObject = {};
-    for (const key in input) {
-      if (Object.prototype.hasOwnProperty.call(input, key)) {
-        transformedObject[key] = transformSetsToArray(input[key]);
-      }
-    }
-    return transformedObject;
-  }
-
-  // Base case: return unchanged for non-object, non-array, non-Set values
-  return input;
-}
-
-export function bufferTimeCalculator(
-  lastDate: Date,
-  bufferTime: number,
-): boolean {
-  return Date.now() - lastDate.getTime() < bufferTime;
-}
-
-type NumberKeyObject<T> = {
-  [key: number]: T; // Replace 'any' with the type of values in your object
-};
-
-export function convertObjectToNumberArray<T>(
-  obj: NumberKeyObject<T>,
-  placeholder: T,
-): T[] {
-  const keys = Object.keys(obj)
-    .map(Number)
-    .sort((a, b) => a - b);
-
-  if (keys.length === 0) return [];
-
-  const resultArray = Array(keys[keys.length - 1] + 1); // Create an array with enough space
-
-  keys.forEach((key) => {
-    resultArray[key] = obj[key];
-  });
-
-  for (let i = 0; i < resultArray.length; i++) {
-    const element = resultArray[i];
-    if (element === undefined) {
-      resultArray[i] = placeholder;
-    }
-  }
-
-  return resultArray;
+  const max = Math.max(...distanceArray);
+  DB.info.maxDistance = max < 100 ? 100 : max;
+  return DB.info.maxDistance;
 }

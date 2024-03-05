@@ -9,6 +9,10 @@ export const data: Types.DBData = {
   types: new Map(),
 };
 
+export const info = {
+  maxDistance: 100,
+};
+
 export function add(payload: Types.Node | Types.Type | Link) {
   if (TypeChecks.node(payload)) {
     payload.id = Helpers.getNewIndex(data.nodes, payload.id);
@@ -29,6 +33,11 @@ export function add(payload: Types.Node | Types.Type | Link) {
 
     source.links.add(payload.id);
     target.links.add(payload.id);
+
+    if (payload.distance > info.maxDistance) {
+      info.maxDistance = payload.distance;
+    }
+
     return data.links.get(payload.id);
   }
 
@@ -92,6 +101,8 @@ export function remove(id: number, type: "node" | "type" | "link") {
       throw new Error(`type: "${type}" is not defined`);
       break;
   }
+
+  Helpers.setMaxDistance();
 }
 
 export function update<T extends "node" | "type" | "link">(
@@ -232,7 +243,7 @@ export function update<T extends "node" | "type" | "link">(
         });
       });
     }
-
+    Helpers.setMaxDistance();
     return refNode;
   }
 
@@ -260,6 +271,8 @@ export function update<T extends "node" | "type" | "link">(
     if (toChangeLink.snapshots !== undefined) {
       refLink.snapshots = toChangeLink.snapshots;
     }
+    Helpers.setMaxDistance();
+    return refLink;
   }
 
   if (type === "type") {
@@ -269,6 +282,9 @@ export function update<T extends "node" | "type" | "link">(
     const toChangeType = toChange as Omit<Partial<Types.Type>, "id">;
 
     refType = { ...refType, ...toChangeType };
+
+    Helpers.setMaxDistance();
+    return refType;
   }
 }
 
@@ -282,6 +298,7 @@ export function set(input: unknown) {
     data.links = { ...inputObject.links };
     data.nodes = { ...inputObject.nodes };
     data.types = { ...inputObject.types };
+    Helpers.setMaxDistance();
   } else {
     throw "Parsing Error while setting data";
   }
