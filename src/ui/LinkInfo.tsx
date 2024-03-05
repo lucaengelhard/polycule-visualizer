@@ -13,7 +13,7 @@ import ClassLink from "../classes/link";
 import { Button, RadioInput } from "./components";
 import useConfirm from "./components/ConfirmDialog";
 import { remove, update } from "../db/db";
-import { HistoryLink } from "../types/types";
+import { HistoryLink } from "../types/types-old";
 
 export default function LinkInfo() {
   const { DBState } = useContext(DBContext);
