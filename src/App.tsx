@@ -1,186 +1,179 @@
-import { createContext, useEffect, useState } from "react";
-import UI from "./ui";
-import { Types } from "./types";
+import { createContext, useMemo, useState } from "react";
+import UI from "@/ui";
+import { DB } from "@/db";
+import { TypeChecks, Types } from "@/types";
+import Link from "@/classes/link";
 
-import { ConfirmDialogProvider } from "./ui/components/ConfirmDialog";
-import { db } from "./db/db";
-
-export const DBContext = createContext<{
-  DBState: Types.DBData;
-  setDBState: React.Dispatch<Types.DBData>;
-}>(null);
-
-export const EditContext = createContext<{
-  editState: {
-    node?: keyof Types.NodeList | undefined;
-    link?: keyof Types.LinkList | undefined;
-    linkHistory?: keyof Types.HistoryLinkList | undefined;
-    linkHistoryOpen?: boolean;
-  };
-  setEditState: React.Dispatch<
-    React.SetStateAction<{
-      node?: keyof Types.NodeList | undefined;
-      link?: keyof Types.LinkList | undefined;
-      linkHistory?: keyof Types.HistoryLinkList | undefined;
-      linkHistoryOpen?: boolean;
-    }>
-  >;
-}>(null);
+export const NodeStateContext = createContext(DB.data.nodes);
+export const LinkStateContext = createContext(DB.data.links);
+export const TypeStateContext = createContext(DB.data.types);
+//TODO: Window Manager
 
 export default function App() {
-  const [DBState, setDBState] = useState<Types.DBData>(db);
-  const [editState, setEditState] = useState<{
-    node?: keyof Types.NodeList;
-    link?: keyof Types.LinkList;
-    linkHistory?: keyof Types.HistoryLinkList;
-    linkHistoryOpen?: boolean;
-  }>({
-    node: undefined,
-    link: undefined,
-    linkHistory: undefined,
-    linkHistoryOpen: false,
+  const [DBState, setDBState] = useState(DB.data);
+  const NodeState = useMemo(() => DBState.nodes, [DBState.nodes]);
+  const LinkState = useMemo(() => DBState.links, [DBState.links]);
+  const TypeState = useMemo(() => DBState.types, [DBState.types]);
+
+  document.addEventListener("db-update", (event) => {
+    if (
+      "detail" in event &&
+      event.detail !== null &&
+      typeof event.detail === "object" &&
+      "id" in event.detail &&
+      event.detail.id !== null &&
+      typeof event.detail.id === "number" &&
+      "type" in event.detail &&
+      event.detail.type !== null &&
+      typeof event.detail.type === "string"
+    ) {
+      let node: Types.Node | undefined = undefined;
+      let link: Link | undefined = undefined;
+      let type: Types.Type | undefined = undefined;
+      switch (event.detail.type) {
+        case "node":
+          node = DB.data.nodes.get(event.detail.id);
+          if (node === undefined) return;
+
+          setDBState({
+            ...DBState,
+            nodes: new Map(DBState.nodes.set(node.id, node)),
+          });
+          break;
+
+        case "link":
+          link = DB.data.links.get(event.detail.id);
+          if (link === undefined) return;
+
+          setDBState({
+            ...DBState,
+            links: new Map(DBState.links.set(link.id, link)),
+          });
+          break;
+
+        case "type":
+          type = DB.data.types.get(event.detail.id);
+          if (type === undefined) return;
+
+          setDBState({
+            ...DBState,
+            types: new Map(DBState.types.set(type.id, type)),
+          });
+          break;
+
+        default:
+          break;
+      }
+    } else {
+      console.error("Error while inserting");
+    }
   });
 
-  useEffect(() => {
-    document.addEventListener("dbUpDate", () => {
-      //console.log(db);
-      setDBState({ ...db });
-    });
+  document.addEventListener("db-remove", (event) => {
+    if (
+      "detail" in event &&
+      event.detail !== null &&
+      typeof event.detail === "object" &&
+      "id" in event.detail &&
+      event.detail.id !== null &&
+      typeof event.detail.id === "number" &&
+      "type" in event.detail &&
+      event.detail.type !== null &&
+      typeof event.detail.type === "string"
+    ) {
+      let nodes: Map<number, Types.Node> | undefined = undefined;
+      let links: Map<number, Link> | undefined = undefined;
+      let types: Map<number, Types.Type> | undefined = undefined;
+      switch (event.detail.type) {
+        case "node":
+          nodes = new Map(DBState.nodes);
+          nodes.delete(event.detail.id);
+          setDBState({ ...DBState, nodes: new Map(nodes) });
+          break;
 
-    document.addEventListener("NodeUpdate", () => {
-      NodeUpdate(DBState, setDBState);
-    });
+        case "links":
+          links = new Map(DBState.links);
+          links.delete(event.detail.id);
+          setDBState({ ...DBState, links: new Map(links) });
+          break;
 
-    document.addEventListener("LinkUpdate", () => {
-      LinkUpdate(DBState, setDBState);
-      NodeUpdate(DBState, setDBState);
-    });
+        case "types":
+          types = new Map(DBState.types);
+          types.delete(event.detail.id);
+          setDBState({ ...DBState, types: new Map(types) });
+          break;
 
-    document.addEventListener("LinkTypeUpdate", () => {
-      LinkTypeUpdate(DBState, setDBState);
-    });
+        default:
+          console.error("Error while inserting");
+          break;
+      }
+    } else {
+      console.error("Error while inserting");
+    }
+  });
+
+  document.addEventListener("db-add", (event) => {
+    if (
+      "detail" in event &&
+      event.detail !== null &&
+      typeof event.detail === "object" &&
+      "payload" in event.detail &&
+      event.detail.payload !== null &&
+      "type" in event.detail &&
+      event.detail.type !== null &&
+      typeof event.detail.type === "string"
+    ) {
+      switch (event.detail.type) {
+        case "node":
+          if (TypeChecks.node(event.detail.payload)) {
+            const node = DB.data.nodes.get(event.detail.payload.id);
+            if (node === undefined) return;
+
+            setDBState({
+              ...DBState,
+              nodes: new Map(DBState.nodes.set(node.id, node)),
+            });
+          }
+          break;
+        case "link":
+          if (TypeChecks.link(event.detail.payload)) {
+            const link = DB.data.links.get(event.detail.payload.id);
+            if (link === undefined) return;
+
+            setDBState({
+              ...DBState,
+              links: new Map(DBState.links.set(link.id, link)),
+            });
+          }
+          break;
+
+        case "type":
+          if (TypeChecks.type(event.detail.payload)) {
+            const type = DB.data.types.get(event.detail.payload.id);
+            if (type === undefined) return;
+
+            setDBState({
+              ...DBState,
+              types: new Map(DBState.types.set(type.id, type)),
+            });
+          }
+          break;
+        default:
+          console.error("Error while inserting");
+          break;
+      }
+    } else {
+      console.error("Error while inserting");
+    }
   });
 
   return (
-    <EditContext.Provider value={{ editState, setEditState }}>
-      <DBContext.Provider value={{ DBState, setDBState }}>
-        <ConfirmDialogProvider>
+    <NodeStateContext.Provider value={NodeState}>
+      <LinkStateContext.Provider value={LinkState}>
+        <TypeStateContext.Provider value={TypeState}>
           <UI />
-        </ConfirmDialogProvider>
-      </DBContext.Provider>
-    </EditContext.Provider>
+        </TypeStateContext.Provider>{" "}
+      </LinkStateContext.Provider>
+    </NodeStateContext.Provider>
   );
-}
-
-export function LinkTypeUpdate(
-  DBState: Types.DBData,
-  setDBState: React.Dispatch<Types.DBData>,
-) {
-  const changeLinkTypes: Types.LinkTypeList = {};
-
-  for (const Key in db.linkTypes) {
-    if (Object.prototype.hasOwnProperty.call(db.linkTypes, Key)) {
-      const LinkType = db.linkTypes[Key];
-
-      if (LinkType.id in DBState.linkTypes) {
-        const StateLinkType = DBState.linkTypes[LinkType.id];
-
-        if (
-          StateLinkType.name !== LinkType.name ||
-          StateLinkType.color !== LinkType.color
-        ) {
-          changeLinkTypes[LinkType.id] = LinkType;
-        }
-      } else {
-        changeLinkTypes[LinkType.id] = LinkType;
-      }
-    }
-  }
-
-  if (
-    Object.keys(DBState.linkTypes).length <= Object.keys(db.linkTypes).length
-  ) {
-    setDBState({
-      ...DBState,
-      linkTypes: { ...DBState.linkTypes, ...changeLinkTypes },
-    });
-  } else {
-    setDBState({
-      ...DBState,
-      linkTypes: db.linkTypes,
-    });
-  }
-}
-
-function LinkUpdate(
-  DBState: Types.DBData,
-  setDBState: React.Dispatch<Types.DBData>,
-) {
-  const changeLinks: Types.LinkList = {};
-
-  for (const Key in db.links) {
-    if (Object.prototype.hasOwnProperty.call(db.links, Key)) {
-      const Link = db.links[Key];
-
-      if (Link.id in DBState.links) {
-        const StateLink = DBState.links[Link.id];
-
-        if (
-          StateLink.source.id !== Link.source.id ||
-          StateLink.target.id !== Link.target.id ||
-          StateLink.type.id !== Link.type.id ||
-          StateLink.type.color !== Link.type.color ||
-          StateLink.type.name !== Link.type.name ||
-          StateLink.distance !== Link.distance
-        ) {
-          changeLinks[Link.id] = Link;
-        }
-      } else {
-        changeLinks[Link.id] = Link;
-      }
-    }
-  }
-
-  setDBState({
-    ...DBState,
-    links: { ...DBState.links, ...changeLinks },
-  });
-}
-
-function NodeUpdate(
-  DBState: Types.DBData,
-  setDBState: React.Dispatch<Types.DBData>,
-) {
-  const changeNodes: Types.NodeList = {};
-
-  for (const Key in db.nodes) {
-    if (Object.prototype.hasOwnProperty.call(db.nodes, Key)) {
-      const Node = db.nodes[Key];
-
-      if (Node.id in DBState.nodes) {
-        const StateNode = DBState.nodes[Node.id];
-        if (
-          StateNode.name !== Node.name ||
-          StateNode.location.name !== Node.location.name ||
-          StateNode.links !== Node.links
-        ) {
-          changeNodes[Node.id] = Node;
-        }
-      } else {
-        changeNodes[Node.id] = Node;
-      }
-    }
-  }
-
-  if (Object.keys(DBState.nodes).length <= Object.keys(db.nodes).length) {
-    setDBState({
-      ...DBState,
-      nodes: { ...DBState.nodes, ...changeNodes },
-    });
-  } else {
-    setDBState({
-      ...DBState,
-      nodes: db.nodes,
-    });
-  }
 }
