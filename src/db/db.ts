@@ -9,6 +9,8 @@ export const data: Types.DBData = {
   types: new Map(),
 };
 
+data.types.set(0, { color: "#f0f0f0", id: 0, name: "test" });
+
 export const info = {
   maxDistance: 100,
 };
@@ -263,6 +265,8 @@ export function update<T extends "node" | "type" | "link">(
       });
     }
 
+    data.nodes.set(id, refNode);
+
     const updateEvent = new CustomEvent("db-update", {
       detail: { id: id, type: type, node: refNode },
     });
@@ -297,6 +301,8 @@ export function update<T extends "node" | "type" | "link">(
       refLink.snapshots = toChangeLink.snapshots;
     }
 
+    data.links.set(id, refLink);
+
     const updateEvent = new CustomEvent("db-update", {
       detail: { id: id, type: type, node: refLink },
     });
@@ -313,6 +319,8 @@ export function update<T extends "node" | "type" | "link">(
     const toChangeType = toChange as Omit<Partial<Types.Type>, "id">;
 
     refType = { ...refType, ...toChangeType };
+
+    data.types.set(id, refType);
 
     const updateEvent = new CustomEvent("db-update", {
       detail: { id: id, type: type, node: refType },

@@ -9,7 +9,9 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import AddPerson from "./AddPerson-v2";
+import AddPerson from "./AddPerson";
+import { useState } from "react";
+import AddRelationship from "./AddRelationship";
 
 export default function UI() {
   function importDB() {
@@ -36,6 +38,10 @@ export default function UI() {
       }
     });
   }
+
+  const [addPerson, setAddPerson] = useState(false);
+  const [addRelationship, setAddRelationship] = useState(false);
+
   return (
     <>
       <Menubar>
@@ -53,16 +59,27 @@ export default function UI() {
         <MenubarMenu>
           <MenubarTrigger>Add</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem>
+            <MenubarItem
+              onClick={() => {
+                setAddPerson(true);
+              }}
+            >
               Person <MenubarShortcut>CMD+SHIFT+P</MenubarShortcut>
             </MenubarItem>
-            <MenubarItem>
+            <MenubarItem
+              onClick={() => {
+                setAddRelationship(true);
+              }}
+            >
               Relationship <MenubarShortcut>CMD+SHIFT+R</MenubarShortcut>
             </MenubarItem>
           </MenubarContent>
         </MenubarMenu>
       </Menubar>
-      <AddPerson />
+      {addPerson && <AddPerson setAddPerson={setAddPerson} />}
+      {addRelationship && (
+        <AddRelationship setAddRelationship={setAddRelationship} />
+      )}
     </>
   );
 }

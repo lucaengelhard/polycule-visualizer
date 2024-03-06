@@ -114,7 +114,7 @@
 }
 
 .wb-title {
-  @apply overflow-hidden overflow-ellipsis whitespace-nowrap;
+  @apply overflow-hidden overflow-ellipsis whitespace-nowrap text-primary-foreground;
 }
 
 .wb-icon {

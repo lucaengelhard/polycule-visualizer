@@ -5,7 +5,10 @@ export type Snapshot<Type> = Omit<
   "snapshots" | "getSnapshot" | "addSnapshot" | "deleteSnapshot"
 >;
 
-export type List<Type> = Map<number, Type>;
+export type List<Type, Index extends string | number = number> = Map<
+  Index,
+  Type
+>;
 
 export type Node = {
   id: number;
@@ -37,9 +40,4 @@ export type DBData = {
 export type GraphData = {
   nodes: Node[];
   links: Link[];
-};
-
-export type WindowState = {
-  windows: Set<number>;
-  order: number[];
 };
