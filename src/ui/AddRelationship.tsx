@@ -77,6 +77,11 @@ export default function AddRelationship({
       return;
     }
 
+    if (target.id === source.id) {
+      //TODO: Alert
+      return;
+    }
+
     if (date === undefined) {
       //TODO: Alert
       return;
