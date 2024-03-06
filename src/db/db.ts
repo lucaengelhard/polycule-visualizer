@@ -9,7 +9,25 @@ export const data: Types.DBData = {
   types: new Map(),
 };
 
+//TODO: Remove test objects
 data.types.set(0, { color: "#f0f0f0", id: 0, name: "test" });
+data.nodes.set(0, {
+  name: "Luca",
+  id: 0,
+  links: new Set(),
+  snapshots: new Map(),
+  date: new Date(),
+  location: { name: "Hinterdupfingen", lat: 0, lon: 0 },
+});
+
+data.nodes.set(1, {
+  name: "Lucaaaaaaaaaaaaaa",
+  id: 1,
+  links: new Set(),
+  snapshots: new Map(),
+  date: new Date(),
+  location: { name: "Hinterdupfingen", lat: 0, lon: 0 },
+});
 
 export const info = {
   maxDistance: 100,
