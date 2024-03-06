@@ -7,21 +7,7 @@ import { Button, TextInput } from "./components";
 import { update } from "../db/db";
 
 export default function AddPerson() {
-  const [name, setName] = useState<string | undefined>(undefined);
-  const [locationstring, setLocationstring] = useState<string | undefined>(
-    undefined,
-  );
-
-  const nameRef = useRef<HTMLInputElement>(null);
-  const locationRef = useRef<HTMLInputElement>(null);
-
   async function submit() {
-    if (locationstring === undefined || locationstring.length === 0)
-      throw new Error("Location undefined");
-    if (name === undefined || name.length === 0)
-      throw new Error("Name undefined");
-    const location = await geoCode(locationstring);
-
     update(
       "nodes",
       {
