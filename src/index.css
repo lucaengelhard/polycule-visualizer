@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -9,68 +9,309 @@
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
- 
+
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
- 
+
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
- 
+
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
- 
+
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
- 
+
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
- 
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
- 
+
     --radius: 0.5rem;
   }
- 
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
- 
+
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
- 
+
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
- 
+
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
- 
+
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
- 
+
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
- 
+
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
- 
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
- 
+
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+.winbox {
+  @apply fixed left-0 right-0 rounded-md bg-accent text-left shadow-md;
+  transition:
+    width 0.3s,
+    height 0.3s,
+    left 0.3s,
+    top 0.3s;
+  transition-timing-function: cubic-bezier(0.3, 1, 0.3, 1);
+  contain: layout size;
+  touch-action: none;
+}
+
+.wb-body,
+.wb-header {
+  @apply absolute left-0;
+}
+
+.wb-header {
+  @apply top-0 z-[1] h-9 w-full overflow-hidden leading-9 text-primary;
+}
+
+.wb-body {
+  @apply bottom-0 right-0 top-9 z-0 mt-0 overflow-auto rounded-b-md bg-background;
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+  will-change: contents;
+  contain: strict;
+}
+
+.wb-control *,
+.wb-icon {
+  @apply bg-no-repeat;
+}
+
+.wb-drag {
+  @apply h-full cursor-move pl-3;
+}
+
+.wb-title {
+  @apply overflow-hidden overflow-ellipsis whitespace-nowrap;
+}
+
+.wb-icon {
+  @apply float-left -ml-1 mb-0 mr-2 mt-[-1px] hidden h-full w-5 bg-center;
+  background-size: 100%;
+}
+
+.wb-e,
+.wb-w {
+  @apply top-0 w-3 cursor-w-resize;
+}
+
+.wb-n,
+.wb-s {
+  @apply absolute left-0 h-3;
+}
+
+.wb-n {
+  @apply -top-[5px] right-0 z-[2] cursor-n-resize;
+}
+
+.wb-e {
+  @apply absolute -right-[5px] bottom-0 z-[2];
+}
+
+.wb-s {
+  @apply -bottom-[5px] right-0 z-[2] cursor-n-resize;
+}
+
+.wb-nw,
+.wb-sw,
+.wb-w {
+  @apply -left-[5px];
+}
+
+.wb-w {
+  @apply absolute bottom-0 z-[2] cursor-w-resize;
+}
+
+.wb-ne,
+.wb-nw,
+.wb-sw {
+  @apply absolute z-[2] h-4 w-4;
+}
+
+.wb-nw {
+  @apply -top-[5px] cursor-nw-resize;
+}
+
+.wb-ne,
+.wb-sw {
+  @apply cursor-ne-resize;
+}
+
+.wb-ne {
+  @apply -right-[5px] -top-[5px];
+}
+
+.wb-se,
+.wb-sw {
+  @apply -bottom-[5px];
+}
+
+.wb-se {
+  @apply absolute -right-[5px] w-[15px];
+  position: absolute;
+  right: -5px;
+  width: 15px;
+  height: 15px;
+  cursor: nw-resize;
+  z-index: 2;
+}
+
+.wb-control {
+  @apply float-right h-full max-w-full text-center;
+}
+
+.wb-control * {
+  @apply inline-block h-full w-[30px] max-w-full cursor-pointer bg-center;
+}
+
+.no-close .wb-close,
+.no-full .wb-full,
+.no-header .wb-header,
+.no-max .wb-max,
+.no-min .wb-min,
+.no-resize .wb-body ~ div,
+.wb-body .wb-hide,
+.wb-show,
+.winbox.hide,
+.winbox.min .wb-body > *,
+.winbox.min .wb-full,
+.winbox.min .wb-min,
+.winbox.modal .wb-full,
+.winbox.modal .wb-max,
+.winbox.modal .wb-min {
+  @apply hidden;
+}
+
+.winbox.max .wb-drag,
+.winbox.min .wb-drag {
+  @apply cursor-default;
+}
+
+.wb-min {
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAyIj48cGF0aCBmaWxsPSIjZmZmIiBkPSJNOCAwaDdhMSAxIDAgMCAxIDAgMkgxYTEgMSAwIDAgMSAwLTJoN3oiLz48L3N2Zz4=);
+  background-size: 14px auto;
+  background-position: center calc(50% + 6px);
+}
+
+.wb-max {
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9IiNmZmYiIHZpZXdCb3g9IjAgMCA5NiA5NiI+PHBhdGggZD0iTTIwIDcxLjMxMUMxNS4zNCA2OS42NyAxMiA2NS4yMyAxMiA2MFYyMGMwLTYuNjMgNS4zNy0xMiAxMi0xMmg0MGM1LjIzIDAgOS42NyAzLjM0IDExLjMxMSA4SDI0Yy0yLjIxIDAtNCAxLjc5LTQgNHY1MS4zMTF6Ii8+PHBhdGggZD0iTTkyIDc2VjM2YzAtNi42My01LjM3LTEyLTEyLTEySDQwYy02LjYzIDAtMTIgNS4zNy0xMiAxMnY0MGMwIDYuNjMgNS4zNyAxMiAxMiAxMmg0MGM2LjYzIDAgMTItNS4zNyAxMi0xMnptLTUyIDRjLTIuMjEgMC00LTEuNzktNC00VjM2YzAtMi4yMSAxLjc5LTQgNC00aDQwYzIuMjEgMCA0IDEuNzkgNCA0djQwYzAgMi4yMS0xLjc5IDQtNCA0SDQweiIvPjwvc3ZnPg==);
+  background-size: 17px auto;
+}
+.wb-close {
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0xIC0xIDE4IDE4Ij48cGF0aCBmaWxsPSIjZmZmIiBkPSJtMS42MTMuMjEuMDk0LjA4M0w4IDYuNTg1IDE0LjI5My4yOTNsLjA5NC0uMDgzYTEgMSAwIDAgMSAxLjQwMyAxLjQwM2wtLjA4My4wOTRMOS40MTUgOGw2LjI5MiA2LjI5M2ExIDEgMCAwIDEtMS4zMiAxLjQ5N2wtLjA5NC0uMDgzTDggOS40MTVsLTYuMjkzIDYuMjkyLS4wOTQuMDgzQTEgMSAwIDAgMSAuMjEgMTQuMzg3bC4wODMtLjA5NEw2LjU4NSA4IC4yOTMgMS43MDdBMSAxIDAgMCAxIDEuNjEzLjIxeiIvPjwvc3ZnPg==);
+  background-size: 15px auto;
+  background-position: 5px center;
+}
+.wb-full {
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2Utd2lkdGg9IjIuNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNOCAzSDVhMiAyIDAgMCAwLTIgMnYzbTE4IDBWNWEyIDIgMCAwIDAtMi0yaC0zbTAgMThoM2EyIDIgMCAwIDAgMi0ydi0zTTMgMTZ2M2EyIDIgMCAwIDAgMiAyaDMiLz48L3N2Zz4=);
+  background-size: 16px auto;
+}
+
+.winbox.max .wb-body ~ div,
+.winbox.min .wb-body ~ div,
+.winbox.modal .wb-body ~ div,
+.winbox.modal .wb-drag,
+body.wb-lock iframe {
+  @apply pointer-events-none;
+}
+
+.winbox.max {
+  @apply shadow-none;
+}
+
+.winbox.max .wb-body {
+  @apply m-0;
+}
+
+.winbox iframe {
+  @apply absolute h-full w-full border-0;
+}
+
+body.wb-lock .winbox {
+  will-change: left, top, width, height;
+  transition: none;
+}
+
+.winbox.modal:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: inherit;
+  border-radius: inherit;
+}
+
+.winbox.modal:after {
+  content: "";
+  position: absolute;
+  top: -50vh;
+  left: -50vw;
+  right: -50vw;
+  bottom: -50vh;
+  background: #0d1117;
+  animation: wb-fade-in 0.2s ease-out forwards;
+  z-index: -1;
+}
+
+.no-animation {
+  transition: none;
+}
+
+.no-shadow {
+  box-shadow: none;
+}
+
+.no-header .wb-body {
+  @apply top-0;
+}
+
+.no-move:not(.min) .wb-title {
+  @apply pointer-events-none;
+}
+
+.wb-body .wb-show {
+  display: revert;
+}
+
+@keyframes wb-fade-in {
+  0% {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.85;
   }
 }
