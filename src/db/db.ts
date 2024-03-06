@@ -356,6 +356,8 @@ export function set(input: unknown) {
     inputObject = JSON.parse(input, reviver);
   }
 
+  console.log(inputObject);
+
   if (TypeChecks.DB(inputObject)) {
     data.links = { ...inputObject.links };
     data.nodes = { ...inputObject.nodes };
@@ -411,29 +413,36 @@ function replacer(
 }
 
 function reviver(_key: unknown, value: unknown) {
+  if (typeof value !== "object") {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (value === null) {
+    return value;
+  }
+
   if (
-    typeof value === "object" &&
-    value !== null &&
-    "datatype" in value &&
+    "dataType" in value &&
     "values" in value &&
-    typeof value.datatype === "string" &&
-    (typeof value.values === "object" ||
-      typeof value.values === "string" ||
-      typeof value.values === "number" ||
-      typeof value.values === "boolean") &&
-    value.values !== null
+    value.values !== null &&
+    value.values !== undefined
   ) {
-    switch (value.datatype) {
+    switch (value.dataType) {
       case "Map":
-        if (value.values === null && Array.isArray(value.values)) return value;
         return new Map(Object.entries(value.values));
 
       case "Set":
-        if (!Array.isArray(value.values)) return value;
+        //TODO: Typechecking
         return new Set(value.values);
 
       default:
+        return value;
         break;
     }
   }
+  return value;
 }

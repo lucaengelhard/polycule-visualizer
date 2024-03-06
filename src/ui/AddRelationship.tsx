@@ -1,4 +1,3 @@
-import WinBox from "react-winbox";
 import { Input } from "@/components/ui/input";
 import { DatePicker, Radio, Search } from "./components";
 import { useCallback, useContext, useRef, useState } from "react";
@@ -10,11 +9,7 @@ import Link from "@/classes/link";
 import { Button } from "@/components/ui/button";
 import { LucideLink } from "lucide-react";
 
-export default function AddRelationship({
-  setAddRelationship,
-}: {
-  setAddRelationship: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+export default function AddRelationship() {
   const LinkTypes = useContext(TypeStateContext);
   const Nodes = useContext(NodeStateContext);
 
@@ -28,9 +23,6 @@ export default function AddRelationship({
 
   const [date, setDate] = useState<Date>();
   const [selected, setSelected] = useState<Types.Type>();
-
-  const [height, setHeight] = useState(100);
-  const body = useRef<HTMLDivElement>(null);
 
   const onSelectedToggle = useCallback((item: Types.Type, active: boolean) => {
     if (active) {
@@ -115,12 +107,6 @@ export default function AddRelationship({
     setSelected(undefined);
   }
 
-  setTimeout(() => {
-    if (body.current !== null) {
-      setHeight(body.current.clientHeight + 36);
-    }
-  }, 100);
-
   function onSourceResult(result: Types.Node) {
     setSourceQuery(undefined);
     setSource(result);
@@ -140,60 +126,49 @@ export default function AddRelationship({
   }
 
   return (
-    <WinBox
-      title="Add Person"
-      height={height}
-      x={"center"}
-      y={"center"}
-      noResize
-      noFull
-      noMax
-      onClose={() => setAddRelationship(false)}
-    >
-      <div ref={body} className="grid gap-3 p-3">
-        <div className="flex gap-3">
-          <div>
-            <Input
-              ref={sourceRef}
-              placeholder="Partner"
-              onInput={(e) => setSourceQuery(e.currentTarget.value)}
-            />
-            <Search
-              className="w-[calc(50%-1rem)]"
-              query={sourceQuery}
-              list={Nodes}
-              onResult={onSourceResult}
-            />
-          </div>
-          <div>
-            <Input
-              ref={targetRef}
-              placeholder="Partner"
-              onInput={(e) => setTargetQuery(e.currentTarget.value)}
-            />
-            <Search
-              className="w-[calc(50%-1rem)]"
-              query={targetQuery}
-              list={Nodes}
-              onResult={onTargetResult}
-            />
-          </div>
+    <div className="grid gap-3">
+      <div className="flex gap-3">
+        <div>
+          <Input
+            ref={sourceRef}
+            placeholder="Partner"
+            onInput={(e) => setSourceQuery(e.currentTarget.value)}
+          />
+          <Search
+            className="w-[calc(50%-1rem)]"
+            query={sourceQuery}
+            list={Nodes}
+            onResult={onSourceResult}
+          />
         </div>
-        <DatePicker onDateChange={(date) => setDate(date)} />
-        <Radio
-          onItemAdded={onItemAdded}
-          list={LinkTypes}
-          onSelectedToggle={onSelectedToggle}
-          onItemUpdate={onItemUpdate}
-          extandable
-          colorMode
-          selectedItem={selected}
-        />
-        <Button onClick={submit} className="flex gap-3">
-          <LucideLink />
-          Submit
-        </Button>
+        <div>
+          <Input
+            ref={targetRef}
+            placeholder="Partner"
+            onInput={(e) => setTargetQuery(e.currentTarget.value)}
+          />
+          <Search
+            className="w-[calc(50%-1rem)]"
+            query={targetQuery}
+            list={Nodes}
+            onResult={onTargetResult}
+          />
+        </div>
       </div>
-    </WinBox>
+      <DatePicker onDateChange={(date) => setDate(date)} />
+      <Radio
+        onItemAdded={onItemAdded}
+        list={LinkTypes}
+        onSelectedToggle={onSelectedToggle}
+        onItemUpdate={onItemUpdate}
+        extandable
+        colorMode
+        selectedItem={selected}
+      />
+      <Button onClick={submit} className="flex gap-3">
+        <LucideLink />
+        Submit
+      </Button>
+    </div>
   );
 }

@@ -18,7 +18,7 @@ import NodeList from "./NodeList";
 export default function UI() {
   const [addPerson, setAddPerson] = useState(false);
   const [addRelationship, setAddRelationship] = useState(false);
-  const [nodeList, setnodeList] = useState(false);
+  const [nodeList, setnodeList] = useState(true);
 
   return (
     <>
@@ -58,15 +58,28 @@ export default function UI() {
           </MenubarContent>
         </MenubarMenu>
       </Menubar>
-      {addPerson && <AddPerson setAddPerson={setAddPerson} />}
-      {addRelationship && (
-        <AddRelationship setAddRelationship={setAddRelationship} />
-      )}
-      {nodeList && (
-        <UIWindow title="People" onClose={() => setnodeList(false)}>
-          <NodeList />
-        </UIWindow>
-      )}
+      <UIWindow
+        title="Add Person"
+        openConditon={addPerson}
+        onClose={() => setAddPerson(false)}
+      >
+        <AddPerson />
+      </UIWindow>
+      <UIWindow
+        title="Add Person"
+        openConditon={addRelationship}
+        onClose={() => setAddRelationship(false)}
+      >
+        <AddRelationship />
+      </UIWindow>
+
+      <UIWindow
+        openConditon={nodeList}
+        title="People"
+        onClose={() => setnodeList(false)}
+      >
+        <NodeList />
+      </UIWindow>
     </>
   );
 }

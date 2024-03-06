@@ -32,9 +32,9 @@ export type Type = {
 };
 
 export type DBData = {
-  nodes: List<Node>;
-  links: List<Link>;
-  types: List<Type>;
+  nodes: List<Node, Node["id"]>;
+  links: List<Link, Link["id"]>;
+  types: List<Type, Type["id"]>;
 };
 
 export type GraphData = {

@@ -109,6 +109,7 @@ export function DB(input: unknown): input is Types.DBData {
 
     input.nodes.forEach((node) => {
       if (!node(node)) {
+        //TODO: throws error on import
         nodes = false;
       }
     });

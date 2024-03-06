@@ -1,4 +1,3 @@
-import WinBox from "react-winbox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { UserRoundPlus } from "lucide-react";
@@ -9,11 +8,7 @@ import { Types } from "@/types";
 import { Alert, DatePicker } from "./components";
 
 //TODO: loading button
-export default function AddPerson({
-  setAddPerson,
-}: {
-  setAddPerson: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+export default function AddPerson() {
   const [name, setName] = useState<string | undefined>(undefined);
   const [locationstring, setLocationstring] = useState<string | undefined>(
     undefined,
@@ -25,10 +20,6 @@ export default function AddPerson({
     undefined,
   );
   const [alertBody, setAlertBody] = useState<ReactNode | undefined>(undefined);
-
-  const [height, setHeight] = useState(100);
-
-  const body = useRef<HTMLDivElement>(null);
 
   const nameRef = useRef<HTMLInputElement>(null);
   const locationRef = useRef<HTMLInputElement>(null);
@@ -99,47 +90,26 @@ export default function AddPerson({
     }
   }
 
-  setTimeout(() => {
-    if (body.current !== null) {
-      setHeight(body.current.clientHeight + 36);
-    }
-  }, 100);
-
   return (
-    <WinBox
-      title="Add Person"
-      height={height}
-      x={"center"}
-      y={"center"}
-      noResize
-      noFull
-      noMax
-      onClose={() => setAddPerson(false)}
-    >
-      <div ref={body} className="grid gap-3 p-3">
-        <Input
-          onBlur={(e) => setName(e.target.value)}
-          ref={nameRef}
-          placeholder="Name"
-        />
-        <Input
-          onBlur={(e) => setLocationstring(e.target.value)}
-          ref={locationRef}
-          placeholder="Location"
-        />
-        <DatePicker onDateChange={(date) => setDate(date)} />
-        <Button onClick={submit} className="flex gap-3">
-          <UserRoundPlus />
-          Submit
-        </Button>
-        <Alert
-          open={alert}
-          title={alertTitle}
-          onContinue={() => setAlert(false)}
-        >
-          {alertBody}
-        </Alert>
-      </div>
-    </WinBox>
+    <div className="grid gap-3">
+      <Input
+        onBlur={(e) => setName(e.target.value)}
+        ref={nameRef}
+        placeholder="Name"
+      />
+      <Input
+        onBlur={(e) => setLocationstring(e.target.value)}
+        ref={locationRef}
+        placeholder="Location"
+      />
+      <DatePicker onDateChange={(date) => setDate(date)} />
+      <Button onClick={submit} className="flex gap-3">
+        <UserRoundPlus />
+        Submit
+      </Button>
+      <Alert open={alert} title={alertTitle} onContinue={() => setAlert(false)}>
+        {alertBody}
+      </Alert>
+    </div>
   );
 }
