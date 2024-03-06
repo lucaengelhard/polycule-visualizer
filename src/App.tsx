@@ -7,7 +7,6 @@ import Link from "@/classes/link";
 export const NodeStateContext = createContext(DB.data.nodes);
 export const LinkStateContext = createContext(DB.data.links);
 export const TypeStateContext = createContext(DB.data.types);
-//TODO: Window Manager
 
 export default function App() {
   const [DBState, setDBState] = useState(DB.data);

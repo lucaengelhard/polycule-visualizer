@@ -5,42 +5,20 @@ import {
   MenubarContent,
   MenubarItem,
   MenubarMenu,
-  //MenubarSeparator,
+  MenubarSeparator,
   MenubarShortcut,
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import AddPerson from "./AddPerson";
 import { useState } from "react";
 import AddRelationship from "./AddRelationship";
+import { UIWindow } from "./components";
+import NodeList from "./NodeList";
 
 export default function UI() {
-  function importDB() {
-    const fileUploadElement = document.createElement("input");
-    fileUploadElement.type = "file";
-    fileUploadElement.accept = ".json";
-    fileUploadElement.click();
-
-    fileUploadElement.addEventListener("change", () => {
-      const files = fileUploadElement.files;
-      if (files?.length ?? 0 > 0) {
-        const file = files?.item(0);
-        const reader = new FileReader();
-
-        if (file) {
-          reader.readAsText(file, "utf-8");
-        }
-
-        reader.addEventListener("load", (e) => {
-          if (typeof e.target?.result === "string") {
-            set(e.target.result);
-          }
-        });
-      }
-    });
-  }
-
   const [addPerson, setAddPerson] = useState(false);
   const [addRelationship, setAddRelationship] = useState(false);
+  const [nodeList, setnodeList] = useState(false);
 
   return (
     <>
@@ -53,6 +31,10 @@ export default function UI() {
             </MenubarItem>
             <MenubarItem onClick={importDB}>
               Import <MenubarShortcut>CMD+I</MenubarShortcut>
+            </MenubarItem>
+            <MenubarSeparator />
+            <MenubarItem onClick={() => setnodeList(true)}>
+              People <MenubarShortcut>?</MenubarShortcut>
             </MenubarItem>
           </MenubarContent>
         </MenubarMenu>
@@ -80,6 +62,36 @@ export default function UI() {
       {addRelationship && (
         <AddRelationship setAddRelationship={setAddRelationship} />
       )}
+      {nodeList && (
+        <UIWindow title="People" onClose={() => setnodeList(false)}>
+          <NodeList />
+        </UIWindow>
+      )}
     </>
   );
+}
+
+function importDB() {
+  const fileUploadElement = document.createElement("input");
+  fileUploadElement.type = "file";
+  fileUploadElement.accept = ".json";
+  fileUploadElement.click();
+
+  fileUploadElement.addEventListener("change", () => {
+    const files = fileUploadElement.files;
+    if (files?.length ?? 0 > 0) {
+      const file = files?.item(0);
+      const reader = new FileReader();
+
+      if (file) {
+        reader.readAsText(file, "utf-8");
+      }
+
+      reader.addEventListener("load", (e) => {
+        if (typeof e.target?.result === "string") {
+          set(e.target.result);
+        }
+      });
+    }
+  });
 }
